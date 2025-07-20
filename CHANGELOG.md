@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2025-07-20
 
+### 🔒 **CRITICAL SECURITY UPDATE**
+
+#### Added - API Key Security & Validation
+- **NEW MODULE**: `ai_scientist/utils/api_security.py` - Centralized secure API key handling
+- **Enhanced Validation**: All API providers now have consistent validation (DEEPSEEK, HUGGINGFACE, OPENROUTER, GEMINI)
+- **Secure Logging**: API key masking and safe usage tracking
+- **Error Handling**: Clear error messages without key exposure
+- **Comprehensive Testing**: 6 test cases covering all security scenarios
+
+#### Security Fixes
+- **FIXED**: Direct `os.environ[KEY]` access in `ai_scientist/llm.py` (lines 320, 442, 454, 469, 481)
+- **FIXED**: Inconsistent API key validation across providers
+- **ADDED**: Format validation for all API keys
+- **ADDED**: Safe error handling preventing key exposure in logs
+
+## Previous Updates - 2025-07-20
+
 ### Added
 - **Security Enhancement**: Replaced `os.popen` with secure `subprocess.run` calls in:
   - `ai_scientist/perform_icbinb_writeup.py:1047`

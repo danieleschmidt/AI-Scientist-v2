@@ -316,10 +316,13 @@ def get_response_from_llm(
         except Exception as e:
             # Fallback to direct API call if OpenAI client doesn't work with HuggingFace
             import requests
-            headers = {
-                "Authorization": f"Bearer {os.environ['HUGGINGFACE_API_KEY']}",
-                "Content-Type": "application/json"
-            }
+            from ai_scientist.utils.api_security import get_api_key_secure, create_secure_headers
+            
+            try:
+                hf_api_key = get_api_key_secure("HUGGINGFACE_API_KEY", required=True)
+                headers = create_secure_headers(hf_api_key, "HUGGINGFACE_API_KEY")
+            except ValueError as api_error:
+                raise ValueError(f"HuggingFace API configuration error: {api_error}") from e
             payload = {
                 "inputs": {
                     "system": system_message,
@@ -433,40 +436,54 @@ def create_client(model) -> tuple[Any, str]:
         print(f"Using OpenAI API with model {model}.")
         return openai.OpenAI(), model
     elif model == "deepseek-coder-v2-0724":
+        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
+        
+        api_key = get_api_key_secure("DEEPSEEK_API_KEY", required=True)
+        log_api_key_usage("DEEPSEEK_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")
         return (
             openai.OpenAI(
-                api_key=os.environ["DEEPSEEK_API_KEY"],
+                api_key=api_key,
                 base_url="https://api.deepseek.com",
             ),
             model,
         )
     elif model == "deepcoder-14b":
+        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
+        
         print(f"Using HuggingFace API with {model}.")
         # Using OpenAI client with HuggingFace API
-        if "HUGGINGFACE_API_KEY" not in os.environ:
-            raise ValueError("HUGGINGFACE_API_KEY environment variable not set")
+        api_key = get_api_key_secure("HUGGINGFACE_API_KEY", required=True)
+        log_api_key_usage("HUGGINGFACE_API_KEY", api_key)
         return (
             openai.OpenAI(
-                api_key=os.environ["HUGGINGFACE_API_KEY"],
+                api_key=api_key,
                 base_url="https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
             ),
             model,
         )
     elif model == "llama3.1-405b":
+        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
+        
+        api_key = get_api_key_secure("OPENROUTER_API_KEY", required=True)
+        log_api_key_usage("OPENROUTER_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")
         return (
             openai.OpenAI(
-                api_key=os.environ["OPENROUTER_API_KEY"],
+                api_key=api_key,
                 base_url="https://openrouter.ai/api/v1",
             ),
             "meta-llama/llama-3.1-405b-instruct",
         )
     elif 'gemini' in model:
+        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
+        
+        api_key = get_api_key_secure("GEMINI_API_KEY", required=True)
+        log_api_key_usage("GEMINI_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")
         return (
             openai.OpenAI(
-                api_key=os.environ["GEMINI_API_KEY"],
+                api_key=api_key,
                 base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
             ),
             model,
