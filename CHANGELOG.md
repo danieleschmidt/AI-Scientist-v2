@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
   - LLM pattern validation tests
   - Utility function tests (including zip extraction)
   - Nested zip file handling tests
-- **CI/CD Pipeline**: GitHub Actions workflows for:
+- **CI/CD Pipeline**: Complete workflow templates provided in `CI_CD_SETUP_GUIDE.md`:
   - Automated testing across Python 3.8-3.11
   - Security scanning with Bandit and Safety
   - Code quality checks and syntax validation
