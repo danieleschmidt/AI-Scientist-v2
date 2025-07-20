@@ -1,0 +1,91 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y poppler-utils
+        # chktex installation is optional for security testing
+        sudo apt-get install -y chktex || echo "chktex installation failed, tests will skip"
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install only test dependencies to avoid API key requirements
+        pip install pytest pytest-cov
+        # Install basic requirements that don't need API keys
+        pip install numpy matplotlib seaborn rich tqdm dataclasses-json
+    
+    - name: Run tests
+      run: |
+        python run_tests.py
+    
+    - name: Run security checks
+      run: |
+        # Check for potential security issues
+        python -c "
+        import subprocess
+        import sys
+        
+        # Check for os.popen usage
+        result = subprocess.run(['grep', '-r', 'os.popen', 'ai_scientist/'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print('SECURITY WARNING: os.popen found in code:')
+            print(result.stdout)
+            sys.exit(1)
+        else:
+            print('✓ No os.popen usage found')
+        
+        # Check for shell=True in subprocess calls
+        result = subprocess.run(['grep', '-r', 'shell=True', 'ai_scientist/'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print('SECURITY WARNING: shell=True found in subprocess calls:')
+            print(result.stdout)
+            sys.exit(1)
+        else:
+            print('✓ No shell=True usage found')
+        "
+    
+    - name: Code quality checks
+      run: |
+        # Basic code quality checks
+        python -c "
+        import ast
+        import sys
+        from pathlib import Path
+        
+        errors = []
+        for py_file in Path('ai_scientist').rglob('*.py'):
+            try:
+                with open(py_file, 'r', encoding='utf-8') as f:
+                    ast.parse(f.read())
+            except SyntaxError as e:
+                errors.append(f'Syntax error in {py_file}: {e}')
+        
+        if errors:
+            for error in errors:
+                print(error)
+            sys.exit(1)
+        else:
+            print('✓ All Python files have valid syntax')
+        "

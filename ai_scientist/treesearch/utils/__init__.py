@@ -46,12 +46,20 @@ def clean_up_dataset(path: Path):
             item.unlink()
 
 
-def extract_archives(path: Path):
+def extract_archives(path: Path, max_depth: int = 3):
     """
-    unzips all .zip files within `path` and cleans up task dir
-
-    [TODO] handle nested zips
+    Recursively unzips all .zip files within `path` and cleans up task dir
+    
+    Args:
+        path: Directory to search for zip files
+        max_depth: Maximum recursion depth for nested zips (prevents infinite loops)
     """
+    if max_depth <= 0:
+        logger.warning(f"Maximum extraction depth reached, stopping recursion")
+        return
+    
+    extracted_any = False
+    
     for zip_f in path.rglob("*.zip"):
         f_out_dir = zip_f.with_suffix("")
 
@@ -61,15 +69,32 @@ def extract_archives(path: Path):
                 f"Skipping {zip_f} as an item with the same name already exists."
             )
             # if it's a file, it's probably exactly the same as in the zip -> remove the zip
-            # [TODO] maybe add an extra check to see if zip file content matches the colliding file
+            # Enhanced validation: check if file size matches (basic content validation)
             if f_out_dir.is_file() and f_out_dir.suffix != "":
-                zip_f.unlink()
+                try:
+                    # Get original file size from zip
+                    with zipfile.ZipFile(zip_f, "r") as zip_ref:
+                        zip_info = zip_ref.infolist()
+                        if len(zip_info) == 1 and zip_info[0].file_size == f_out_dir.stat().st_size:
+                            logger.debug(f"File size matches, removing zip: {zip_f}")
+                            zip_f.unlink()
+                        else:
+                            logger.debug(f"File size mismatch, keeping zip: {zip_f}")
+                except (zipfile.BadZipFile, OSError) as e:
+                    logger.warning(f"Could not validate zip content: {e}")
             continue
 
         logger.debug(f"Extracting: {zip_f}")
         f_out_dir.mkdir(exist_ok=True)
-        with zipfile.ZipFile(zip_f, "r") as zip_ref:
-            zip_ref.extractall(f_out_dir)
+        
+        try:
+            with zipfile.ZipFile(zip_f, "r") as zip_ref:
+                zip_ref.extractall(f_out_dir)
+            extracted_any = True
+        except zipfile.BadZipFile as e:
+            logger.error(f"Failed to extract {zip_f}: {e}")
+            f_out_dir.rmdir()  # Clean up empty directory
+            continue
 
         # remove any unwanted files
         clean_up_dataset(f_out_dir)
@@ -83,8 +108,12 @@ def extract_archives(path: Path):
             if sub_item.is_dir():
                 logger.debug(f"Special handling (child is dir) enabled for: {zip_f}")
                 for f in sub_item.rglob("*"):
-                    shutil.move(f, f_out_dir)
-                sub_item.rmdir()
+                    if f.is_file():  # Only move files, not directories
+                        relative_path = f.relative_to(sub_item)
+                        target_path = f_out_dir / relative_path
+                        target_path.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.move(str(f), str(target_path))
+                shutil.rmtree(sub_item)  # Use rmtree for recursive removal
             # if it's a file, rename it to the parent and remove the parent
             elif sub_item.is_file():
                 logger.debug(f"Special handling (child is file) enabled for: {zip_f}")
@@ -93,6 +122,11 @@ def extract_archives(path: Path):
                 sub_item_tmp.rename(f_out_dir)
 
         zip_f.unlink()
+
+    # Handle nested zips: if we extracted any files, check for new zip files
+    if extracted_any and max_depth > 1:
+        logger.debug(f"Checking for nested zip files (depth: {max_depth})")
+        extract_archives(path, max_depth - 1)
 
 
 def preproc_data(path: Path):

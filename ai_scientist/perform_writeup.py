@@ -681,9 +681,16 @@ def perform_writeup(
             else:
                 reflection_page_info = "\nCould not detect 'Impact Statement' page (compilation or detection failed).\n"
 
-            check_output = os.popen(
-                f"chktex {writeup_file} -q -n2 -n24 -n13 -n1"
-            ).read()
+            try:
+                check_result = subprocess.run(
+                    ["chktex", str(writeup_file), "-q", "-n2", "-n24", "-n13", "-n1"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                check_output = check_result.stdout
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError) as e:
+                check_output = f"chktex check failed: {str(e)}"
 
             reflection_prompt = f"""
 Now let's reflect and identify any issues (including but not limited to):

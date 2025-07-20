@@ -1,0 +1,65 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan weekly
+    - cron: '0 2 * * 1'
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Run Bandit security linter
+      run: |
+        bandit -r ai_scientist/ -f json -o bandit-report.json || true
+        bandit -r ai_scientist/ || true
+    
+    - name: Check for known vulnerabilities
+      run: |
+        pip install -r requirements.txt
+        safety check --json --output safety-report.json || true
+        safety check || true
+    
+    - name: Custom security checks
+      run: |
+        echo "Running custom security checks..."
+        
+        # Check for hardcoded secrets patterns
+        grep -r -i "api[_-]key\s*=\s*['\"][^'\"]*['\"]" ai_scientist/ && echo "WARNING: Potential hardcoded API key found" || echo "✓ No hardcoded API keys found"
+        grep -r -i "secret\s*=\s*['\"][^'\"]*['\"]" ai_scientist/ && echo "WARNING: Potential hardcoded secret found" || echo "✓ No hardcoded secrets found"
+        grep -r -i "password\s*=\s*['\"][^'\"]*['\"]" ai_scientist/ && echo "WARNING: Potential hardcoded password found" || echo "✓ No hardcoded passwords found"
+        
+        # Check for dangerous function usage
+        grep -r "eval(" ai_scientist/ && echo "WARNING: eval() usage found" || echo "✓ No eval() usage found"
+        grep -r "exec(" ai_scientist/ && echo "WARNING: exec() usage found" || echo "✓ No exec() usage found"
+        
+        # Check for subprocess shell injection risks
+        grep -r "shell=True" ai_scientist/ && echo "WARNING: shell=True found in subprocess" || echo "✓ No shell=True in subprocess calls"
+        
+        echo "Security scan completed"
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
