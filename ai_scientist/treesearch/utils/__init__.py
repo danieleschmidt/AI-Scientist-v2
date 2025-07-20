@@ -109,10 +109,24 @@ def extract_archives(path: Path, max_depth: int = 3):
                 logger.debug(f"Special handling (child is dir) enabled for: {zip_f}")
                 for f in sub_item.rglob("*"):
                     if f.is_file():  # Only move files, not directories
-                        relative_path = f.relative_to(sub_item)
-                        target_path = f_out_dir / relative_path
-                        target_path.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.move(str(f), str(target_path))
+                        try:
+                            # Securely calculate relative path
+                            from ai_scientist.utils.path_security import secure_relative_path, validate_safe_path
+                            
+                            relative_path = secure_relative_path(f, sub_item)
+                            target_path = f_out_dir / relative_path
+                            
+                            # Validate that target path is safe
+                            if not validate_safe_path(target_path, f_out_dir, allow_relative=False):
+                                logger.warning(f"Skipping potentially unsafe file move: {f} -> {target_path}")
+                                continue
+                            
+                            target_path.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.move(str(f), str(target_path))
+                            
+                        except Exception as e:
+                            logger.warning(f"Failed to move file {f} safely: {e}")
+                            continue
                 shutil.rmtree(sub_item)  # Use rmtree for recursive removal
             # if it's a file, rename it to the parent and remove the parent
             elif sub_item.is_file():
