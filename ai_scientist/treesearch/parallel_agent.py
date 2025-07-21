@@ -23,6 +23,16 @@ from pathlib import Path
 import base64
 import sys
 
+# Import enhanced error handling
+try:
+    from .error_handling import EnhancedErrorHandler, FailureType, NodeExecutionError, retry_with_backoff
+except ImportError:
+    # Fallback if error handling not available
+    EnhancedErrorHandler = None
+    FailureType = None
+    NodeExecutionError = Exception
+    retry_with_backoff = lambda **kwargs: lambda f: f
+
 logger = logging.getLogger("ai-scientist")
 
 ExecCallbackType = Callable[[str, bool], ExecutionResult]
@@ -1168,6 +1178,16 @@ class ParallelAgent:
         self.num_workers = cfg.agent.num_workers
         self.num_gpus = get_gpu_count()
         print(f"num_gpus: {self.num_gpus}")
+        
+        # Initialize enhanced error handling
+        if EnhancedErrorHandler is not None:
+            self.error_handler = EnhancedErrorHandler(
+                base_timeout=getattr(cfg.agent, 'timeout', 300)
+            )
+        else:
+            self.error_handler = None
+            logger.warning("Enhanced error handling not available - using basic error handling")
+        
         if self.num_gpus == 0:
             print("No GPUs detected, falling back to CPU-only mode")
         else:
@@ -1315,8 +1335,13 @@ class ParallelAgent:
             )
 
         for future in futures:
+            # Get adaptive timeout if error handler available
+            timeout_val = self.timeout
+            if self.error_handler:
+                timeout_val = self.error_handler.get_timeout_for_node(node, "seed_evaluation")
+            
             try:
-                result_data = future.result(timeout=self.timeout)
+                result_data = future.result(timeout=timeout_val)
                 result_node = Node.from_dict(result_data, self.journal)
                 print(f"Parent node id: {result_node.parent.id}")
                 print(f"Sanity check: actual parent node id: {node.id}")
@@ -1324,8 +1349,21 @@ class ParallelAgent:
                 self.journal.append(result_node)
                 seed_nodes.append(self.journal.get_node_by_id(result_node.id))
                 print("Added result node to journal")
+                
+                # Record successful execution
+                if self.error_handler:
+                    self.error_handler.handle_node_success(result_node)
+                    
             except Exception as e:
-                logger.error(f"Error in multi-seed evaluation: {str(e)}")
+                logger.error(f"Error in multi-seed evaluation: {str(e)}", exc_info=True)
+                
+                # Enhanced error handling
+                if self.error_handler:
+                    # Create a dummy node for error tracking
+                    error_node = Node(id=f"error_seed_{len(seed_nodes)}", stage_name="seed_evaluation")
+                    error_node.exc_type = type(e).__name__
+                    error_node.exc_info = str(e)
+                    self.error_handler.handle_node_failure(error_node, e)
 
         return seed_nodes
 
@@ -1488,9 +1526,33 @@ class ParallelAgent:
                     print("Drafting new node")
                     child_node = worker_agent._draft()
                 elif parent_node.is_buggy:
-                    print("Debugging node with id: ", parent_node.id)
+                    # Enhanced debug depth check
+                    debug_depth = getattr(parent_node, 'debug_depth', 0)
+                    max_debug_depth = getattr(self.cfg.search, 'max_debug_depth', 3)
+                    
+                    if debug_depth >= max_debug_depth:
+                        logger.warning(f"Skipping debug for node {parent_node.id}: "
+                                     f"max debug depth {max_debug_depth} reached")
+                        # Mark node as non-recoverable and skip
+                        if self.error_handler:
+                            self.error_handler.handle_node_failure(parent_node)
+                        continue  # Skip this node
+                    
+                    print(f"Debugging node {parent_node.id} (depth: {debug_depth})")
+                    
+                    # Attempt recovery if error handler available
+                    recovery_attempted = False
+                    if self.error_handler:
+                        failure_info = self.error_handler.handle_node_failure(parent_node)
+                        if failure_info.get('recovery_result'):
+                            logger.info(f"Recovery attempted for node {parent_node.id}")
+                            recovery_attempted = True
+                    
                     child_node = worker_agent._debug(parent_node)
                     child_node.parent = parent_node
+                    
+                    if recovery_attempted:
+                        child_node.analysis = f"[RECOVERY ATTEMPTED] {child_node.analysis or ''}"
                 else:
                     if (
                         new_hyperparam_idea is not None and new_ablation_idea is None
