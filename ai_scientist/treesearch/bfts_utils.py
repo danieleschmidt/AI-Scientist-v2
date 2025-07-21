@@ -57,7 +57,8 @@ def edit_bfts_config_file(config_path: str, idea_dir: str, idea_path: str) -> st
     run_config_path = osp.join(idea_dir, "bfts_config.yaml")
     shutil.copy(config_path, run_config_path)
     with open(run_config_path, "r") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+        # Use safe YAML loader to prevent code injection
+        config = yaml.safe_load(f)
     config["desc_file"] = idea_path
     config["workspace_dir"] = idea_dir
 

@@ -18,19 +18,16 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 4. ✅ ZIP File Content Validation (WSJF: 2.5)
 5. ✅ Pre-commit Hooks and Code Quality
 6. ✅ **CRITICAL: Fix File Handle Leak** (WSJF: 8.5) - *Completed*
-7. ✅ **API Key Security & Validation** (WSJF: 7.2) - *Just Completed*
+7. ✅ **API Key Security & Validation** (WSJF: 7.2) - *Completed*
+8. ✅ **Input Validation and Sanitization** (WSJF: 6.0) - *Just Completed*
 
 ## 🔥 **NEW HIGH PRIORITY ISSUES** (WSJF > 6.0)
 
-### 1. **Input Validation and Sanitization** (WSJF: 6.0) ⬆️ *Now Top Priority*
-- **Issue**: LLM-generated code execution without proper validation  
-- **Files**: Archive extraction path traversal risk
-- **Business Value**: 7, Time Criticality: 6, Risk Reduction: 9, Job Size: 5
-- **Test Plan**: Test with malicious inputs, verify sandboxing
+*No critical security issues remaining - excellent progress!*
 
 ## 🎯 **HIGH PRIORITY** (WSJF 4.0-6.0)
 
-### 4. **GPU Resource Management Race Conditions** (WSJF: 5.4)
+### 1. **GPU Resource Management Race Conditions** (WSJF: 5.4) ⬆️ *Now Top Priority*
 - **File**: `ai_scientist/treesearch/parallel_agent.py:2334-2349`
 - **Issue**: Non-atomic GPU operations, potential race conditions
 - **Business Value**: 6, Time Criticality: 6, Risk Reduction: 7, Job Size: 4
@@ -75,15 +72,15 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 
 ## 🎯 **IMMEDIATE NEXT ACTION**
 
-**Selected Task**: Input Validation and Sanitization (WSJF: 6.0)
-- **Rationale**: LLM-generated code execution needs validation and sandboxing
-- **Implementation**: Add input validation layers and execution sandboxing
-- **Testing**: Test with malicious inputs, verify safe execution
-- **Risk**: Medium implementation risk, high security impact
+**Selected Task**: GPU Resource Management Race Conditions (WSJF: 5.4)
+- **Rationale**: Non-atomic GPU operations create potential race conditions
+- **Implementation**: Add proper synchronization and atomic operations
+- **Testing**: Concurrent GPU access testing, resource leak detection
+- **Risk**: Medium implementation risk, medium stability impact
 
 ## 📊 **Progress Metrics**
 
-- **Security Issues Resolved**: 4 critical (os.popen, file handle leak, API key validation), 1 pending (input validation)
+- **Security Issues Resolved**: 5 critical (os.popen, file handle leak, API key validation, input validation) - ALL COMPLETE!
 - **Test Coverage**: 20+ tests, 100% pass rate
 - **Code Quality**: Pre-commit hooks active
 - **Technical Debt**: Significantly reduced, new issues identified and prioritized

@@ -190,7 +190,24 @@ if __name__ == "__main__":
     print(f"Using GPUs: {available_gpus}")
 
     with open(args.load_ideas, "r") as f:
-        ideas = json.load(f)
+        # Import security validation
+        from ai_scientist.utils.input_validation import validate_json_config, SecurityError
+        
+        try:
+            # Load and validate JSON configuration
+            content = f.read()
+            ideas = validate_json_config(content)
+            
+            # Ensure it's a list of ideas
+            if not isinstance(ideas, (list, dict)):
+                raise ValueError("Ideas file must contain a list or dictionary")
+                
+        except SecurityError as se:
+            print(f"Security validation failed for ideas file: {se}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Failed to load ideas file: {e}")
+            sys.exit(1)
         print(f"Loaded {len(ideas)} pregenerated ideas from {args.load_ideas}")
 
     idea = ideas[args.idea_idx]
