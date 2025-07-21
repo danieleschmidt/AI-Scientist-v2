@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2025-07-20
+## [Unreleased] - 2025-07-21
+
+### 🛠️ **CRITICAL RESOURCE LEAK FIX**
+
+#### Fixed - File Handle Leak
+- **FIXED**: Critical file handle leak in `launch_scientist_bfts.py:165`
+- **Enhanced**: `redirect_stdout_stderr_to_file()` context manager with proper exception handling
+- **Added**: Graceful handling of file.close() failures
+- **Risk Mitigation**: Prevents resource exhaustion under load
+- **Comprehensive Testing**: 6 test cases covering all scenarios including exception paths
+
+## [Previous] - 2025-07-20
 
 ### 🔒 **CRITICAL SECURITY UPDATE**
 

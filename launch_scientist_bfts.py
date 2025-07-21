@@ -162,15 +162,22 @@ def find_pdf_path_for_review(idea_dir):
 def redirect_stdout_stderr_to_file(log_file_path):
     original_stdout = sys.stdout
     original_stderr = sys.stderr
-    log = open(log_file_path, "a")
-    sys.stdout = log
-    sys.stderr = log
+    log = None
     try:
+        log = open(log_file_path, "a")
+        sys.stdout = log
+        sys.stderr = log
         yield
     finally:
         sys.stdout = original_stdout
         sys.stderr = original_stderr
-        log.close()
+        if log is not None:
+            try:
+                log.close()
+            except (OSError, IOError):
+                # Handle cases where file.close() fails
+                # Still restore stdout/stderr even if close fails
+                pass
 
 
 if __name__ == "__main__":

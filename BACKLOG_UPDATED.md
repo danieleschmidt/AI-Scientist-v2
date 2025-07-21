@@ -17,18 +17,11 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 3. ✅ Nested ZIP Handling (WSJF: 3.5)
 4. ✅ ZIP File Content Validation (WSJF: 2.5)
 5. ✅ Pre-commit Hooks and Code Quality
+6. ✅ **CRITICAL: Fix File Handle Leak** (WSJF: 8.5) - *Just Completed*
 
 ## 🔥 **NEW HIGH PRIORITY ISSUES** (WSJF > 6.0)
 
-### 1. **CRITICAL: Fix File Handle Leak** (WSJF: 8.5)
-- **File**: `launch_scientist_bfts.py:165`
-- **Issue**: File opened without proper cleanup on exception paths
-- **Impact**: Resource exhaustion, system instability
-- **Business Value**: 8, Time Criticality: 9, Risk Reduction: 9, Job Size: 2
-- **Risk**: High - can cause system failure under load
-- **Test Plan**: Test exception scenarios, verify file handles are properly closed
-
-### 2. **API Key Security & Validation** (WSJF: 7.2)
+### 1. **API Key Security & Validation** (WSJF: 7.2) ⬆️ *Now Top Priority*
 - **Files**: `ai_scientist/llm.py`, idea files
 - **Issue**: API keys accessed without validation, potential exposure
 - **Impact**: Security vulnerability, runtime failures
@@ -88,15 +81,15 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 
 ## 🎯 **IMMEDIATE NEXT ACTION**
 
-**Selected Task**: Fix File Handle Leak (WSJF: 8.5)
-- **Rationale**: Critical resource leak that can cause system failure
-- **Implementation**: Add proper context managers and exception handling
-- **Testing**: Verify file handles are properly closed in all code paths
-- **Risk**: Low implementation risk, high impact
+**Selected Task**: API Key Security & Validation (WSJF: 7.2)
+- **Rationale**: Security vulnerability in API key handling, potential exposure
+- **Implementation**: Enhance validation and secure access patterns 
+- **Testing**: Test missing keys, verify secure error handling
+- **Risk**: Medium implementation risk, high security impact
 
 ## 📊 **Progress Metrics**
 
-- **Security Issues Resolved**: 2 critical (os.popen), 2 pending (file leak, API validation)
+- **Security Issues Resolved**: 3 critical (os.popen, file handle leak), 1 pending (API validation)
 - **Test Coverage**: 20+ tests, 100% pass rate
 - **Code Quality**: Pre-commit hooks active
 - **Technical Debt**: Significantly reduced, new issues identified and prioritized
