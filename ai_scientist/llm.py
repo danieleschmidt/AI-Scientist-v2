@@ -418,9 +418,14 @@ def extract_json_between_markers(llm_output: str) -> dict | None:
 
 
 def create_client(model) -> tuple[Any, str]:
+    from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
+    
     if model.startswith("claude-"):
         print(f"Using Anthropic API with model {model}.")
-        return anthropic.Anthropic(), model
+        # Validate API key before client creation
+        anthropic_key = get_api_key_secure("ANTHROPIC_API_KEY")
+        log_api_key_usage("ANTHROPIC_API_KEY", "client_creation", model)
+        return anthropic.Anthropic(api_key=anthropic_key), model
     elif model.startswith("bedrock") and "claude" in model:
         client_model = model.split("/")[-1]
         print(f"Using Amazon Bedrock with model {client_model}.")
@@ -431,13 +436,17 @@ def create_client(model) -> tuple[Any, str]:
         return anthropic.AnthropicVertex(), client_model
     elif "gpt" in model:
         print(f"Using OpenAI API with model {model}.")
-        return openai.OpenAI(), model
+        # Validate API key before client creation
+        openai_key = get_api_key_secure("OPENAI_API_KEY")
+        log_api_key_usage("OPENAI_API_KEY", "client_creation", model)
+        return openai.OpenAI(api_key=openai_key), model
     elif "o1" in model or "o3" in model:
         print(f"Using OpenAI API with model {model}.")
-        return openai.OpenAI(), model
+        # Validate API key before client creation
+        openai_key = get_api_key_secure("OPENAI_API_KEY")
+        log_api_key_usage("OPENAI_API_KEY", "client_creation", model)
+        return openai.OpenAI(api_key=openai_key), model
     elif model == "deepseek-coder-v2-0724":
-        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
-        
         api_key = get_api_key_secure("DEEPSEEK_API_KEY", required=True)
         log_api_key_usage("DEEPSEEK_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")
@@ -449,8 +458,6 @@ def create_client(model) -> tuple[Any, str]:
             model,
         )
     elif model == "deepcoder-14b":
-        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
-        
         print(f"Using HuggingFace API with {model}.")
         # Using OpenAI client with HuggingFace API
         api_key = get_api_key_secure("HUGGINGFACE_API_KEY", required=True)
@@ -463,8 +470,6 @@ def create_client(model) -> tuple[Any, str]:
             model,
         )
     elif model == "llama3.1-405b":
-        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
-        
         api_key = get_api_key_secure("OPENROUTER_API_KEY", required=True)
         log_api_key_usage("OPENROUTER_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")
@@ -476,8 +481,6 @@ def create_client(model) -> tuple[Any, str]:
             "meta-llama/llama-3.1-405b-instruct",
         )
     elif 'gemini' in model:
-        from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
-        
         api_key = get_api_key_secure("GEMINI_API_KEY", required=True)
         log_api_key_usage("GEMINI_API_KEY", api_key)
         print(f"Using OpenAI API with {model}.")

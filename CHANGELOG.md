@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2025-07-21
 
+### 🔒 **CRITICAL API KEY SECURITY ENHANCEMENT**
+
+#### Enhanced - API Key Security & Validation
+- **FIXED**: Direct `HF_TOKEN` access in idea files (`i_cant_believe_its_not_better*.py`)
+- **ENHANCED**: Client creation with explicit API key validation for OpenAI & Anthropic
+- **ADDED**: Secure API key handling in all model client creation paths
+- **IMPROVED**: Consistent use of `get_api_key_secure()` across all providers
+- **SECURITY**: Eliminated potential runtime failures from missing API keys
+- **COMPREHENSIVE TESTING**: 12 test cases covering all security scenarios
+
+#### Fixed - HuggingFace Token Security
+- **REPLACED**: `os.environ["HF_TOKEN"]` with `get_api_key_secure("HF_TOKEN")`
+- **ENHANCED**: Error handling prevents crashes on missing tokens
+- **ADDED**: Proper import structure for security utilities
+
 ### 🛠️ **CRITICAL RESOURCE LEAK FIX**
 
 #### Fixed - File Handle Leak
