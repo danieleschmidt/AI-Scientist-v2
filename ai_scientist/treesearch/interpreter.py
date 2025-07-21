@@ -20,6 +20,14 @@ from pathlib import Path
 import humanize
 from dataclasses_json import DataClassJsonMixin
 
+# Import security utilities
+try:
+    from ..utils.code_security import execute_code_safely, CodeSecurityValidator
+except ImportError:
+    # Fallback if security utils not available
+    execute_code_safely = None
+    CodeSecurityValidator = None
+
 logger = logging.getLogger("ai-scientist")
 
 
@@ -136,26 +144,62 @@ class Interpreter:
         while True:
             code = code_inq.get()
             os.chdir(str(self.working_dir))
+            
+            # Write code to file for debugging/logging purposes
             with open(self.agent_file_name, "w") as f:
                 f.write(code)
 
             event_outq.put(("state:ready",))
-            try:
-                exec(compile(code, self.agent_file_name, "exec"), global_scope)
-            except BaseException as e:
-                tb_str, e_cls_name, exc_info, exc_stack = exception_summary(
-                    e,
-                    self.working_dir,
-                    self.agent_file_name,
-                    self.format_tb_ipython,
-                )
-                result_outq.put(tb_str)
-                if e_cls_name == "KeyboardInterrupt":
-                    e_cls_name = "TimeoutError"
-
-                event_outq.put(("state:finished", e_cls_name, exc_info, exc_stack))
+            
+            # Use secure execution if available, otherwise fall back to unsafe execution
+            if execute_code_safely is not None:
+                try:
+                    success, stdout, stderr = execute_code_safely(
+                        code, str(self.working_dir), timeout=300
+                    )
+                    
+                    if success:
+                        # Print stdout to simulate normal execution output
+                        if stdout:
+                            print(stdout, end='')
+                        if stderr:
+                            print(stderr, file=sys.stderr, end='')
+                        event_outq.put(("state:finished", None, None, None))
+                    else:
+                        # Handle security violations or execution errors
+                        error_message = stderr if stderr else "Code execution failed"
+                        result_outq.put(error_message)
+                        event_outq.put(("state:finished", "SecurityError", None, None))
+                        
+                except Exception as e:
+                    # Handle unexpected errors in secure execution
+                    tb_str, e_cls_name, exc_info, exc_stack = exception_summary(
+                        e,
+                        self.working_dir,
+                        self.agent_file_name,
+                        self.format_tb_ipython,
+                    )
+                    result_outq.put(tb_str)
+                    event_outq.put(("state:finished", e_cls_name, exc_info, exc_stack))
             else:
-                event_outq.put(("state:finished", None, None, None))
+                # Fallback to original unsafe execution with warning
+                logger.warning("Security validation not available - using unsafe code execution")
+                try:
+                    exec(compile(code, self.agent_file_name, "exec"), global_scope)
+                except BaseException as e:
+                    tb_str, e_cls_name, exc_info, exc_stack = exception_summary(
+                        e,
+                        self.working_dir,
+                        self.agent_file_name,
+                        self.format_tb_ipython,
+                    )
+                    result_outq.put(tb_str)
+                    if e_cls_name == "KeyboardInterrupt":
+                        e_cls_name = "TimeoutError"
+
+                    event_outq.put(("state:finished", e_cls_name, exc_info, exc_stack))
+                else:
+                    event_outq.put(("state:finished", None, None, None))
 
             # put EOF marker to indicate that we're done
             result_outq.put("<|EOF|>")
