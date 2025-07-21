@@ -1,0 +1,110 @@
+name: Bug Report
+description: Report a bug in AI Scientist v2
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the following information to help us diagnose and fix the issue.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component is affected?
+      options:
+        - Tree Search System
+        - Code Security/Validation
+        - LLM Integration
+        - Experiment Execution
+        - Paper Generation
+        - Configuration
+        - Tests
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical (System unusable/Security vulnerability)
+        - High (Major feature broken)
+        - Medium (Feature partially broken)
+        - Low (Minor issue/Enhancement)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the behavior
+      placeholder: |
+        1. Run command '...'
+        2. With config '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Please provide information about your environment:
+      value: |
+        - OS: 
+        - Python version: 
+        - AI Scientist version/commit: 
+        - GPU: 
+        - CUDA version (if applicable): 
+        - Relevant packages:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs/Output
+      description: If applicable, add error messages, stack traces, or relevant log output
+      render: shell
+      placeholder: Paste error messages or logs here
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: If relevant, include your configuration files (remove any API keys!)
+      render: yaml
+      placeholder: Include relevant configuration
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security Consideration
+      description: Does this bug have security implications?
+      options:
+        - label: This bug could be a security vulnerability
+        - label: This bug involves LLM code execution security
+        - label: This bug involves file system access
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or information about the problem
+      placeholder: Any additional information that might be helpful
