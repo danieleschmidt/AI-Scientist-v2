@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2025-07-21
 
+### 🛡️ **CRITICAL INPUT VALIDATION & CODE EXECUTION SECURITY**
+
+#### Enhanced - LLM Code Execution Security
+- **FIXED**: Direct `exec()` of LLM-generated code without validation (`interpreter.py:144`)
+- **ADDED**: Comprehensive code safety validation before execution
+- **IMPLEMENTED**: AST-based dangerous pattern detection (imports, builtins, patterns)
+- **SECURITY**: Prevents code injection, system access, and malicious operations
+- **COMPATIBILITY**: Maintains existing functionality while adding security layers
+
+#### Enhanced - Archive Extraction Security  
+- **REPLACED**: Unsafe `zip_ref.extractall()` with secure extraction (`utils/__init__.py:92`)
+- **ADDED**: Path traversal protection and zip bomb detection
+- **IMPLEMENTED**: File size limits and compression ratio validation
+- **SECURITY**: Prevents directory traversal attacks and resource exhaustion
+
+#### Enhanced - Configuration Security
+- **FIXED**: Unsafe YAML loading with `FullLoader` → `safe_load` (`bfts_utils.py:60`)
+- **ENHANCED**: JSON configuration validation with schema checking
+- **ADDED**: XSS and injection pattern detection in configurations
+- **SECURITY**: Prevents code injection via malicious YAML/JSON
+
+#### Added - Comprehensive Security Module
+- **NEW MODULE**: `ai_scientist/utils/input_validation.py` - Complete validation framework
+- **FUNCTIONS**: Code safety, path validation, archive security, config validation
+- **PATTERNS**: Dangerous import detection, builtin restriction, pattern matching
+- **UTILITIES**: File sanitization, response validation, text content cleaning
+
 ### 🔒 **CRITICAL API KEY SECURITY ENHANCEMENT**
 
 #### Enhanced - API Key Security & Validation

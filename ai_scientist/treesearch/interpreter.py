@@ -141,6 +141,16 @@ class Interpreter:
 
             event_outq.put(("state:ready",))
             try:
+                # Import security validation
+                from ai_scientist.utils.input_validation import is_code_safe, SecurityError
+                
+                # Validate code before execution
+                try:
+                    is_code_safe(code)
+                except SecurityError as se:
+                    raise ValueError(f"Code security validation failed: {se}")
+                
+                # Execute with existing global scope (maintains compatibility)
                 exec(compile(code, self.agent_file_name, "exec"), global_scope)
             except BaseException as e:
                 tb_str, e_cls_name, exc_info, exc_stack = exception_summary(

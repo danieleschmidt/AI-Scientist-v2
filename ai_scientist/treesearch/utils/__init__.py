@@ -88,9 +88,17 @@ def extract_archives(path: Path, max_depth: int = 3):
         f_out_dir.mkdir(exist_ok=True)
         
         try:
-            with zipfile.ZipFile(zip_f, "r") as zip_ref:
-                zip_ref.extractall(f_out_dir)
-            extracted_any = True
+            # Import security validation
+            from ai_scientist.utils.input_validation import safe_extract_zip, SecurityError
+            
+            # Secure extraction
+            try:
+                safe_extract_zip(str(zip_f), str(f_out_dir))
+                extracted_any = True
+            except SecurityError as se:
+                logger.error(f"Security validation failed for {zip_f}: {se}")
+                f_out_dir.rmdir()  # Clean up empty directory
+                continue
         except zipfile.BadZipFile as e:
             logger.error(f"Failed to extract {zip_f}: {e}")
             f_out_dir.rmdir()  # Clean up empty directory
