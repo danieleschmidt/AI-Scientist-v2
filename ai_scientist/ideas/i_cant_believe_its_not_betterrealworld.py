@@ -15,8 +15,14 @@ from torch.utils.data import DataLoader
 from datasets import load_dataset
 from torchvision.models import resnet50
 from huggingface_hub import login
+import sys
+import os
 
-login(token=os.environ["HF_TOKEN"])
+# Add the ai_scientist directory to Python path for secure imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from utils.api_security import get_api_key_secure
+
+login(token=get_api_key_secure("HF_TOKEN"))
 
 ## DATASET REFERENCE
 

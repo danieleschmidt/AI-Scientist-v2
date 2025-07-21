@@ -17,18 +17,12 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 3. ✅ Nested ZIP Handling (WSJF: 3.5)
 4. ✅ ZIP File Content Validation (WSJF: 2.5)
 5. ✅ Pre-commit Hooks and Code Quality
-6. ✅ **CRITICAL: Fix File Handle Leak** (WSJF: 8.5) - *Just Completed*
+6. ✅ **CRITICAL: Fix File Handle Leak** (WSJF: 8.5) - *Completed*
+7. ✅ **API Key Security & Validation** (WSJF: 7.2) - *Just Completed*
 
 ## 🔥 **NEW HIGH PRIORITY ISSUES** (WSJF > 6.0)
 
-### 1. **API Key Security & Validation** (WSJF: 7.2) ⬆️ *Now Top Priority*
-- **Files**: `ai_scientist/llm.py`, idea files
-- **Issue**: API keys accessed without validation, potential exposure
-- **Impact**: Security vulnerability, runtime failures
-- **Business Value**: 7, Time Criticality: 8, Risk Reduction: 9, Job Size: 3
-- **Test Plan**: Test with missing keys, verify secure handling
-
-### 3. **Input Validation and Sanitization** (WSJF: 6.0) ⬆️ *Previously identified*
+### 1. **Input Validation and Sanitization** (WSJF: 6.0) ⬆️ *Now Top Priority*
 - **Issue**: LLM-generated code execution without proper validation  
 - **Files**: Archive extraction path traversal risk
 - **Business Value**: 7, Time Criticality: 6, Risk Reduction: 9, Job Size: 5
@@ -81,15 +75,15 @@ Each task is scored using Weighted Shortest Job First (WSJF):
 
 ## 🎯 **IMMEDIATE NEXT ACTION**
 
-**Selected Task**: API Key Security & Validation (WSJF: 7.2)
-- **Rationale**: Security vulnerability in API key handling, potential exposure
-- **Implementation**: Enhance validation and secure access patterns 
-- **Testing**: Test missing keys, verify secure error handling
+**Selected Task**: Input Validation and Sanitization (WSJF: 6.0)
+- **Rationale**: LLM-generated code execution needs validation and sandboxing
+- **Implementation**: Add input validation layers and execution sandboxing
+- **Testing**: Test with malicious inputs, verify safe execution
 - **Risk**: Medium implementation risk, high security impact
 
 ## 📊 **Progress Metrics**
 
-- **Security Issues Resolved**: 3 critical (os.popen, file handle leak), 1 pending (API validation)
+- **Security Issues Resolved**: 4 critical (os.popen, file handle leak, API key validation), 1 pending (input validation)
 - **Test Coverage**: 20+ tests, 100% pass rate
 - **Code Quality**: Pre-commit hooks active
 - **Technical Debt**: Significantly reduced, new issues identified and prioritized
