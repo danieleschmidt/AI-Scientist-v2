@@ -6,6 +6,7 @@ import os
 from queue import Queue
 import logging
 import humanize
+import threading
 from .backend import FunctionSpec, compile_prompt_to_md, query
 from .interpreter import ExecutionResult
 from .journal import Journal, Node
@@ -1089,32 +1090,46 @@ class MinimalAgent:
 
 
 class GPUManager:
-    """Manages GPU allocation across processes"""
+    """Thread-safe manager for GPU allocation across processes"""
 
     def __init__(self, num_gpus: int):
         self.num_gpus = num_gpus
         self.available_gpus: Set[int] = set(range(num_gpus))
         self.gpu_assignments: Dict[str, int] = {}  # process_id -> gpu_id
+        self._lock = threading.Lock()  # Thread-safe synchronization
 
     def acquire_gpu(self, process_id: str) -> int:
-        """Assigns a GPU to a process"""
-        if not self.available_gpus:
-            raise RuntimeError("No GPUs available")
-        print(f"Available GPUs: {self.available_gpus}")
-        print(f"Process ID: {process_id}")
-        gpu_id = min(self.available_gpus)
-        print(f"Acquiring GPU {gpu_id} for process {process_id}")
-        self.available_gpus.remove(gpu_id)
-        self.gpu_assignments[process_id] = gpu_id
-        print(f"GPU assignments: {self.gpu_assignments}")
-        return gpu_id
+        """Atomically assigns a GPU to a process"""
+        with self._lock:
+            if not self.available_gpus:
+                raise RuntimeError("No GPUs available")
+            print(f"Available GPUs: {self.available_gpus}")
+            print(f"Process ID: {process_id}")
+            gpu_id = min(self.available_gpus)
+            print(f"Acquiring GPU {gpu_id} for process {process_id}")
+            self.available_gpus.remove(gpu_id)
+            self.gpu_assignments[process_id] = gpu_id
+            print(f"GPU assignments: {self.gpu_assignments}")
+            return gpu_id
 
     def release_gpu(self, process_id: str):
-        """Releases GPU assigned to a process"""
-        if process_id in self.gpu_assignments:
-            gpu_id = self.gpu_assignments[process_id]
-            self.available_gpus.add(gpu_id)
-            del self.gpu_assignments[process_id]
+        """Atomically releases GPU assigned to a process"""
+        with self._lock:
+            if process_id in self.gpu_assignments:
+                gpu_id = self.gpu_assignments[process_id]
+                self.available_gpus.add(gpu_id)
+                del self.gpu_assignments[process_id]
+                print(f"Released GPU {gpu_id} from process {process_id}")
+
+    def has_gpu_assigned(self, process_id: str) -> bool:
+        """Thread-safe check if process has GPU assigned"""
+        with self._lock:
+            return process_id in self.gpu_assignments
+
+    def get_all_assignments(self) -> Dict[str, int]:
+        """Thread-safe method to get copy of all GPU assignments"""
+        with self._lock:
+            return self.gpu_assignments.copy()
 
 
 def get_gpu_count() -> int:
@@ -2175,7 +2190,7 @@ class ParallelAgent:
                 process_id = f"worker_{i}"
                 if (
                     self.gpu_manager is not None
-                    and process_id in self.gpu_manager.gpu_assignments
+                    and self.gpu_manager.has_gpu_assigned(process_id)
                 ):
                     self.gpu_manager.release_gpu(process_id)
                     logger.info(f"Released GPU for process {process_id}")
@@ -2331,7 +2346,8 @@ class ParallelAgent:
             try:
                 # Release all GPUs
                 if self.gpu_manager is not None:
-                    for process_id in list(self.gpu_manager.gpu_assignments.keys()):
+                    assignments = self.gpu_manager.get_all_assignments()
+                    for process_id in assignments:
                         self.gpu_manager.release_gpu(process_id)
 
                 # Shutdown executor first
