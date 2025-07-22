@@ -13,6 +13,10 @@ MAX_NUM_TOKENS = 4096
 AVAILABLE_LLMS = [
     "claude-3-5-sonnet-20240620",
     "claude-3-5-sonnet-20241022",
+    # Claude Code (Max Plan) models
+    "claude-code-max-plan",
+    "claude-sonnet-4",
+    "claude-sonnet-4-20250514",
     # OpenAI models
     "gpt-4o-mini",
     "gpt-4o-mini-2024-07-18",
@@ -420,7 +424,15 @@ def extract_json_between_markers(llm_output: str) -> dict | None:
 def create_client(model) -> tuple[Any, str]:
     from ai_scientist.utils.api_security import get_api_key_secure, log_api_key_usage
     
-    if model.startswith("claude-"):
+    if model in ["claude-code-max-plan", "claude-sonnet-4", "claude-sonnet-4-20250514"]:
+        print(f"Using Claude Code (Max Plan) with model {model}.")
+        # Claude Code uses ANTHROPIC_API_KEY but may need special handling
+        anthropic_key = get_api_key_secure("ANTHROPIC_API_KEY")
+        log_api_key_usage("ANTHROPIC_API_KEY", "client_creation", model)
+        # Use the actual model name for Claude Code
+        actual_model = "claude-3-5-sonnet-20241022" if model == "claude-code-max-plan" else model
+        return anthropic.Anthropic(api_key=anthropic_key), actual_model
+    elif model.startswith("claude-"):
         print(f"Using Anthropic API with model {model}.")
         # Validate API key before client creation
         anthropic_key = get_api_key_secure("ANTHROPIC_API_KEY")

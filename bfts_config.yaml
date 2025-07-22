@@ -22,8 +22,9 @@ exec:
 
 generate_report: True
 # LLM settings for final report from journal
+# Can also use claude-code-max-plan for Claude Code (Max Plan) compute
 report:
-  model: gpt-4o-2024-11-20
+  model: gpt-4o-2024-11-20  # Alternative: claude-code-max-plan
   temp: 1.0
 
 experiment:
@@ -53,20 +54,22 @@ agent:
   data_preview: False
 
   # LLM settings for coding
+  # Use claude-code-max-plan for Claude Code (Max Plan) compute, or anthropic.claude-3-5-sonnet-20241022-v2:0 for Bedrock
   code:
-    model: anthropic.claude-3-5-sonnet-20241022-v2:0
+    model: claude-code-max-plan  # Change to anthropic.claude-3-5-sonnet-20241022-v2:0 for Bedrock
     temp: 1.0
     max_tokens: 12000
 
   # LLM settings for evaluating program output / tracebacks
+  # Can also use claude-code-max-plan for Claude Code (Max Plan) compute
   feedback:
-    model: gpt-4o-2024-11-20
+    model: gpt-4o-2024-11-20  # Alternative: claude-code-max-plan
     # gpt-4o
     temp: 0.5
     max_tokens: 8192
 
   vlm_feedback:
-    model: gpt-4o-2024-11-20
+    model: gpt-4o-2024-11-20  # Alternative: claude-code-max-plan
     temp: 0.5
     max_tokens: null
 
