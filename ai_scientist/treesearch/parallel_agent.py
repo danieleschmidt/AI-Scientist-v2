@@ -1554,7 +1554,7 @@ class ParallelAgent:
                     print("Drafting new node")
                     child_node = worker_agent._draft()
                 elif parent_node.is_buggy:
-                    print("Debugging node with id: ", parent_node.id)
+                    logger.info(f"Starting debug process for node {parent_node.id} (debug_depth: {parent_node.debug_depth})")
                     child_node = worker_agent._debug(parent_node)
                     child_node.parent = parent_node
                 else:
@@ -2028,46 +2028,90 @@ class ParallelAgent:
 
             # Debugging phase (with some probability)
             if random.random() < search_cfg.debug_prob:
-                print("Checking debuggable nodes")
-                # print(f"Buggy nodes: {self.journal.buggy_nodes}")
+                logger.debug("Starting debug phase - checking for debuggable nodes")
+                debuggable_nodes = None
+                
                 try:
-                    debuggable_nodes = None
-                    print("Checking buggy nodes...")
                     buggy_nodes = self.journal.buggy_nodes
-                    print(f"Type of buggy_nodes: {type(buggy_nodes)}")
-                    print(f"Length of buggy_nodes: {len(buggy_nodes)}")
-
-                    for i, n in enumerate(buggy_nodes):
-                        if not isinstance(n, Node):
-                            print(f"Found non-Node object in journal.buggy_nodes: {n}")
-                            raise ValueError(
-                                "Found non-Node object in journal.buggy_nodes"
+                    logger.debug(f"Found {len(buggy_nodes)} buggy nodes to evaluate for debugging")
+                    
+                    # Validate buggy nodes data integrity
+                    invalid_nodes = []
+                    for i, node in enumerate(buggy_nodes):
+                        if not isinstance(node, Node):
+                            invalid_nodes.append((i, type(node).__name__, str(node)[:100]))
+                    
+                    if invalid_nodes:
+                        error_msg = f"Found {len(invalid_nodes)} invalid node objects in journal.buggy_nodes"
+                        logger.error(error_msg)
+                        for i, node_type, node_str in invalid_nodes:
+                            logger.error(f"  Index {i}: {node_type} - {node_str}")
+                        
+                        # Filter out invalid nodes and continue with valid ones
+                        valid_buggy_nodes = [n for n in buggy_nodes if isinstance(n, Node)]
+                        logger.warning(f"Continuing with {len(valid_buggy_nodes)} valid nodes out of {len(buggy_nodes)} total")
+                    else:
+                        valid_buggy_nodes = buggy_nodes
+                        logger.debug("All buggy nodes are valid Node instances")
+                    
+                    # Filter nodes that are eligible for debugging
+                    debuggable_nodes = []
+                    for node in valid_buggy_nodes:
+                        if not node.is_leaf:
+                            logger.debug(f"Skipping non-leaf node {node.id} for debugging")
+                            continue
+                        
+                        if node.debug_depth > search_cfg.max_debug_depth:
+                            logger.debug(
+                                f"Skipping node {node.id}: debug_depth ({node.debug_depth}) "
+                                f"exceeds max_debug_depth ({search_cfg.max_debug_depth})"
                             )
-                    debuggable_nodes = [
-                        n
-                        for n in self.journal.buggy_nodes
-                        if (
-                            isinstance(n, Node)
-                            and n.is_leaf
-                            and n.debug_depth <= search_cfg.max_debug_depth
-                        )
-                    ]
+                            continue
+                        
+                        debuggable_nodes.append(node)
+                    
+                    logger.info(f"Identified {len(debuggable_nodes)} debuggable nodes from {len(valid_buggy_nodes)} buggy nodes")
+                    
+                except AttributeError as e:
+                    logger.error(f"Journal or node attribute error during debug node selection: {e}")
+                    logger.debug("This may indicate journal corruption or unexpected node structure")
+                    debuggable_nodes = []
+                except ValueError as e:
+                    logger.error(f"Value error during debug node validation: {e}")
+                    debuggable_nodes = []
                 except Exception as e:
-                    print(f"Error getting debuggable nodes: {e}")
+                    logger.error(f"Unexpected error during debug node selection: {e}")
+                    logger.debug(f"Error type: {type(e).__name__}")
+                    logger.debug(f"Error details: {str(e)}")
+                    debuggable_nodes = []
+                
                 if debuggable_nodes:
-                    print("Found debuggable nodes")
-                    node = random.choice(debuggable_nodes)
-                    tree_root = node
-                    while tree_root.parent:
-                        tree_root = tree_root.parent
-
-                    tree_id = id(tree_root)
-                    if tree_id not in processed_trees or len(processed_trees) >= len(
-                        viable_trees
-                    ):
-                        nodes_to_process.append(node)
-                        processed_trees.add(tree_id)
-                        continue
+                    try:
+                        selected_node = random.choice(debuggable_nodes)
+                        logger.info(f"Selected node {selected_node.id} for debugging (debug_depth: {selected_node.debug_depth})")
+                        
+                        # Find the root of this node's tree
+                        tree_root = selected_node
+                        while tree_root.parent:
+                            tree_root = tree_root.parent
+                        
+                        tree_id = id(tree_root)
+                        logger.debug(f"Debug node belongs to tree {tree_id}")
+                        
+                        # Check if we should process this tree
+                        if tree_id not in processed_trees or len(processed_trees) >= len(viable_trees):
+                            nodes_to_process.append(selected_node)
+                            processed_trees.add(tree_id)
+                            logger.debug(f"Added debug node {selected_node.id} to processing queue")
+                            continue
+                        else:
+                            logger.debug(f"Skipping debug node {selected_node.id} - tree {tree_id} already processed")
+                    
+                    except (IndexError, AttributeError) as e:
+                        logger.error(f"Error processing debug node selection: {e}")
+                        logger.debug(f"debuggable_nodes state: {[n.id if hasattr(n, 'id') else str(n) for n in debuggable_nodes[:5]]}")
+                else:
+                    logger.debug("No debuggable nodes found in this iteration")
 
             # Special handling for Stage 4 (Ablation Studies)
             print(f"[red]self.stage_name: {self.stage_name}[/red]")
