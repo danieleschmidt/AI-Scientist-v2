@@ -334,50 +334,119 @@ if __name__ == "__main__":
                 json.dump(review_img_cap_ref, f, indent=4)
             print("Paper review completed.")
 
-    print("Start cleaning up processes")
-    # Kill all mp and torch processes associated with this experiment
+    print("Start enhanced cleanup process")
+    # Enhanced cleanup using new utilities
+    from ai_scientist.utils.process_cleanup_enhanced import (
+        cleanup_child_processes,
+        detect_orphaned_processes,
+        setup_cleanup_signal_handlers
+    )
+    from ai_scientist.utils.gpu_cleanup import cleanup_gpu_resources
+    
     import psutil
-    import signal
-
-    # Get the current process and all its children
-    current_process = psutil.Process()
-    children = current_process.children(recursive=True)
-
-    # First try graceful termination
-    for child in children:
+    
+    try:
+        # Step 1: Set up signal handlers for graceful shutdown
+        setup_cleanup_signal_handlers()
+        
+        # Step 2: Get current process and all its children
+        current_process = psutil.Process()
+        children = current_process.children(recursive=True)
+        
+        if children:
+            print(f"Found {len(children)} child processes to clean up")
+            # Convert psutil processes to multiprocessing-like objects for cleanup
+            child_processes = []
+            for child in children:
+                # Create a wrapper that mimics multiprocessing.Process interface
+                class ProcessWrapper:
+                    def __init__(self, psutil_proc):
+                        self.proc = psutil_proc
+                        self.pid = psutil_proc.pid
+                    
+                    def is_alive(self):
+                        try:
+                            return self.proc.is_running()
+                        except psutil.NoSuchProcess:
+                            return False
+                    
+                    def terminate(self):
+                        try:
+                            self.proc.terminate()
+                        except psutil.NoSuchProcess:
+                            pass
+                    
+                    def kill(self):
+                        try:
+                            self.proc.kill()
+                        except psutil.NoSuchProcess:
+                            pass
+                
+                child_processes.append(ProcessWrapper(child))
+            
+            # Use enhanced cleanup with escalating termination
+            success = cleanup_child_processes(child_processes, timeout=5)
+            if success:
+                print("All child processes cleaned up successfully")
+            else:
+                print("Warning: Some child processes may not have been cleaned up properly")
+        else:
+            print("No child processes found")
+        
+        # Step 3: Check for orphaned processes
+        keywords = ["python", "torch", "mp", "bfts", "experiment", "ai_scientist"]
+        orphaned = detect_orphaned_processes(keywords)
+        
+        if orphaned:
+            print(f"Found {len(orphaned)} potentially orphaned processes")
+            # Additional cleanup for orphaned processes
+            for proc_info in orphaned:
+                try:
+                    proc = psutil.Process(proc_info['pid'])
+                    proc.terminate()
+                    proc.wait(timeout=3)
+                    if proc.is_running():
+                        proc.kill()
+                    print(f"Cleaned up orphaned process PID={proc_info['pid']}")
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
+                    continue
+        
+        # Step 4: Clean up GPU resources
+        gpu_success = cleanup_gpu_resources(force=True)
+        if gpu_success:
+            print("GPU resources cleaned up successfully")
+        else:
+            print("Warning: GPU cleanup may not have completed successfully")
+            
+        print("Enhanced cleanup process completed")
+        
+    except Exception as e:
+        print(f"Error during enhanced cleanup: {e}")
+        # Fallback to basic cleanup if enhanced cleanup fails
+        print("Falling back to basic cleanup...")
+        
         try:
-            child.send_signal(signal.SIGTERM)
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue
-
-    # Wait briefly for processes to terminate
-    gone, alive = psutil.wait_procs(children, timeout=3)
-
-    # If any processes remain, force kill them
-    for process in alive:
-        try:
-            process.kill()
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue
-
-    # Additional cleanup: find any orphaned processes containing specific keywords
-    keywords = ["python", "torch", "mp", "bfts", "experiment"]
-    for proc in psutil.process_iter(["name", "cmdline"]):
-        try:
-            # Check both process name and command line arguments
-            cmdline = " ".join(proc.cmdline()).lower()
-            if any(keyword in cmdline for keyword in keywords):
-                proc.send_signal(signal.SIGTERM)
-                proc.wait(timeout=3)
-                if proc.is_running():
-                    proc.kill()
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.TimeoutExpired):
-            continue
-
-    # Finally, terminate the current process
-    # current_process.send_signal(signal.SIGTERM)
-    # try:
-    #     current_process.wait(timeout=3)
+            import signal
+            current_process = psutil.Process()
+            children = current_process.children(recursive=True)
+            
+            for child in children:
+                try:
+                    child.send_signal(signal.SIGTERM)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            
+            # Wait and force kill if needed
+            gone, alive = psutil.wait_procs(children, timeout=3)
+            for process in alive:
+                try:
+                    process.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+                    
+            print("Basic cleanup completed")
+        except Exception as fallback_error:
+            print(f"Fallback cleanup also failed: {fallback_error}")
     # except psutil.TimeoutExpired:
     #     current_process.kill()
 

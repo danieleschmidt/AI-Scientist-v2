@@ -27,12 +27,12 @@ class TestTorchCompileSafety(unittest.TestCase):
                 with open(idea_file, 'r') as f:
                     content = f.read()
                 
-                # Check for safety pattern
-                self.assertIn("try:", content, f"Missing try block in {idea_file.name}")
-                self.assertIn("torch.compile", content, f"Missing torch.compile in {idea_file.name}")
-                self.assertIn("except Exception as e:", content, f"Missing exception handling in {idea_file.name}")
-                self.assertIn("torch.compile failed, falling back to eager mode", content, 
-                            f"Missing fallback message in {idea_file.name}")
+                # Check for enhanced safety pattern
+                self.assertIn("safe_torch_compile", content, f"Missing safe_torch_compile import in {idea_file.name}")
+                self.assertIn("from ai_scientist.utils.torch_compile_safety import safe_torch_compile", content, 
+                            f"Missing safety import in {idea_file.name}")
+                self.assertIn("model = safe_torch_compile(model)", content, 
+                            f"Missing safe compilation call in {idea_file.name}")
     
     def test_cuda_availability_check(self):
         """Test that CUDA availability is checked before torch.compile."""
@@ -62,28 +62,17 @@ class TestTorchCompileSafety(unittest.TestCase):
                 with open(idea_file, 'r') as f:
                     content = f.read()
                 
-                # Find the torch.compile section
-                lines = content.split('\\n')
-                compile_section = []
-                in_compile_section = False
+                # Verify the enhanced safety pattern
+                self.assertIn("safe_torch_compile", content, f"Missing safe compilation in {idea_file.name}")
+                self.assertIn("torch_compile_safety", content, f"Missing safety module import in {idea_file.name}")
                 
-                for line in lines:
-                    if "torch.compile" in line or in_compile_section:
-                        compile_section.append(line.strip())
-                        in_compile_section = True
-                        if line.strip().startswith("except") and "Exception" in line:
-                            # Add a few more lines to capture the complete pattern
-                            continue
-                        elif in_compile_section and line.strip() and not line.strip().startswith(("try:", "except", "print", "model =", "#")):
-                            break
-                
-                compile_text = '\\n'.join(compile_section)
-                
-                # Verify the complete safety pattern
-                self.assertIn("try:", compile_text, f"Missing try in torch.compile section of {idea_file.name}")
-                self.assertIn("model = torch.compile", compile_text, f"Missing compile call in {idea_file.name}")
-                self.assertIn("except Exception", compile_text, f"Missing exception handling in {idea_file.name}")
-                self.assertIn("falling back to eager mode", compile_text, f"Missing fallback message in {idea_file.name}")
+                # Ensure old unsafe pattern is not used
+                lines = content.split('\n')
+                for i, line in enumerate(lines):
+                    if "torch.compile" in line and "safe_torch_compile" not in line and "import" not in line:
+                        # Check if this is the old unsafe pattern
+                        if "model = torch.compile(model)" in line:
+                            self.fail(f"Found unsafe torch.compile pattern at line {i+1} in {idea_file.name}")
 
 
 class TestTorchCompileSafetyImplementation(unittest.TestCase):
@@ -101,13 +90,13 @@ class TestTorchCompileSafetyImplementation(unittest.TestCase):
                 with open(idea_file, 'r') as f:
                     content = f.read()
                 
-                # Check that we're catching general Exception (broad enough to catch compilation issues)
-                self.assertIn("except Exception as e:", content, 
-                            f"Should catch general Exception in {idea_file.name}")
+                # Check that safe_torch_compile is used (which has proper error handling internally)
+                self.assertIn("safe_torch_compile", content, 
+                            f"Should use safe_torch_compile in {idea_file.name}")
                 
-                # Check that error is properly logged
-                self.assertIn("Error: {e}", content, 
-                            f"Should log the actual error in {idea_file.name}")
+                # Ensure we're not using the old pattern with manual error handling
+                self.assertNotIn("except Exception as e:", content, 
+                            f"Should not have manual exception handling when using safe_torch_compile in {idea_file.name}")
     
     def test_no_unsafe_torch_compile_calls(self):
         """Test that there are no unsafe torch.compile calls without error handling."""
