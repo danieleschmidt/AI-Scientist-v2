@@ -7,6 +7,7 @@ from queue import Queue
 import logging
 import humanize
 import threading
+import uuid
 from .backend import FunctionSpec, compile_prompt_to_md, query
 from .interpreter import ExecutionResult
 from .journal import Journal, Node
@@ -1097,29 +1098,49 @@ class GPUManager:
         self.available_gpus: Set[int] = set(range(num_gpus))
         self.gpu_assignments: Dict[str, int] = {}  # process_id -> gpu_id
         self._lock = threading.Lock()  # Thread-safe synchronization
+        self._shutdown = False
 
-    def acquire_gpu(self, process_id: str) -> int:
-        """Atomically assigns a GPU to a process"""
-        with self._lock:
-            if not self.available_gpus:
-                raise RuntimeError("No GPUs available")
-            print(f"Available GPUs: {self.available_gpus}")
-            print(f"Process ID: {process_id}")
-            gpu_id = min(self.available_gpus)
-            print(f"Acquiring GPU {gpu_id} for process {process_id}")
-            self.available_gpus.remove(gpu_id)
-            self.gpu_assignments[process_id] = gpu_id
-            print(f"GPU assignments: {self.gpu_assignments}")
-            return gpu_id
+    def acquire_gpu(self, process_id: str, timeout: float = 30.0) -> int:
+        """Atomically assigns a GPU to a process with timeout"""
+        import time
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            with self._lock:
+                if self._shutdown:
+                    raise RuntimeError("GPUManager is shutting down")
+                if self.available_gpus:
+                    gpu_id = min(self.available_gpus)
+                    self.available_gpus.remove(gpu_id)
+                    self.gpu_assignments[process_id] = gpu_id
+                    logger.info(f"Acquired GPU {gpu_id} for process {process_id}")
+                    return gpu_id
+            # Wait a bit before retrying
+            time.sleep(0.1)
+        
+        raise RuntimeError(f"No GPUs available after {timeout}s timeout")
 
-    def release_gpu(self, process_id: str):
-        """Atomically releases GPU assigned to a process"""
+    def release_gpu(self, process_id: str) -> bool:
+        """Atomically releases GPU assigned to a process, returns True if released"""
         with self._lock:
             if process_id in self.gpu_assignments:
                 gpu_id = self.gpu_assignments[process_id]
                 self.available_gpus.add(gpu_id)
                 del self.gpu_assignments[process_id]
-                print(f"Released GPU {gpu_id} from process {process_id}")
+                logger.info(f"Released GPU {gpu_id} from process {process_id}")
+                return True
+            return False
+
+    def release_gpu_if_assigned(self, process_id: str) -> bool:
+        """Atomically check and release GPU if assigned (fixes race condition)"""
+        with self._lock:
+            if process_id in self.gpu_assignments:
+                gpu_id = self.gpu_assignments[process_id]
+                self.available_gpus.add(gpu_id)
+                del self.gpu_assignments[process_id]
+                logger.info(f"Released GPU {gpu_id} from process {process_id}")
+                return True
+            return False
 
     def has_gpu_assigned(self, process_id: str) -> bool:
         """Thread-safe check if process has GPU assigned"""
@@ -1130,6 +1151,22 @@ class GPUManager:
         """Thread-safe method to get copy of all GPU assignments"""
         with self._lock:
             return self.gpu_assignments.copy()
+    
+    def shutdown(self):
+        """Shutdown GPU manager and release all resources"""
+        with self._lock:
+            self._shutdown = True
+            # Release all GPUs atomically
+            process_ids = list(self.gpu_assignments.keys())
+            for process_id in process_ids:
+                gpu_id = self.gpu_assignments[process_id]
+                self.available_gpus.add(gpu_id)
+                logger.info(f"Shutdown: Released GPU {gpu_id} from process {process_id}")
+            self.gpu_assignments.clear()
+
+    def generate_process_id(self) -> str:
+        """Generate unique process ID to avoid race conditions"""
+        return f"worker_{uuid.uuid4().hex[:8]}"
 
 
 def get_gpu_count() -> int:
@@ -1284,17 +1321,23 @@ class ParallelAgent:
         # Submit parallel jobs for different seeds
         seed_nodes = []
         futures = []
+        seed_process_ids = []  # Track process IDs for proper cleanup
         for seed in range(self.cfg.agent.multi_seed_eval.num_seeds):
             gpu_id = None
+            process_id = None
             if self.gpu_manager is not None:
                 try:
-                    process_id = f"seed_{seed}_worker"
-                    gpu_id = self.gpu_manager.acquire_gpu(process_id)
+                    # Generate unique process ID to avoid race conditions
+                    process_id = f"seed_{seed}_{self.gpu_manager.generate_process_id()}"
+                    gpu_id = self.gpu_manager.acquire_gpu(process_id, timeout=10.0)
                     logger.info(f"Assigned GPU {gpu_id} to seed {seed}")
                 except RuntimeError as e:
                     logger.warning(
                         f"Could not acquire GPU for seed {seed}: {e}. Running on CPU"
                     )
+                    process_id = None
+            
+            seed_process_ids.append(process_id)  # Store for cleanup
 
             # Add seed to node code
             node_data["code"] = (
@@ -1329,18 +1372,26 @@ class ParallelAgent:
                 )
             )
 
-        for future in futures:
-            try:
-                result_data = future.result(timeout=self.timeout)
-                result_node = Node.from_dict(result_data, self.journal)
-                print(f"Parent node id: {result_node.parent.id}")
-                print(f"Sanity check: actual parent node id: {node.id}")
-                # Add node to journal's list and assign its step number
-                self.journal.append(result_node)
-                seed_nodes.append(self.journal.get_node_by_id(result_node.id))
-                print("Added result node to journal")
-            except Exception as e:
-                logger.error(f"Error in multi-seed evaluation: {str(e)}")
+        try:
+            for i, future in enumerate(futures):
+                try:
+                    result_data = future.result(timeout=self.timeout)
+                    result_node = Node.from_dict(result_data, self.journal)
+                    print(f"Parent node id: {result_node.parent.id}")
+                    print(f"Sanity check: actual parent node id: {node.id}")
+                    # Add node to journal's list and assign its step number
+                    self.journal.append(result_node)
+                    seed_nodes.append(self.journal.get_node_by_id(result_node.id))
+                    print("Added result node to journal")
+                except Exception as e:
+                    logger.error(f"Error in multi-seed evaluation: {str(e)}")
+        finally:
+            # Release GPU resources for all seed processes
+            for i, process_id in enumerate(seed_process_ids):
+                if self.gpu_manager is not None and process_id is not None:
+                    # Use atomic release operation to avoid race condition
+                    if self.gpu_manager.release_gpu_if_assigned(process_id):
+                        logger.info(f"Released GPU for seed process {process_id}")
 
         return seed_nodes
 
@@ -2088,16 +2139,21 @@ class ParallelAgent:
 
         print("Submitting tasks to process pool")
         futures = []
+        process_ids = []  # Track process IDs for proper cleanup
         for node_data in node_data_list:
             gpu_id = None
+            process_id = None
             if self.gpu_manager is not None:
                 try:
-                    # Get current process ID for GPU assignment
-                    process_id = f"worker_{len(futures)}"
-                    gpu_id = self.gpu_manager.acquire_gpu(process_id)
+                    # Generate unique process ID to avoid race conditions
+                    process_id = self.gpu_manager.generate_process_id()
+                    gpu_id = self.gpu_manager.acquire_gpu(process_id, timeout=10.0)
                     logger.info(f"Assigned GPU {gpu_id} to process {process_id}")
                 except RuntimeError as e:
                     logger.warning(f"Could not acquire GPU: {e}. Running on CPU")
+                    process_id = None
+            
+            process_ids.append(process_id)  # Store for cleanup
 
             if (
                 self.stage_name
@@ -2187,13 +2243,12 @@ class ParallelAgent:
                 raise
             finally:
                 # Release GPU for this process if it was using one
-                process_id = f"worker_{i}"
-                if (
-                    self.gpu_manager is not None
-                    and self.gpu_manager.has_gpu_assigned(process_id)
-                ):
-                    self.gpu_manager.release_gpu(process_id)
-                    logger.info(f"Released GPU for process {process_id}")
+                # Use the process_id from the process_ids list to avoid race conditions
+                process_id = process_ids[i] if i < len(process_ids) else None
+                if self.gpu_manager is not None and process_id is not None:
+                    # Use atomic release operation to avoid race condition
+                    if self.gpu_manager.release_gpu_if_assigned(process_id):
+                        logger.info(f"Released GPU for process {process_id}")
 
     def _update_hyperparam_tuning_state(self, result_node: Node):
         """Update hyperparam tuning tracking state based on execution results."""
@@ -2344,11 +2399,9 @@ class ParallelAgent:
         if not self._is_shutdown:
             print("Shutting down parallel executor...")
             try:
-                # Release all GPUs
+                # Release all GPUs atomically
                 if self.gpu_manager is not None:
-                    assignments = self.gpu_manager.get_all_assignments()
-                    for process_id in assignments:
-                        self.gpu_manager.release_gpu(process_id)
+                    self.gpu_manager.shutdown()
 
                 # Shutdown executor first
                 self.executor.shutdown(wait=False, cancel_futures=True)

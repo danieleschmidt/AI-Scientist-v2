@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2025-07-21
+## [Unreleased] - 2025-07-23
+
+### ⚡ **CRITICAL GPU RESOURCE MANAGEMENT FIXES**
+
+#### Enhanced - GPU Resource Race Condition Resolution
+- **FIXED**: Non-atomic GPU operations causing race conditions (`parallel_agent.py:2096-2196`)
+- **ADDED**: UUID-based unique process ID generation to prevent conflicts
+- **IMPLEMENTED**: Atomic `release_gpu_if_assigned()` operation eliminating check-then-act race conditions
+- **ENHANCED**: GPU acquisition with configurable timeout and retry logic
+- **ADDED**: Comprehensive GPU manager shutdown functionality with resource cleanup
+- **FIXED**: GPU resource leak in multi-seed evaluation (missing GPU releases)
+- **SECURITY**: Prevents GPU resource exhaustion and deadlocks under concurrent access
+- **COMPATIBILITY**: Maintains existing functionality while adding robustness
+
+#### Enhanced - Multi-Seed Evaluation GPU Management
+- **FIXED**: GPU resource leak in `_run_multi_seed_evaluation()` method
+- **ADDED**: Proper GPU cleanup in finally blocks for seed evaluation processes
+- **IMPROVED**: Thread-safe GPU resource tracking across seed evaluations
+- **ENHANCED**: Error handling with guaranteed resource cleanup
 
 ### 🛡️ **CRITICAL INPUT VALIDATION & CODE EXECUTION SECURITY**
 
