@@ -20,6 +20,11 @@ import pickle
 from dataclasses import asdict
 from omegaconf import OmegaConf
 
+# Enhanced process cleanup utilities
+from ..utils.process_cleanup_enhanced import cleanup_child_processes, detect_orphaned_processes
+from .signal_handlers import setup_signal_handlers, register_cleanup_function
+from .resource_monitor import detect_resource_leaks
+
 from rich import print
 from pathlib import Path
 import base64
@@ -1234,6 +1239,10 @@ class ParallelAgent:
         self.timeout = self.cfg.exec.timeout
         self.executor = ProcessPoolExecutor(max_workers=self.num_workers)
         self._is_shutdown = False
+        
+        # Enhanced cleanup setup
+        self._setup_enhanced_cleanup()
+        
         # Define the metric once at initialization
         self.evaluation_metrics = self._define_global_metrics()
         self._ablation_state = {  # store ablation names
@@ -1242,6 +1251,28 @@ class ParallelAgent:
         self._hyperparam_tuning_state = {  # store hyperparam tuning ideas
             "tried_hyperparams": set(),
         }
+
+    def _setup_enhanced_cleanup(self):
+        """Set up enhanced cleanup functionality with signal handlers."""
+        try:
+            # Set up signal handlers for graceful shutdown
+            setup_signal_handlers()
+            
+            # Register our cleanup function
+            register_cleanup_function(self.cleanup)
+            
+            logger.info("Enhanced cleanup setup completed")
+        except Exception as e:
+            logger.warning(f"Could not set up enhanced cleanup: {e}")
+
+    def cleanup_with_timeout(self, timeout: int = 30) -> bool:
+        """Enhanced cleanup with timeout handling."""
+        from .process_cleanup import cleanup_with_timeout
+        return cleanup_with_timeout(self.cleanup, timeout)
+
+    def detect_resource_leaks(self) -> Dict[str, Any]:
+        """Detect potential resource leaks."""
+        return detect_resource_leaks()
 
     def _define_global_metrics(self) -> str:
         """Define eval metric to be used across all experiments"""
@@ -2439,32 +2470,54 @@ class ParallelAgent:
         return self
 
     def cleanup(self):
-        """Cleanup parallel workers and resources"""
+        """Enhanced cleanup with proper process termination and resource management"""
         if not self._is_shutdown:
-            print("Shutting down parallel executor...")
+            print("Shutting down parallel executor with enhanced cleanup...")
             try:
-                # Release all GPUs atomically
+                # Step 1: Check for resource leaks before cleanup
+                try:
+                    leaks = self.detect_resource_leaks()
+                    if leaks.get('potential_leaks'):
+                        logger.warning(f"Detected {len(leaks['potential_leaks'])} potential resource leaks before cleanup")
+                except Exception as e:
+                    logger.debug(f"Could not check for resource leaks: {e}")
+
+                # Step 2: Release all GPUs atomically
                 if self.gpu_manager is not None:
                     self.gpu_manager.shutdown()
 
-                # Shutdown executor first
+                # Step 3: Shutdown executor first
                 self.executor.shutdown(wait=False, cancel_futures=True)
 
-                # Force terminate all worker processes
-                if self.executor._processes:
+                # Step 4: Enhanced process termination with escalation
+                if hasattr(self.executor, '_processes') and self.executor._processes:
                     ## Get copy of processes
                     processes = list(self.executor._processes.values())
+                    
+                    # Use enhanced cleanup with escalating termination
+                    success = cleanup_child_processes(processes, timeout=5)
+                    if success:
+                        logger.info("All worker processes cleaned up successfully")
+                    else:
+                        logger.warning("Some worker processes may not have been cleaned up properly")
+                else:
+                    logger.info("No worker processes to clean up")
 
-                    # Then terminate processes if they're still alive
-                    for process in processes:
-                        if process.is_alive():
-                            process.terminate()
-                            process.join(timeout=1)
+                # Step 5: Check for orphaned processes
+                try:
+                    orphaned = detect_orphaned_processes()
+                    if orphaned:
+                        logger.warning(f"Detected {len(orphaned)} potentially orphaned processes")
+                        for proc in orphaned[:5]:  # Log first 5
+                            logger.warning(f"Orphaned process: PID={proc['pid']}, Memory={proc['memory_mb']:.1f}MB")
+                except Exception as e:
+                    logger.debug(f"Could not check for orphaned processes: {e}")
 
-                print("Executor shutdown complete")
+                print("Enhanced executor shutdown complete")
 
             except Exception as e:
-                print(f"Error during executor shutdown: {e}")
+                print(f"Error during enhanced executor shutdown: {e}")
+                logger.error(f"Enhanced cleanup failed: {e}")
             finally:
                 self._is_shutdown = True
 

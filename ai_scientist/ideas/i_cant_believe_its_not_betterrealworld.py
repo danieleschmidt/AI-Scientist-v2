@@ -198,12 +198,9 @@ model = resnet50(weights=weights)
 model = model.to(device)
 
 start_time = time.time()
-# Use torch.compile with safer settings
-if torch.cuda.is_available():
-    try:
-        model = torch.compile(model)
-    except Exception as e:
-        print(f"Warning: torch.compile failed, falling back to eager mode. Error: {e}")
+# Use enhanced torch.compile with comprehensive safety checks
+from ai_scientist.utils.torch_compile_safety import safe_torch_compile
+model = safe_torch_compile(model)
 
 criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
 
