@@ -287,17 +287,40 @@ class Interpreter:
                     continue
                 running_time = time.time() - start_time
                 if running_time > self.timeout:
-                    # [TODO] handle this in a better way
-                    assert reset_session, "Timeout ocurred in interactive session"
-
-                    # send interrupt to child
-                    os.kill(self.process.pid, signal.SIGINT)  # type: ignore
-                    child_in_overtime = True
-                    # terminate if we're overtime by more than a minute
-                    if running_time > self.timeout + 60:
-                        logger.warning("Child failed to terminate, killing it..")
+                    # Handle timeout gracefully for both reset and interactive sessions
+                    if not reset_session:
+                        logger.warning(
+                            f"Timeout occurred in interactive session after {running_time:.2f}s. "
+                            "Cleaning up session to prevent resource leaks."
+                        )
+                        # For interactive sessions, we need to clean up the entire session
+                        # to prevent resource leaks and maintain system stability
                         self.cleanup_session()
-
+                        state = (None, "TimeoutError", {}, [])
+                        exec_time = self.timeout
+                        break
+                    
+                    # For reset sessions, try graceful interrupt first
+                    try:
+                        logger.info(f"Sending SIGINT to child process (PID: {self.process.pid}) after {running_time:.2f}s timeout")
+                        os.kill(self.process.pid, signal.SIGINT)  # type: ignore
+                        child_in_overtime = True
+                    except (ProcessLookupError, OSError) as e:
+                        logger.warning(f"Failed to send SIGINT to child process: {e}")
+                        # Process may have already died, clean up
+                        self.cleanup_session()
+                        state = (None, "TimeoutError", {}, [])
+                        exec_time = self.timeout
+                        break
+                    
+                    # Give child process grace period to handle interrupt
+                    grace_period = 60  # seconds
+                    if running_time > self.timeout + grace_period:
+                        logger.warning(
+                            f"Child process failed to terminate after {grace_period}s grace period. "
+                            "Force killing process."
+                        )
+                        self.cleanup_session()
                         state = (None, "TimeoutError", {}, [])
                         exec_time = self.timeout
                         break

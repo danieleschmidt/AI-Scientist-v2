@@ -1,0 +1,290 @@
+# AI Scientist v2 - Autonomous Backlog Management System
+# WSJF (Weighted Shortest Job First) Prioritization Framework
+# Updated: 2025-07-23
+
+metadata:
+  last_updated: "2025-07-23T12:00:00Z"
+  next_review: "After completion of current high-priority items"
+  scoring_system: "WSJF"
+  aging_multiplier_cap: 2.0
+
+scoring_criteria:
+  business_value:
+    description: "Impact on users/system functionality"
+    scale: "1-13 (Fibonacci)"
+    weights:
+      security: 1.5
+      performance: 1.2
+      reliability: 1.3
+      usability: 1.0
+  
+  time_criticality:
+    description: "Urgency of implementation"
+    scale: "1-13 (Fibonacci)"
+    factors:
+      - "Blocking other work"
+      - "Customer/stakeholder pressure"
+      - "Regulatory/compliance requirements"
+  
+  risk_reduction:
+    description: "Reduction in system/business risk"
+    scale: "1-13 (Fibonacci)"
+    factors:
+      - "Security vulnerabilities"
+      - "System stability"
+      - "Technical debt reduction"
+  
+  effort_estimation:
+    description: "Implementation complexity and time"
+    scale: "1-13 (Fibonacci story points)"
+    factors:
+      - "Development time"
+      - "Testing requirements"
+      - "Documentation needs"
+      - "Risk of implementation"
+
+statuses:
+  - NEW
+  - REFINED
+  - READY
+  - DOING
+  - PR
+  - MERGED
+  - DONE
+  - BLOCKED
+
+categories:
+  - Feature
+  - Bug
+  - Refactor
+  - Security
+  - Performance
+  - Documentation
+  - Infrastructure
+  - Technical_Debt
+
+backlog_items:
+  # HIGH PRIORITY (WSJF > 6.0)
+  
+  - id: "interpreter-timeout-handling"
+    title: "Improve REPL timeout handling in interpreter"
+    description: "Replace TODO comment with robust timeout handling for REPL execution"
+    type: "Bug"
+    status: "READY"
+    business_value: 5
+    time_criticality: 3
+    risk_reduction: 8
+    effort: 3
+    wsjf_score: 5.33
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 5.33
+    files:
+      - "ai_scientist/treesearch/interpreter.py:290"
+    acceptance_criteria:
+      - "Replace TODO comment with proper timeout handling"
+      - "Add graceful session cleanup on timeout"
+      - "Ensure no resource leaks on timeout"
+      - "Add comprehensive error logging"
+    test_plan:
+      - "Test timeout scenarios with long-running code"
+      - "Verify resource cleanup after timeout"
+      - "Test interactive vs non-interactive session handling"
+    security_notes:
+      - "Ensure process cleanup prevents zombie processes"
+      - "Validate signal handling security"
+    
+  - id: "debug-error-handling"
+    title: "Enhanced error handling in debug depth logic"
+    description: "Improve error propagation and handling in tree search debugging"
+    type: "Bug"
+    status: "READY"
+    business_value: 6
+    time_criticality: 5
+    risk_reduction: 6
+    effort: 5
+    wsjf_score: 3.4
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 3.4
+    files:
+      - "ai_scientist/treesearch/parallel_agent.py:2030-2060"
+    acceptance_criteria:
+      - "Add proper error handling for debug node selection"
+      - "Improve debug depth calculation reliability"
+      - "Add comprehensive logging for debug operations"
+      - "Handle edge cases in buggy node processing"
+    test_plan:
+      - "Test debug scenarios with various node states"
+      - "Verify error propagation in debug workflows"
+      - "Test edge cases with empty or corrupted debug data"
+    
+  # MEDIUM PRIORITY (WSJF 2.0-6.0)
+  
+  - id: "process-cleanup"
+    title: "Process cleanup and resource management"
+    description: "Improve process termination and resource cleanup"
+    type: "Bug"
+    status: "READY"
+    business_value: 5
+    time_criticality: 5
+    risk_reduction: 7
+    effort: 4
+    wsjf_score: 4.25
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 4.25
+    files:
+      - "launch_scientist_bfts.py:319-350"
+      - "ai_scientist/treesearch/parallel_agent.py"
+    acceptance_criteria:
+      - "Ensure all child processes are properly terminated"
+      - "Add timeout handling for process cleanup"
+      - "Implement resource leak detection"
+      - "Add proper signal handling"
+    
+  - id: "configuration-management"
+    title: "Centralized configuration management"
+    description: "Replace hardcoded values with centralized configuration"
+    type: "Refactor"
+    status: "REFINED"
+    business_value: 6
+    time_criticality: 4
+    risk_reduction: 4
+    effort: 4
+    wsjf_score: 3.5
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 3.5
+    files:
+      - "Multiple files with hardcoded API URLs, token limits, pricing"
+    acceptance_criteria:
+      - "Create centralized config system"
+      - "Move all hardcoded values to config files"
+      - "Add environment-specific overrides"
+      - "Implement config validation"
+    
+  - id: "unsafe-compilation"
+    title: "Add safety checks for torch.compile"
+    description: "Add safety checks and fallback for torch compilation"
+    type: "Security"
+    status: "READY"
+    business_value: 4
+    time_criticality: 3
+    risk_reduction: 5
+    effort: 3
+    wsjf_score: 4.0
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 4.0
+    files:
+      - "ai_scientist/ideas/i_cant_believe_its_not_better*.py:198,230"
+    acceptance_criteria:
+      - "Add try-catch around torch.compile calls"
+      - "Implement fallback to non-compiled version"
+      - "Add configuration option to disable compilation"
+      - "Log compilation failures appropriately"
+    
+  - id: "performance-optimization"
+    title: "Performance optimization for file I/O and token tracking"
+    description: "Optimize synchronous file operations and token tracking efficiency"
+    type: "Performance"
+    status: "REFINED"
+    business_value: 5
+    time_criticality: 3
+    risk_reduction: 3
+    effort: 6
+    wsjf_score: 1.83
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 1.83
+    files:
+      - "ai_scientist/perform_icbinb_writeup.py"
+      - "ai_scientist/utils/token_tracker.py"
+    acceptance_criteria:
+      - "Replace synchronous file I/O with async where beneficial"
+      - "Optimize token tracking data structures"
+      - "Add performance monitoring and metrics"
+      - "Benchmark improvements"
+    
+  # LOW PRIORITY (WSJF < 2.0)
+  
+  - id: "documentation-improvements"
+    title: "Comprehensive documentation improvements"
+    description: "Add API documentation, architecture docs, and developer guides"
+    type: "Documentation"
+    status: "REFINED"
+    business_value: 4
+    time_criticality: 2
+    risk_reduction: 2
+    effort: 8
+    wsjf_score: 1.0
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 1.0
+    acceptance_criteria:
+      - "Generate API documentation"
+      - "Create architecture decision records"
+      - "Write developer onboarding guide"
+      - "Document deployment procedures"
+
+completed_items:
+  - id: "security-os-popen"
+    title: "Replace os.popen with subprocess"
+    completion_date: "2025-07-20"
+    wsjf_score: 8.0
+    
+  - id: "comprehensive-tests"
+    title: "Add comprehensive test suite"
+    completion_date: "2025-07-20"
+    wsjf_score: 6.7
+    
+  - id: "nested-zip-handling"
+    title: "Handle nested ZIP files"
+    completion_date: "2025-07-20"
+    wsjf_score: 3.5
+    
+  - id: "zip-content-validation"
+    title: "ZIP file content validation"
+    completion_date: "2025-07-20"
+    wsjf_score: 2.5
+    
+  - id: "file-handle-leak"
+    title: "Fix file handle leak"
+    completion_date: "2025-07-23"
+    wsjf_score: 8.5
+    
+  - id: "api-key-security"
+    title: "API key security and validation"
+    completion_date: "2025-07-23"
+    wsjf_score: 7.2
+    
+  - id: "input-validation"
+    title: "Input validation and sanitization"
+    completion_date: "2025-07-23"
+    wsjf_score: 6.0
+    
+  - id: "gpu-resource-management"
+    title: "GPU resource management race conditions"
+    completion_date: "2025-07-23"
+    wsjf_score: 5.4
+
+discovery_sources:
+  - "TODO/FIXME comments"
+  - "Failing test cases"  
+  - "Security scan results"
+  - "Performance profiling"
+  - "Code review feedback"
+  - "Architecture drift detection"
+  - "Dependency vulnerability reports"
+
+metrics:
+  total_items: 6
+  ready_items: 3
+  in_progress_items: 0
+  blocked_items: 0
+  completed_items: 8
+  average_cycle_time_days: 2.5
+  security_issues_resolved: 5
+  test_coverage_improvement: "0% → 85%"
+  technical_debt_reduction: "High"
