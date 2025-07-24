@@ -237,7 +237,7 @@ class MetricValue(DataClassJsonMixin):
     def __eq__(self, other: Any) -> bool:
         """Compare equality of metric values"""
         if not isinstance(other, MetricValue):
-            raise NotImplementedError
+            return False
         if self.value is None and other.value is None:
             return True
         if self.value is None or other.value is None:
