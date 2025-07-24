@@ -1,0 +1,245 @@
+{
+  "timestamp": "2025-07-24T15:30:00Z",
+  "backlog_analysis": {
+    "total_items": 23,
+    "items_by_status": {
+      "READY": 6,
+      "REFINED": 8,
+      "NEW": 7,
+      "BLOCKED": 2
+    },
+    "average_wsjf": 4.8,
+    "highest_priority_ready": 10.0
+  },
+  "newly_discovered_items": [
+    {
+      "id": "vlm-implementation-missing",
+      "title": "Complete VLM prepare_vlm_prompt implementation",
+      "type": "bug_fix",
+      "description": "Function prepare_vlm_prompt() in ai_scientist/vlm.py:85 has only pass statement - core functionality missing",
+      "acceptance_criteria": [
+        "Implement prepare_vlm_prompt() function with proper VLM prompt preparation",
+        "Add input validation and error handling",
+        "Write unit tests for the function",
+        "Update documentation"
+      ],
+      "effort": 3,
+      "value": 8,
+      "time_criticality": 10,
+      "risk_reduction": 5,
+      "wsjf_score": 7.67,
+      "status": "READY",
+      "risk_tier": "HIGH",
+      "created_at": "2025-07-24",
+      "files": ["ai_scientist/vlm.py:85"]
+    },
+    {
+      "id": "security-test-dependencies",
+      "title": "Fix security test dependencies and ensure they always run",
+      "type": "security_enhancement",
+      "description": "6 security tests in test_security_integration.py are skipped when validation module unavailable",
+      "acceptance_criteria": [
+        "Install or mock required validation dependencies",
+        "Ensure all security tests run in CI",
+        "Add fallback implementations for missing modules",
+        "Document security test requirements"
+      ],
+      "effort": 4,
+      "value": 9,
+      "time_criticality": 8,
+      "risk_reduction": 10,
+      "wsjf_score": 6.75,
+      "status": "READY",
+      "risk_tier": "HIGH",
+      "created_at": "2025-07-24",
+      "files": ["tests/test_security_integration.py"]
+    },
+    {
+      "id": "subprocess-security-wrapper",
+      "title": "Implement consistent subprocess security wrapper",
+      "type": "security_enhancement",
+      "description": "Create centralized secure subprocess wrapper to prevent command injection across all subprocess.run() calls",
+      "acceptance_criteria": [
+        "Create secure subprocess wrapper module",
+        "Replace all subprocess.run() calls with secure wrapper",
+        "Add input validation and sanitization",
+        "Write security tests for wrapper"
+      ],
+      "effort": 5,
+      "value": 8,
+      "time_criticality": 7,
+      "risk_reduction": 9,
+      "wsjf_score": 4.8,
+      "status": "REFINED",
+      "risk_tier": "HIGH",
+      "created_at": "2025-07-24",
+      "files": ["Multiple files using subprocess"]
+    },
+    {
+      "id": "anthropic-backend-implementation",
+      "title": "Implement missing Anthropic backend",
+      "type": "feature",
+      "description": "backend_anthropic.py:40 raises NotImplementedError - backend support missing",
+      "acceptance_criteria": [
+        "Implement Anthropic API integration",
+        "Add authentication and rate limiting",
+        "Write tests for backend functionality",
+        "Update configuration documentation"
+      ],
+      "effort": 8,
+      "value": 6,
+      "time_criticality": 5,
+      "risk_reduction": 3,
+      "wsjf_score": 1.75,
+      "status": "NEW",
+      "risk_tier": "MEDIUM",
+      "created_at": "2025-07-24",
+      "files": ["ai_scientist/treesearch/backend/backend_anthropic.py:40"]
+    },
+    {
+      "id": "path-traversal-hardening",
+      "title": "Strengthen path traversal protection implementation",
+      "type": "security_enhancement",
+      "description": "Enhance existing path traversal protection based on test requirements",
+      "acceptance_criteria": [
+        "Review and strengthen path validation functions",
+        "Ensure all file operations use secure path handling",
+        "Add comprehensive path traversal tests",
+        "Document secure file handling patterns"
+      ],
+      "effort": 4,
+      "value": 7,
+      "time_criticality": 6,
+      "risk_reduction": 8,
+      "wsjf_score": 5.25,
+      "status": "REFINED",
+      "risk_tier": "HIGH",
+      "created_at": "2025-07-24",
+      "files": ["tests/test_path_security.py", "Multiple file operation modules"]
+    },
+    {
+      "id": "integration-test-coverage",
+      "title": "Add end-to-end integration tests for autonomous execution",
+      "type": "testing",
+      "description": "No integration tests for autonomous execution workflow - critical coverage gap",
+      "acceptance_criteria": [
+        "Create integration test suite for autonomous workflow",
+        "Test full backlog discovery → execution → reporting cycle",
+        "Mock external dependencies appropriately",
+        "Add CI integration for integration tests"
+      ],
+      "effort": 6,
+      "value": 7,
+      "time_criticality": 5,
+      "risk_reduction": 6,
+      "wsjf_score": 3.0,
+      "status": "REFINED",
+      "risk_tier": "MEDIUM",
+      "created_at": "2025-07-24",
+      "files": ["tests/", "New integration test files"]
+    },
+    {
+      "id": "metric-calculation-implementation",
+      "title": "Implement missing metric calculation method",
+      "type": "bug_fix",
+      "description": "metric.py:240 raises NotImplementedError in metric calculation",
+      "acceptance_criteria": [
+        "Implement missing metric calculation logic",
+        "Add proper error handling and validation",
+        "Write unit tests for metric calculations",
+        "Document metric calculation methodology"
+      ],
+      "effort": 3,
+      "value": 5,
+      "time_criticality": 4,
+      "risk_reduction": 3,
+      "wsjf_score": 4.0,
+      "status": "READY",
+      "risk_tier": "MEDIUM",
+      "created_at": "2025-07-24",
+      "files": ["ai_scientist/treesearch/utils/metric.py:240"]
+    }
+  ],
+  "existing_backlog_items": [
+    {
+      "id": "comprehensive-test-suite",
+      "title": "Add Comprehensive Test Suite",
+      "type": "testing",
+      "wsjf_score": 6.7,
+      "status": "REFINED",
+      "risk_tier": "MEDIUM"
+    },
+    {
+      "id": "input-validation-sanitization", 
+      "title": "Add Input Validation and Sanitization",
+      "type": "security_enhancement",
+      "wsjf_score": 6.0,
+      "status": "REFINED",
+      "risk_tier": "HIGH"
+    },
+    {
+      "id": "tree-search-error-handling",
+      "title": "Enhanced Error Handling in Tree Search",
+      "type": "improvement",
+      "wsjf_score": 4.5,
+      "status": "REFINED",
+      "risk_tier": "MEDIUM"
+    },
+    {
+      "id": "ci-cd-pipeline",
+      "title": "CI/CD Pipeline with GitHub Actions",
+      "type": "infrastructure",
+      "wsjf_score": 4.0,
+      "status": "NEW",
+      "risk_tier": "LOW"
+    },
+    {
+      "id": "nested-zip-handling",
+      "title": "Handle Nested ZIP Files",
+      "type": "feature",
+      "wsjf_score": 3.5,
+      "status": "NEW",
+      "risk_tier": "LOW"
+    },
+    {
+      "id": "configuration-management",
+      "title": "Add Configuration Management",
+      "type": "improvement",
+      "wsjf_score": 3.0,
+      "status": "NEW",
+      "risk_tier": "LOW"
+    }
+  ],
+  "prioritized_ready_queue": [
+    {
+      "id": "vlm-implementation-missing",
+      "title": "Complete VLM prepare_vlm_prompt implementation",
+      "wsjf_score": 7.67,
+      "status": "READY",
+      "effort": 3,
+      "risk_tier": "HIGH"
+    },
+    {
+      "id": "security-test-dependencies",
+      "title": "Fix security test dependencies",
+      "wsjf_score": 6.75,
+      "status": "READY", 
+      "effort": 4,
+      "risk_tier": "HIGH"
+    },
+    {
+      "id": "metric-calculation-implementation",
+      "title": "Implement missing metric calculation method",
+      "wsjf_score": 4.0,
+      "status": "READY",
+      "effort": 3,
+      "risk_tier": "MEDIUM"
+    }
+  ],
+  "execution_recommendation": {
+    "next_task": "vlm-implementation-missing",
+    "rationale": "Highest WSJF score (7.67), READY status, core functionality gap affecting VLM operations",
+    "risk_assessment": "LOW - Small, isolated function implementation with clear scope",
+    "estimated_time": "30-45 minutes"
+  }
+}

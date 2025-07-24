@@ -82,7 +82,59 @@ def make_vlm_call(client, model, temperature, system_message, prompt):
 
 
 def prepare_vlm_prompt(msg, image_paths, max_images):
-    pass
+    """
+    Prepare VLM prompt with text message and images.
+    
+    Args:
+        msg (str): Text message to include in the prompt
+        image_paths (str | list[str]): Path(s) to image files
+        max_images (int): Maximum number of images to include
+        
+    Returns:
+        list[dict]: List containing a single user message with text and images
+        
+    Raises:
+        ValueError: If inputs are invalid
+    """
+    # Input validation
+    if not msg or msg is None:
+        raise ValueError("Message cannot be empty or None")
+    
+    if image_paths is None:
+        raise ValueError("Image paths cannot be None")
+        
+    if max_images <= 0:
+        raise ValueError("max_images must be greater than 0")
+    
+    # Convert single image path to list for consistent handling
+    if isinstance(image_paths, str):
+        image_paths = [image_paths]
+    
+    if not image_paths:
+        raise ValueError("At least one image path must be provided")
+    
+    # Create content list starting with the text message
+    content = [{"type": "text", "text": msg}]
+    
+    # Add each image to the content list (up to max_images)
+    for image_path in image_paths[:max_images]:
+        try:
+            base64_image = encode_image_to_base64(image_path)
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}",
+                        "detail": "low",
+                    },
+                }
+            )
+        except Exception as e:
+            # If image encoding fails, raise a clear error
+            raise ValueError(f"Failed to encode image {image_path}: {str(e)}")
+    
+    # Return as message format expected by VLM API
+    return [{"role": "user", "content": content}]
 
 
 @backoff.on_exception(
@@ -108,27 +160,9 @@ def get_response_from_vlm(
         msg_history = []
 
     if model in AVAILABLE_VLMS:
-        # Convert single image path to list for consistent handling
-        if isinstance(image_paths, str):
-            image_paths = [image_paths]
-
-        # Create content list starting with the text message
-        content = [{"type": "text", "text": msg}]
-
-        # Add each image to the content list
-        for image_path in image_paths[:max_images]:
-            base64_image = encode_image_to_base64(image_path)
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}",
-                        "detail": "low",
-                    },
-                }
-            )
-        # Construct message with all images
-        new_msg_history = msg_history + [{"role": "user", "content": content}]
+        # Use the prepare_vlm_prompt function for consistent prompt preparation
+        prompt_messages = prepare_vlm_prompt(msg, image_paths, max_images)
+        new_msg_history = msg_history + prompt_messages
 
         response = make_vlm_call(
             client,
@@ -243,26 +277,9 @@ def get_batch_responses_from_vlm(
         "gpt-4o-mini-2024-07-18",
         "o3-mini",
     ]:
-        # Convert single image path to list
-        if isinstance(image_paths, str):
-            image_paths = [image_paths]
-
-        # Create content list with text and images
-        content = [{"type": "text", "text": msg}]
-        for image_path in image_paths[:max_images]:
-            base64_image = encode_image_to_base64(image_path)
-            content.append(
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}",
-                        "detail": "low",
-                    },
-                }
-            )
-
-        # Construct message with all images
-        new_msg_history = msg_history + [{"role": "user", "content": content}]
+        # Use the prepare_vlm_prompt function for consistent prompt preparation
+        prompt_messages = prepare_vlm_prompt(msg, image_paths, max_images)
+        new_msg_history = msg_history + prompt_messages
 
         # Get multiple responses
         response = client.chat.completions.create(

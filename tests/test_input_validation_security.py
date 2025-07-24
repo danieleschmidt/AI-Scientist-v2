@@ -22,6 +22,18 @@ except ImportError:
 # Add the parent directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+# Import security exceptions from validation module
+try:
+    from ai_scientist.utils.input_validation import SecurityError, ValidationError
+    HAS_SECURITY_EXCEPTIONS = True
+except ImportError:
+    # Define local fallback exceptions
+    class SecurityError(Exception):
+        pass
+    class ValidationError(Exception):
+        pass
+    HAS_SECURITY_EXCEPTIONS = False
+
 
 class TestCodeExecutionSecurity(unittest.TestCase):
     """Test security of LLM-generated code execution"""
@@ -122,21 +134,22 @@ class TestCodeExecutionSecurity(unittest.TestCase):
                     self.assertNotIsInstance(e, type(None))
     
     def _is_code_safe(self, code):
-        """Helper method to check if code is safe (would be implemented)"""
-        # This is a placeholder for the actual validation logic we'll implement
-        dangerous_patterns = [
-            'os.system', '__import__', 'exec(open',
-            'urllib.request', 'requests.post', 'subprocess',
-            'eval(', 'open(', 'sys.modules', '__builtins__'
-        ]
-        
-        return not any(pattern in code for pattern in dangerous_patterns)
+        """Use actual code safety check from validation module"""
+        try:
+            from ai_scientist.utils.input_validation import is_code_safe
+            return is_code_safe(code)
+        except ImportError:
+            # Fallback placeholder implementation
+            dangerous_patterns = [
+                'os.system', '__import__', 'exec(open',
+                'urllib.request', 'requests.post', 'subprocess',
+                'eval(', 'open(', 'sys.modules', '__builtins__'
+            ]
+            return not any(pattern in code for pattern in dangerous_patterns)
     
     def _execute_in_sandbox(self, code):
         """Helper method for sandboxed execution (would be implemented)"""
         # This is a placeholder for the actual sandbox implementation
-        class SecurityError(Exception):
-            pass
         
         if any(danger in code for danger in ['import os', 'open(', 'socket']):
             raise SecurityError("Dangerous operation blocked by sandbox")
@@ -171,8 +184,14 @@ class TestArchiveExtractionSecurity(unittest.TestCase):
                 zf.writestr(f"file_{i}.txt", large_content)
         
         # Should detect and reject zip bomb
-        with self.assertRaises((ValueError, SecurityError)):
+        with self.assertRaises((ValueError, SecurityError, Exception)) as cm:
             self._safe_extract_zip(zip_bomb_path, self.temp_dir)
+        
+        # Verify it's a security-related error
+        error_msg = str(cm.exception).lower()
+        self.assertTrue(any(keyword in error_msg for keyword in 
+                          ['zip bomb', 'large', 'compression', 'ratio', 'suspicious']),
+                       f"Expected security-related error message, got: {cm.exception}")
     
     def test_path_traversal_protection(self):
         """Test protection against path traversal attacks"""
@@ -213,24 +232,37 @@ class TestArchiveExtractionSecurity(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(extract_dir, "README.txt")))
     
     def _safe_extract_zip(self, zip_path, extract_dir):
-        """Helper method for safe zip extraction (would be implemented)"""
-        class SecurityError(Exception):
+        """Use actual safe zip extraction from validation module"""
+        try:
+            from ai_scientist.utils.input_validation import safe_extract_zip
+            return safe_extract_zip(zip_path, extract_dir)
+        except ImportError:
+            # Fallback placeholder implementation
             pass
-        
-        # Placeholder for actual secure extraction logic
-        with zipfile.ZipFile(zip_path, 'r') as zf:
-            for member in zf.namelist():
-                # Check for path traversal
-                if '..' in member or member.startswith('/'):
-                    raise SecurityError(f"Dangerous path detected: {member}")
-                
-                # Check file size
-                info = zf.getinfo(member)
-                if info.file_size > 100 * 1024 * 1024:  # 100MB limit
-                    raise SecurityError(f"File too large: {member}")
             
-            # If all checks pass, extract safely
-            zf.extractall(extract_dir)
+            # Basic zip bomb protection for fallback
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                total_size = 0
+                for member in zf.namelist():
+                    # Check for path traversal
+                    if '..' in member or member.startswith('/') or member.startswith('\\'):
+                        raise SecurityError(f"Dangerous path detected: {member}")
+                    
+                    # Check file size and compression ratio
+                    info = zf.getinfo(member)
+                    total_size += info.file_size
+                    
+                    if total_size > 100 * 1024 * 1024:  # 100MB limit
+                        raise SecurityError(f"Archive too large when extracted: {total_size}")
+                    
+                    # Check compression ratio (zip bomb detection)
+                    if info.compress_size > 0:
+                        ratio = info.file_size / info.compress_size
+                        if ratio > 100:  # Highly compressed files are suspicious
+                            raise SecurityError(f"Suspicious compression ratio: {ratio}")
+                
+                # If all checks pass, extract safely
+                zf.extractall(extract_dir)
 
 
 class TestConfigurationSecurity(unittest.TestCase):
@@ -345,9 +377,6 @@ class TestExternalDataValidation(unittest.TestCase):
     
     def _validate_api_response(self, response):
         """Helper method for API response validation (would be implemented)"""
-        class SecurityError(Exception):
-            pass
-        
         # Basic validation checks
         if not isinstance(response, dict):
             raise ValueError("Response must be dictionary")
@@ -364,6 +393,10 @@ class TestExternalDataValidation(unittest.TestCase):
         # Check size limits
         if len(response_str) > 1024 * 1024:  # 1MB limit
             raise SecurityError("Response too large")
+        
+        # Validate expected structure - data should be an object/dict if present
+        if 'data' in response and not isinstance(response['data'], dict):
+            raise SecurityError("Invalid data structure - data must be an object")
         
         return True
 
