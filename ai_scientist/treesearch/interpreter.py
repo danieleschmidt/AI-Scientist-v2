@@ -220,6 +220,19 @@ class Interpreter:
         self.process.close()
         self.process = None  # type: ignore
 
+    def __enter__(self):
+        """Context manager entry - ensures interpreter is ready for use."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures proper cleanup regardless of exceptions."""
+        try:
+            self.cleanup_session()
+        except Exception as cleanup_error:
+            # Log cleanup errors but don't raise them to avoid masking original exceptions
+            logger.warning(f"Error during interpreter cleanup: {cleanup_error}")
+        return False  # Don't suppress exceptions
+
     def run(self, code: str, reset_session=True) -> ExecutionResult:
         """
         Execute the provided Python command in a separate process and return its output.

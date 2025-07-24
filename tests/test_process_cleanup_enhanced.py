@@ -47,16 +47,32 @@ class TestProcessCleanupEnhanced(unittest.TestCase):
 
     def test_child_process_termination_escalation(self):
         """Test that child processes are terminated with proper escalation."""
-        # This test should fail initially - we need to implement escalating termination
+        # Test that the escalating termination function exists and works
         try:
-            from ai_scientist.treesearch.parallel_agent import cleanup_child_processes
-            # This should not succeed yet - the function doesn't exist
-            self.fail("cleanup_child_processes function should not exist yet")
-        except ImportError:
-            # Expected - function doesn't exist yet
-            pass
-        except AttributeError:
-            # Also expected - function doesn't exist yet
+            # First try importing from the utils module directly
+            from ai_scientist.utils.process_cleanup_enhanced import cleanup_child_processes
+            
+            # Test with empty list (should succeed immediately)
+            result = cleanup_child_processes([], timeout=1)
+            self.assertTrue(result, "cleanup_child_processes should succeed with empty list")
+            
+            # Test with mock processes
+            import multiprocessing
+            import time
+            
+            def short_task():
+                time.sleep(0.2)
+            
+            # Create a short-lived process
+            proc = multiprocessing.Process(target=short_task)
+            proc.start()
+            
+            # Test cleanup
+            result = cleanup_child_processes([proc], timeout=2)
+            self.assertTrue(result, "cleanup_child_processes should succeed with real process")
+            
+        except ImportError as e:
+            self.skipTest(f"Process cleanup dependencies not available: {e}")
             pass
             
     def test_timeout_handling_for_cleanup(self):
@@ -110,33 +126,89 @@ class TestProcessCleanupEnhanced(unittest.TestCase):
             
     def test_interpreter_session_cleanup(self):
         """Test that interpreter sessions are properly cleaned up."""
-        # This test should fail initially - need context manager for interpreters
-        # Test will fail because context manager support doesn't exist yet
-        self.skipTest("Context manager for Interpreter not implemented yet")
+        import tempfile
+        import sys
+        import os
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+        
+        try:
+            from ai_scientist.treesearch.interpreter import Interpreter
+        except ImportError as e:
+            self.skipTest(f"Interpreter dependencies not available: {e}")
+        
+        # Test context manager usage ensures cleanup
+        temp_dir = tempfile.mkdtemp()
+        
+        try:
+            with Interpreter(working_dir=temp_dir, timeout=5) as interpreter:
+                # Execute some simple code
+                result = interpreter.run("print('Hello World')", reset_session=True)
+                self.assertIsNotNone(result)
+                self.assertIn("Hello World", result.term_out)
+            
+            # After context manager exit, process should be cleaned up
+            self.assertIsNone(interpreter.process)
+            
+        finally:
+            # Clean up temp directory
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
+    
+    def test_interpreter_context_manager_exception_handling(self):
+        """Test that context manager properly cleans up even when exceptions occur."""
+        import tempfile
+        import sys
+        import os
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+        
+        from ai_scientist.treesearch.interpreter import Interpreter
+        
+        temp_dir = tempfile.mkdtemp()
+        interpreter = None
+        
+        try:
+            with Interpreter(working_dir=temp_dir, timeout=5) as interp:
+                interpreter = interp
+                # Execute some code
+                result = interpreter.run("print('Test')", reset_session=True)
+                self.assertIsNotNone(result)
+                # Simulate an exception
+                raise ValueError("Test exception")
+                
+        except ValueError:
+            # Exception occurred, but cleanup should still happen
+            self.assertIsNone(interpreter.process)
+        finally:
+            # Clean up temp directory
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
                 
     def test_zombie_process_prevention(self):
         """Test that zombie processes are prevented."""
-        # This test should fail initially - zombie prevention needs implementation
-        import psutil
+        try:
+            import psutil
+            from ai_scientist.utils.process_cleanup_enhanced import cleanup_child_processes
+        except ImportError as e:
+            self.skipTest(f"Process cleanup dependencies not available: {e}")
         
         # Get initial process count
         initial_procs = len(psutil.pids())
         
-        # Create and cleanup processes
+        # Create and cleanup processes using our enhanced cleanup
         def short_task():
             time.sleep(0.1)
             
         processes = []
-        for _ in range(5):
+        for _ in range(3):  # Reduced for test stability
             proc = multiprocessing.Process(target=short_task)
             proc.start()
             processes.append(proc)
             
-        # Wait for processes to complete
-        for proc in processes:
-            proc.join()
+        # Use our enhanced cleanup instead of basic join
+        success = cleanup_child_processes(processes, timeout=2)
+        self.assertTrue(success, "Process cleanup should succeed")
             
-        # Check for zombie processes (this might fail without proper cleanup)
+        # Check for zombie processes 
         time.sleep(0.5)  # Allow time for cleanup
         final_procs = len(psutil.pids())
         

@@ -592,7 +592,7 @@ Ensure you are always writing good compilable LaTeX code. Common mistakes that s
 - Do not hallucinate new citations or any results not in the logs.
 
 Ensure proper citation usage:
-- Always include references within \begin{{filecontents}}{{references.bib}} ... \end{{filecontents}}, even if they haven't changed from the previous round.
+- Always include references within \\begin{{filecontents}}{{references.bib}} ... \\end{{filecontents}}, even if they haven't changed from the previous round.
 - Use citations from the provided references.bib content.
 - Each section (especially Related Work) should have multiple citations.
 
@@ -943,7 +943,7 @@ def perform_writeup(
         if citations_text:
             with open(writeup_file, "r") as f:
                 content = f.read()
-            pattern_end = r"\end{filecontents}"
+            pattern_end = r"\\end{filecontents}"
             content = content.replace(pattern_end, f"\n{citations_text}{pattern_end}")
             with open(writeup_file, "w") as f:
                 f.write(content)
@@ -1085,7 +1085,7 @@ Return the entire file in full, with no unfilled placeholders!
 This must be an acceptable complete LaTeX writeup.
 Do not hallucinate any details!
 Ensure proper citation usage:
-- Always include references within \begin{{filecontents}}{{references.bib}} ... \end{{filecontents}}, even if they haven't changed from the previous round.
+- Always include references within \\begin{{filecontents}}{{references.bib}} ... \\end{{filecontents}}, even if they haven't changed from the previous round.
 - Use citations from the provided references.bib content.
 """
 
@@ -1107,8 +1107,8 @@ Ensure proper citation usage:
                 if reflected_latex_code != current_latex:
                     final_text = reflected_latex_code
                     cleanup_map = {
-                        "</end": r"\\end",
-                        "</begin": r"\\begin",
+                        "</end": r"\\\\end",
+                        "</begin": r"\\\\begin",
                         "’": "'",
                     }
                     for bad_str, repl_str in cleanup_map.items():
@@ -1174,8 +1174,8 @@ If you believe you are done with reflection, simply say: "I am done"."""
                 if reflected_latex_code != current_latex:
                     final_text = reflected_latex_code
                     cleanup_map = {
-                        "</end": r"\\end",
-                        "</begin": r"\\begin",
+                        "</end": r"\\\\end",
+                        "</begin": r"\\\\begin",
                         "’": "'",
                     }
                     for bad_str, repl_str in cleanup_map.items():
