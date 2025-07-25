@@ -8,6 +8,7 @@ import unittest
 import sys
 import os
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
@@ -22,8 +23,10 @@ class TestInterpreterTimeoutHandling(unittest.TestCase):
         # Skip actual interpreter tests if dependencies not available
         self.skip_interpreter_tests = False
         try:
+            import tempfile
             from ai_scientist.treesearch.interpreter import Interpreter
-            self.interpreter = Interpreter(timeout=2)  # 2 second timeout for testing
+            self.temp_dir = tempfile.mkdtemp()
+            self.interpreter = Interpreter(working_dir=self.temp_dir, timeout=2)  # 2 second timeout for testing
         except ImportError as e:
             self.skip_interpreter_tests = True
             self.skipTest(f"Interpreter dependencies not available: {e}")
@@ -32,6 +35,9 @@ class TestInterpreterTimeoutHandling(unittest.TestCase):
         """Clean up interpreter after each test."""
         if not self.skip_interpreter_tests and hasattr(self.interpreter, 'process') and self.interpreter.process:
             self.interpreter.cleanup_session()
+        if hasattr(self, 'temp_dir'):
+            import shutil
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_graceful_timeout_handling(self):
         """Test that timeout is handled gracefully without TODO assertion."""
