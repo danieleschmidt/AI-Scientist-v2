@@ -34,7 +34,8 @@ def query(
 
     filtered_kwargs: dict = select_values(notnone, model_kwargs)  # type: ignore
     if "max_tokens" not in filtered_kwargs:
-        filtered_kwargs["max_tokens"] = 8192  # default for Claude models
+        from ai_scientist.utils.config_manager import get_config
+        filtered_kwargs["max_tokens"] = get_config('models.claude.max_tokens', 8192)  # default for Claude models
 
     if func_spec is not None:
         raise NotImplementedError(

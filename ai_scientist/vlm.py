@@ -6,16 +6,19 @@ import backoff
 import openai
 from PIL import Image
 from ai_scientist.utils.token_tracker import track_token_usage
+from ai_scientist.utils.config_manager import get_config
 
-MAX_NUM_TOKENS = 4096
+# Load max tokens from configuration
+MAX_NUM_TOKENS = get_config('llm.max_tokens', 4096)
 
-AVAILABLE_VLMS = [
+# Load available VLM models from configuration
+AVAILABLE_VLMS = get_config('vlm_models.available', [
     "gpt-4o-2024-05-13",
-    "gpt-4o-2024-08-06",
+    "gpt-4o-2024-08-06", 
     "gpt-4o-2024-11-20",
     "gpt-4o-mini-2024-07-18",
     "o3-mini",
-]
+])
 
 
 def encode_image_to_base64(image_path: str) -> str:

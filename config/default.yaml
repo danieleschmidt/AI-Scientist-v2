@@ -1,0 +1,54 @@
+# AI Scientist Default Configuration
+# This file contains default values for all configurable parameters
+
+llm:
+  max_tokens: 4096
+  temperature: 0.7
+  timeout: 60
+  default_model: "gpt-4o-2024-11-20"
+
+models:
+  gpt4:
+    name: "gpt-4o-2024-11-20"
+    max_tokens: 4096
+    temperature: 0.7
+    timeout: 60
+  
+  gpt4_mini:
+    name: "gpt-4o-mini-2024-07-18"
+    max_tokens: 4096
+    temperature: 0.7
+    timeout: 60
+  
+  claude:
+    name: "claude-3-5-sonnet-20241022"
+    max_tokens: 8192
+    temperature: 0.7
+    timeout: 60
+  
+  vlm:
+    name: "gpt-4o-2024-11-20"
+    max_tokens: 4096
+    temperature: 0.7
+    timeout: 60
+
+# Model-specific overrides for different use cases
+vlm_models:
+  available:
+    - "gpt-4o-2024-05-13"
+    - "gpt-4o-2024-08-06" 
+    - "gpt-4o-2024-11-20"
+    - "gpt-4o-mini-2024-07-18"
+    - "o3-mini"
+
+# Execution settings
+execution:
+  timeout: 3600
+  agent_file_name: "runfile.py"
+  format_tb_ipython: false
+
+# Security settings
+security:
+  max_file_size_mb: 100
+  allowed_extensions: [".py", ".txt", ".json", ".yaml", ".yml", ".md"]
+  input_validation_enabled: true

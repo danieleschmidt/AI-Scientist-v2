@@ -7,8 +7,10 @@ from ai_scientist.utils.token_tracker import track_token_usage
 import anthropic
 import backoff
 import openai
+from ai_scientist.utils.config_manager import get_config
 
-MAX_NUM_TOKENS = 4096
+# Load max tokens from configuration
+MAX_NUM_TOKENS = get_config('llm.max_tokens', 4096)
 
 AVAILABLE_LLMS = [
     "claude-3-5-sonnet-20240620",
