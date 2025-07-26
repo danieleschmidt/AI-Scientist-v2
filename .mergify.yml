@@ -1,0 +1,34 @@
+pull_request_rules:
+  - name: Merge queue
+    conditions:
+      - label=automerge
+      - status-success=ci
+    actions:
+      queue:
+        name: default
+        method: rebase
+
+  - name: Auto-approve for dependencies
+    conditions:
+      - author~=^dependabot
+      - status-success=ci
+    actions:
+      review:
+        type: APPROVE
+      label:
+        add: [automerge]
+
+  - name: Conflict resolution assistance
+    conditions:
+      - conflict
+    actions:
+      comment:
+        message: |
+          This PR has merge conflicts. The auto-rebase action will attempt to resolve simple conflicts automatically.
+          
+          If conflicts persist, they likely require manual resolution due to logic changes.
+          
+          Common auto-resolvable conflicts:
+          - Lock files (package-lock.json, poetry.lock)
+          - Documentation (*.md files)
+          - Snapshots (*.snap files)

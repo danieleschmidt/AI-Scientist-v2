@@ -7,15 +7,25 @@ import openai
 from PIL import Image
 from ai_scientist.utils.token_tracker import track_token_usage
 
-MAX_NUM_TOKENS = 4096
-
-AVAILABLE_VLMS = [
-    "gpt-4o-2024-05-13",
-    "gpt-4o-2024-08-06",
-    "gpt-4o-2024-11-20",
-    "gpt-4o-mini-2024-07-18",
-    "o3-mini",
-]
+# Load configuration for VLM settings
+try:
+    from .utils.config import load_config
+    config = load_config()
+    MAX_NUM_TOKENS = config.get('models', {}).get('default_max_tokens', 4096)
+    AVAILABLE_VLMS = config.get('models', {}).get('vision_capable_models', [])
+    # Add any additional models not in config
+    if "o3-mini" not in AVAILABLE_VLMS:
+        AVAILABLE_VLMS.append("o3-mini")
+except ImportError:
+    # Fallback to hardcoded values if config system not available
+    MAX_NUM_TOKENS = 4096
+    AVAILABLE_VLMS = [
+        "gpt-4o-2024-05-13",
+        "gpt-4o-2024-08-06",
+        "gpt-4o-2024-11-20",
+        "gpt-4o-mini-2024-07-18",
+        "o3-mini",
+    ]
 
 
 def encode_image_to_base64(image_path: str) -> str:

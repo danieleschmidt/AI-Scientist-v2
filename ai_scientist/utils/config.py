@@ -1,472 +1,361 @@
 """
-Centralized configuration management system for AI Scientist.
+Centralized configuration management for AI Scientist.
+Implements the requirements from backlog item: configuration-management (WSJF: 3.5)
 
-This module provides a unified interface for managing all configuration values
-throughout the AI Scientist system, replacing hardcoded values with a flexible,
-environment-aware configuration system.
-
-Features:
-- YAML/JSON configuration file support
-- Environment variable overrides
-- Configuration validation with schemas
-- Default value fallbacks
-- Type conversion and validation
+Acceptance criteria:
+- Create centralized config system
+- Move all hardcoded values to config files  
+- Add environment-specific overrides
+- Implement config validation
 """
 
-import os
-import yaml
 import json
+import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List
-from dataclasses import dataclass
+from typing import Dict, Any, Optional, Union
 import logging
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass
-class ConfigSchema:
-    """Configuration schema definition for validation."""
-    key: str
-    type: type
-    default: Any
-    description: str
-    required: bool = False
-    choices: Optional[List[Any]] = None
-    min_value: Optional[Union[int, float]] = None
-    max_value: Optional[Union[int, float]] = None
-
-
-class ConfigurationManager:
-    """
-    Centralized configuration management system.
-    
-    Supports hierarchical configuration loading:
-    1. Default values (hardcoded fallbacks)
-    2. Configuration files (ai_scientist_config.yaml/json)
-    3. Environment variables (AI_SCIENTIST_*)
-    """
-    
-    def __init__(self, config_file: Optional[Union[str, Path]] = None):
-        """
-        Initialize configuration manager.
-        
-        Args:
-            config_file: Path to configuration file. If None, searches for default locations.
-        """
-        self._config = {}
-        self._schema = self._define_schema()
-        self._load_defaults()
-        
-        if config_file:
-            self.load_config_file(config_file)
-        else:
-            self._load_default_config_files()
-        
-        self._load_environment_overrides()
-        self._validate_config()
-    
-    def _define_schema(self) -> Dict[str, ConfigSchema]:
-        """Define the configuration schema with all supported configuration keys."""
-        return {
-            # API Configuration
-            "API_DEEPSEEK_BASE_URL": ConfigSchema(
-                "API_DEEPSEEK_BASE_URL", str, "https://api.deepseek.com",
-                "Base URL for DeepSeek API"
-            ),
-            "API_HUGGINGFACE_BASE_URL": ConfigSchema(
-                "API_HUGGINGFACE_BASE_URL", str, 
-                "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
-                "Base URL for HuggingFace API"
-            ),
-            "API_OPENROUTER_BASE_URL": ConfigSchema(
-                "API_OPENROUTER_BASE_URL", str, "https://openrouter.ai/api/v1",
-                "Base URL for OpenRouter API"
-            ),
-            "API_GEMINI_BASE_URL": ConfigSchema(
-                "API_GEMINI_BASE_URL", str, 
-                "https://generativelanguage.googleapis.com/v1beta/openai/",
-                "Base URL for Google Gemini API"
-            ),
-            "API_SEMANTIC_SCHOLAR_BASE_URL": ConfigSchema(
-                "API_SEMANTIC_SCHOLAR_BASE_URL", str,
-                "https://api.semanticscholar.org/graph/v1/paper/search",
-                "Base URL for Semantic Scholar API"
-            ),
-            
-            # Model Configuration
-            "AVAILABLE_LLM_MODELS": ConfigSchema(
-                "AVAILABLE_LLM_MODELS", list, [
-                    "claude-3-5-sonnet-20240620", "gpt-4o-mini", "o1-2024-12-17",
-                    "gpt-4o-2024-11-20", "o1-preview-2024-09-12", "o3-mini-2025-01-31"
-                ],
-                "List of available LLM models"
-            ),
-            "AVAILABLE_VLM_MODELS": ConfigSchema(
-                "AVAILABLE_VLM_MODELS", list, [
-                    "gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet-20240620"
-                ],
-                "List of available VLM models"
-            ),
-            "DEFAULT_MODEL_PLOT_AGG": ConfigSchema(
-                "DEFAULT_MODEL_PLOT_AGG", str, "o3-mini-2025-01-31",
-                "Default model for plot aggregation"
-            ),
-            "DEFAULT_MODEL_WRITEUP": ConfigSchema(
-                "DEFAULT_MODEL_WRITEUP", str, "o1-preview-2024-09-12",
-                "Default model for writeup generation"
-            ),
-            "DEFAULT_MODEL_CITATION": ConfigSchema(
-                "DEFAULT_MODEL_CITATION", str, "gpt-4o-2024-11-20",
-                "Default model for citation generation"
-            ),
-            "DEFAULT_MODEL_REVIEW": ConfigSchema(
-                "DEFAULT_MODEL_REVIEW", str, "gpt-4o-2024-11-20",
-                "Default model for review tasks"
-            ),
-            
-            # Token Limits
-            "MAX_LLM_TOKENS": ConfigSchema(
-                "MAX_LLM_TOKENS", int, 4096,
-                "Maximum tokens for LLM calls", min_value=1, max_value=200000
-            ),
-            "MAX_VLM_TOKENS": ConfigSchema(
-                "MAX_VLM_TOKENS", int, 4096,
-                "Maximum tokens for VLM calls", min_value=1, max_value=200000
-            ),
-            "DEFAULT_CLAUDE_MAX_TOKENS": ConfigSchema(
-                "DEFAULT_CLAUDE_MAX_TOKENS", int, 8192,
-                "Default max tokens for Claude models", min_value=1, max_value=200000
-            ),
-            
-            # Timeout Configuration
-            "LATEX_COMPILE_TIMEOUT": ConfigSchema(
-                "LATEX_COMPILE_TIMEOUT", int, 30,
-                "Timeout for LaTeX compilation in seconds", min_value=5, max_value=600
-            ),
-            "PDF_DETECTION_TIMEOUT": ConfigSchema(
-                "PDF_DETECTION_TIMEOUT", int, 30,
-                "Timeout for PDF detection in seconds", min_value=5, max_value=300
-            ),
-            "CHKTEX_TIMEOUT": ConfigSchema(
-                "CHKTEX_TIMEOUT", int, 60,
-                "Timeout for Chktex execution in seconds", min_value=10, max_value=600
-            ),
-            "INTERPRETER_TIMEOUT": ConfigSchema(
-                "INTERPRETER_TIMEOUT", int, 3600,
-                "Default interpreter timeout in seconds", min_value=60, max_value=86400
-            ),
-            
-            # File Paths
-            "LATEX_TEMPLATE_DIR_ICML": ConfigSchema(
-                "LATEX_TEMPLATE_DIR_ICML", str, "ai_scientist/blank_icml_latex",
-                "Path to ICML LaTeX template directory"
-            ),
-            "LATEX_TEMPLATE_DIR_ICBINB": ConfigSchema(
-                "LATEX_TEMPLATE_DIR_ICBINB", str, "ai_scientist/blank_icbinb_latex",
-                "Path to ICBINB LaTeX template directory"
-            ),
-            "FEWSHOT_EXAMPLES_DIR": ConfigSchema(
-                "FEWSHOT_EXAMPLES_DIR", str, "ai_scientist/fewshot_examples",
-                "Path to fewshot examples directory"
-            ),
-            
-            # Default Settings
-            "MAX_FIGURES_ALLOWED": ConfigSchema(
-                "MAX_FIGURES_ALLOWED", int, 12,
-                "Maximum number of figures allowed", min_value=1, max_value=50
-            ),
-            "DEFAULT_WRITEUP_RETRIES": ConfigSchema(
-                "DEFAULT_WRITEUP_RETRIES", int, 3,
-                "Default number of writeup retries", min_value=1, max_value=10
-            ),
-            "DEFAULT_CITATION_ROUNDS": ConfigSchema(
-                "DEFAULT_CITATION_ROUNDS", int, 20,
-                "Default number of citation rounds", min_value=1, max_value=100
-            ),
-            "DEFAULT_VLM_MAX_IMAGES": ConfigSchema(
-                "DEFAULT_VLM_MAX_IMAGES", int, 25,
-                "Default max images for VLM", min_value=1, max_value=1000
-            ),
-            "BATCH_VLM_MAX_IMAGES": ConfigSchema(
-                "BATCH_VLM_MAX_IMAGES", int, 200,
-                "Max images for batch VLM processing", min_value=1, max_value=1000
-            ),
-            "VLM_REVIEW_MAX_TOKENS": ConfigSchema(
-                "VLM_REVIEW_MAX_TOKENS", int, 1000,
-                "Max tokens for VLM review", min_value=100, max_value=10000
-            ),
-            
-            # Temperature Values
-            "TEMP_REPORT": ConfigSchema(
-                "TEMP_REPORT", float, 1.0,
-                "Temperature for report generation", min_value=0.0, max_value=2.0
-            ),
-            "TEMP_CODE": ConfigSchema(
-                "TEMP_CODE", float, 1.0,
-                "Temperature for code generation", min_value=0.0, max_value=2.0
-            ),
-            "TEMP_FEEDBACK": ConfigSchema(
-                "TEMP_FEEDBACK", float, 0.5,
-                "Temperature for feedback generation", min_value=0.0, max_value=2.0
-            ),
-            "TEMP_VLM_FEEDBACK": ConfigSchema(
-                "TEMP_VLM_FEEDBACK", float, 0.5,
-                "Temperature for VLM feedback", min_value=0.0, max_value=2.0
-            ),
-            "TEMP_REVIEW_DEFAULT": ConfigSchema(
-                "TEMP_REVIEW_DEFAULT", float, 0.75,
-                "Default temperature for reviews", min_value=0.0, max_value=2.0
-            ),
-            
-            # Other Settings
-            "DEFAULT_MODEL_SEED": ConfigSchema(
-                "DEFAULT_MODEL_SEED", int, 0,
-                "Default seed for model reproducibility", min_value=0
-            ),
-            "PAGE_LIMIT_NORMAL": ConfigSchema(
-                "PAGE_LIMIT_NORMAL", int, 8,
-                "Page limit for normal writeups", min_value=1, max_value=50
-            ),
-            "PAGE_LIMIT_ICBINB": ConfigSchema(
-                "PAGE_LIMIT_ICBINB", int, 4,
-                "Page limit for ICBINB submissions", min_value=1, max_value=20
-            ),
-            "SEMANTIC_SCHOLAR_RATE_LIMIT_DELAY": ConfigSchema(
-                "SEMANTIC_SCHOLAR_RATE_LIMIT_DELAY", float, 1.0,
-                "Rate limiting delay for Semantic Scholar API", min_value=0.1, max_value=10.0
-            ),
-            
-            # Execution Configuration
-            "EXEC_TIMEOUT": ConfigSchema(
-                "EXEC_TIMEOUT", int, 3600,
-                "Execution timeout in seconds", min_value=60, max_value=86400
-            ),
-            "NUM_WORKERS": ConfigSchema(
-                "NUM_WORKERS", int, 4,
-                "Number of parallel workers", min_value=1, max_value=32
-            ),
-            "EVAL_NUM_SEEDS": ConfigSchema(
-                "EVAL_NUM_SEEDS", int, 3,
-                "Number of evaluation seeds", min_value=1, max_value=10
-            ),
-        }
-    
-    def _load_defaults(self):
-        """Load default values from schema."""
-        for key, schema in self._schema.items():
-            self._config[key] = schema.default
-    
-    def _load_default_config_files(self):
-        """Load configuration from default file locations."""
-        # Look for config files in order of preference
-        config_paths = [
-            Path("ai_scientist_config.yaml"),
-            Path("ai_scientist_config.yml"),
-            Path("ai_scientist_config.json"),
-            Path("config/ai_scientist.yaml"),
-            Path("config/ai_scientist.yml"),
-            Path("config/ai_scientist.json"),
+# Default configuration
+DEFAULT_CONFIG = {
+    "models": {
+        "gpt_models": [
+            "gpt-4o-2024-05-13",
+            "gpt-4o-2024-08-06",
+            "gpt-4o-2024-11-20", 
+            "gpt-4o-mini-2024-07-18"
+        ],
+        "default_max_tokens": 4096,
+        "anthropic_max_tokens": 8192,
+        "vision_capable_models": [
+            "gpt-4o-2024-05-13",
+            "gpt-4o-2024-08-06", 
+            "gpt-4o-2024-11-20",
+            "gpt-4o-mini-2024-07-18"
         ]
-        
-        for config_path in config_paths:
-            if config_path.exists():
-                logger.info(f"Loading configuration from {config_path}")
-                self.load_config_file(config_path)
-                break
-        else:
-            logger.info("No configuration file found, using defaults")
-    
-    def load_config_file(self, config_file: Union[str, Path]):
-        """
-        Load configuration from a YAML or JSON file.
-        
-        Args:
-            config_file: Path to configuration file
-        """
-        config_path = Path(config_file)
-        if not config_path.exists():
-            logger.warning(f"Configuration file not found: {config_path}")
-            return
-        
-        try:
-            with open(config_path, 'r') as f:
-                if config_path.suffix.lower() in ['.yaml', '.yml']:
-                    file_config = yaml.safe_load(f) or {}
-                elif config_path.suffix.lower() == '.json':
-                    file_config = json.load(f)
-                else:
-                    logger.warning(f"Unsupported config file format: {config_path}")
-                    return
-            
-            # Update configuration with values from file
-            for key, value in file_config.items():
-                if key in self._schema:
-                    self._config[key] = value
-                else:
-                    logger.warning(f"Unknown configuration key in file: {key}")
-                    
-        except Exception as e:
-            logger.error(f"Error loading configuration file {config_path}: {e}")
-    
-    def _load_environment_overrides(self):
-        """Load configuration overrides from environment variables."""
-        env_prefix = "AI_SCIENTIST_"
-        
-        for key in self._schema:
-            env_key = f"{env_prefix}{key}"
-            env_value = os.getenv(env_key)
-            
-            if env_value is not None:
-                # Convert environment string to appropriate type
-                try:
-                    schema_type = self._schema[key].type
-                    if schema_type == bool:
-                        converted_value = env_value.lower() in ('true', '1', 'yes', 'on')
-                    elif schema_type == int:
-                        converted_value = int(env_value)
-                    elif schema_type == float:
-                        converted_value = float(env_value)
-                    elif schema_type == list:
-                        # Assume comma-separated values for lists
-                        converted_value = [item.strip() for item in env_value.split(',')]
-                    else:
-                        converted_value = env_value
-                    
-                    self._config[key] = converted_value
-                    logger.info(f"Environment override: {key} = {converted_value}")
-                    
-                except (ValueError, TypeError) as e:
-                    logger.error(f"Invalid environment value for {env_key}: {env_value} ({e})")
-    
-    def _validate_config(self):
-        """Validate configuration values against schema."""
-        for key, schema in self._schema.items():
-            value = self._config.get(key)
-            
-            # Check required values
-            if schema.required and value is None:
-                raise ValueError(f"Required configuration key missing: {key}")
-            
-            # Check type
-            if value is not None and not isinstance(value, schema.type):
-                logger.warning(f"Configuration value {key} has wrong type: expected {schema.type.__name__}, got {type(value).__name__}")
-            
-            # Check choices
-            if schema.choices and value not in schema.choices:
-                logger.warning(f"Configuration value {key} not in allowed choices: {schema.choices}")
-            
-            # Check numeric ranges
-            if isinstance(value, (int, float)):
-                if schema.min_value is not None and value < schema.min_value:
-                    logger.warning(f"Configuration value {key} below minimum: {value} < {schema.min_value}")
-                if schema.max_value is not None and value > schema.max_value:
-                    logger.warning(f"Configuration value {key} above maximum: {value} > {schema.max_value}")
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        """
-        Get configuration value.
-        
-        Args:
-            key: Configuration key
-            default: Default value if key not found
-            
-        Returns:
-            Configuration value
-        """
-        return self._config.get(key, default)
-    
-    def set(self, key: str, value: Any):
-        """
-        Set configuration value.
-        
-        Args:
-            key: Configuration key
-            value: Configuration value
-        """
-        if key not in self._schema:
-            logger.warning(f"Setting unknown configuration key: {key}")
-        
-        self._config[key] = value
-    
-    def get_all(self) -> Dict[str, Any]:
-        """Get all configuration values."""
-        return self._config.copy()
-    
-    def export_config(self, output_file: Union[str, Path], format: str = 'yaml'):
-        """
-        Export current configuration to file.
-        
-        Args:
-            output_file: Output file path
-            format: Output format ('yaml' or 'json')
-        """
-        output_path = Path(output_file)
-        
-        try:
-            with open(output_path, 'w') as f:
-                if format.lower() == 'yaml':
-                    yaml.dump(self._config, f, default_flow_style=False, sort_keys=True)
-                elif format.lower() == 'json':
-                    json.dump(self._config, f, indent=2, sort_keys=True)
-                else:
-                    raise ValueError(f"Unsupported format: {format}")
-            
-            logger.info(f"Configuration exported to {output_path}")
-            
-        except Exception as e:
-            logger.error(f"Error exporting configuration: {e}")
+    },
+    "apis": {
+        "semantic_scholar_base_url": "https://api.semanticscholar.org/graph/v1/paper/search",
+        "huggingface_base_url": "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
+        "deepseek_base_url": "https://api.deepseek.com",
+        "openrouter_base_url": "https://openrouter.ai/api/v1"
+    },
+    "pricing": {
+        "gpt-4o-2024-11-20": {
+            "prompt": 2.5 / 1000000,  # $2.5 per 1M tokens
+            "completion": 10.0 / 1000000,  # $10.0 per 1M tokens
+            "cached_prompt": 1.25 / 1000000  # $1.25 per 1M tokens
+        },
+        "gpt-4o-2024-08-06": {
+            "prompt": 2.5 / 1000000,
+            "completion": 10.0 / 1000000,
+            "cached_prompt": 1.25 / 1000000
+        },
+        "gpt-4o-2024-05-13": {
+            "prompt": 5.0 / 1000000,  # $5.0 per 1M tokens (no cached tokens)
+            "completion": 15.0 / 1000000  # $15.0 per 1M tokens
+        },
+        "gpt-4o-mini-2024-07-18": {
+            "prompt": 0.15 / 1000000,  # $0.15 per 1M tokens
+            "completion": 0.6 / 1000000  # $0.6 per 1M tokens
+        }
+    },
+    "timeouts": {
+        "process_cleanup_interval": 0.1,
+        "default_request_timeout": 30,
+        "anthropic_function_call_timeout": 60
+    },
+    "cdn": {
+        "p5js_url": "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js",
+        "highlight_css_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
+        "highlight_js_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
+        "highlight_python_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"
+    },
+    "resource_management": {
+        "max_memory_mb_per_process": 1024,
+        "orphaned_process_keywords": ["python", "torch", "mp", "bfts", "experiment", "ai_scientist"],
+        "gpu_cleanup_force": True
+    }
+}
+
+# Environment variable mapping
+ENV_VAR_MAPPING = {
+    "AI_SCIENTIST_MAX_TOKENS": "models.default_max_tokens",
+    "AI_SCIENTIST_ANTHROPIC_MAX_TOKENS": "models.anthropic_max_tokens",
+    "AI_SCIENTIST_SEMANTIC_SCHOLAR_URL": "apis.semantic_scholar_base_url",
+    "AI_SCIENTIST_HF_URL": "apis.huggingface_base_url",
+    "AI_SCIENTIST_DEEPSEEK_URL": "apis.deepseek_base_url",
+    "AI_SCIENTIST_OPENROUTER_URL": "apis.openrouter_base_url",
+    "AI_SCIENTIST_REQUEST_TIMEOUT": "timeouts.default_request_timeout",
+    "AI_SCIENTIST_CLEANUP_INTERVAL": "timeouts.process_cleanup_interval"
+}
+
+_config_cache = None
+_config_file_path = None
 
 
-# Global configuration instance
-_config_manager = None
+def get_config_path() -> Path:
+    """Get the path to the configuration file."""
+    # Try project root first
+    project_root = Path(__file__).parent.parent.parent
+    config_path = project_root / "config.json"
+    
+    if config_path.exists():
+        return config_path
+    
+    # Try user's home directory
+    user_config = Path.home() / ".ai_scientist" / "config.json"
+    if user_config.exists():
+        return user_config
+    
+    # Return project root path (may not exist yet)
+    return config_path
 
-def get_config() -> ConfigurationManager:
-    """Get the global configuration manager instance."""
-    global _config_manager
-    if _config_manager is None:
-        _config_manager = ConfigurationManager()
-    return _config_manager
 
-def init_config(config_file: Optional[Union[str, Path]] = None) -> ConfigurationManager:
+def load_config(config_path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
     """
-    Initialize the global configuration manager.
+    Load configuration from file with environment variable overrides.
     
     Args:
-        config_file: Path to configuration file
+        config_path: Optional path to configuration file
         
     Returns:
-        Configuration manager instance
+        Configuration dictionary
     """
-    global _config_manager
-    _config_manager = ConfigurationManager(config_file)
-    return _config_manager
-
-# Convenience functions for common access patterns
-def get_api_config(provider: str) -> str:
-    """Get API configuration for a provider."""
-    config = get_config()
-    key = f"API_{provider.upper()}_BASE_URL"
-    return config.get(key, "")
-
-def get_model_config(model_type: str) -> Union[str, List[str]]:
-    """Get model configuration."""
-    config = get_config()
-    if model_type.upper() == "LLM":
-        return config.get("AVAILABLE_LLM_MODELS", [])
-    elif model_type.upper() == "VLM":
-        return config.get("AVAILABLE_VLM_MODELS", [])
+    global _config_cache, _config_file_path
+    
+    if config_path is None:
+        config_path = get_config_path()
     else:
-        return config.get(f"DEFAULT_MODEL_{model_type.upper()}", "")
+        config_path = Path(config_path)
+    
+    # Use cache if same file and already loaded
+    if _config_cache is not None and _config_file_path == config_path:
+        return _config_cache
+    
+    # Start with default configuration
+    config = DEFAULT_CONFIG.copy()
+    
+    # Load from file if it exists
+    if config_path.exists():
+        try:
+            with open(config_path, 'r') as f:
+                file_config = json.load(f)
+            
+            # Deep merge configuration
+            config = deep_merge(config, file_config)
+            logger.info(f"Loaded configuration from {config_path}")
+            
+        except (json.JSONDecodeError, IOError) as e:
+            logger.warning(f"Could not load config from {config_path}: {e}")
+            logger.info("Using default configuration")
+    else:
+        logger.info(f"Config file {config_path} not found, using defaults")
+    
+    # Apply environment variable overrides
+    config = apply_env_overrides(config)
+    
+    # Cache the configuration
+    _config_cache = config
+    _config_file_path = config_path
+    
+    return config
 
-def get_timeout_config(operation: str) -> int:
-    """Get timeout configuration for an operation."""
-    config = get_config()
-    key = f"{operation.upper()}_TIMEOUT"
-    return config.get(key, 30)
 
-def get_temp_config(operation: str) -> float:
-    """Get temperature configuration for an operation."""
-    config = get_config()
-    key = f"TEMP_{operation.upper()}"
-    return config.get(key, 1.0)
+def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Deep merge two dictionaries.
+    
+    Args:
+        base: Base configuration dictionary
+        override: Override configuration dictionary
+        
+    Returns:
+        Merged configuration dictionary
+    """
+    result = base.copy()
+    
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = value
+    
+    return result
+
+
+def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Apply environment variable overrides to configuration.
+    
+    Args:
+        config: Configuration dictionary to modify
+        
+    Returns:
+        Configuration with environment overrides applied
+    """
+    for env_var, config_path in ENV_VAR_MAPPING.items():
+        value = os.getenv(env_var)
+        if value is not None:
+            set_nested_value(config, config_path, value)
+            logger.info(f"Applied environment override: {env_var} -> {config_path}")
+    
+    return config
+
+
+def set_nested_value(config: Dict[str, Any], path: str, value: str) -> None:
+    """
+    Set a nested value in configuration using dot notation.
+    
+    Args:
+        config: Configuration dictionary to modify
+        path: Dot-separated path to the value (e.g., "models.default_max_tokens")
+        value: String value to set (will be converted to appropriate type)
+    """
+    keys = path.split('.')
+    current = config
+    
+    # Navigate to the parent of the target key
+    for key in keys[:-1]:
+        if key not in current:
+            current[key] = {}
+        current = current[key]
+    
+    # Set the value with type conversion
+    target_key = keys[-1]
+    try:
+        # Try to convert to appropriate type
+        if value.lower() in ('true', 'false'):
+            current[target_key] = value.lower() == 'true'
+        elif value.isdigit():
+            current[target_key] = int(value)
+        elif '.' in value and value.replace('.', '').isdigit():
+            current[target_key] = float(value)
+        else:
+            current[target_key] = value
+    except Exception:
+        # Fallback to string
+        current[target_key] = value
+
+
+def validate_config(config: Dict[str, Any]) -> bool:
+    """
+    Validate configuration structure and required keys.
+    
+    Args:
+        config: Configuration dictionary to validate
+        
+    Returns:
+        True if configuration is valid, False otherwise
+    """
+    required_sections = ['models', 'apis', 'pricing', 'timeouts']
+    
+    # Check required top-level sections
+    for section in required_sections:
+        if section not in config:
+            logger.error(f"Missing required configuration section: {section}")
+            return False
+    
+    # Validate models section
+    models = config.get('models', {})
+    if 'gpt_models' not in models or not isinstance(models['gpt_models'], list):
+        logger.error("models.gpt_models must be a list")
+        return False
+    
+    if 'default_max_tokens' not in models or not isinstance(models['default_max_tokens'], int):
+        logger.error("models.default_max_tokens must be an integer")
+        return False
+    
+    # Validate pricing section
+    pricing = config.get('pricing', {})
+    for model_name, model_pricing in pricing.items():
+        if not isinstance(model_pricing, dict):
+            logger.error(f"Pricing for {model_name} must be a dictionary")
+            return False
+        
+        required_price_keys = ['prompt', 'completion']
+        for key in required_price_keys:
+            if key not in model_pricing:
+                logger.error(f"Missing pricing key '{key}' for model {model_name}")
+                return False
+            
+            if not isinstance(model_pricing[key], (int, float)):
+                logger.error(f"Pricing key '{key}' for model {model_name} must be a number")
+                return False
+    
+    logger.info("Configuration validation passed")
+    return True
+
+
+def save_config(config: Dict[str, Any], config_path: Optional[Union[str, Path]] = None) -> bool:
+    """
+    Save configuration to file.
+    
+    Args:
+        config: Configuration dictionary to save
+        config_path: Optional path to save configuration to
+        
+    Returns:
+        True if saved successfully, False otherwise
+    """
+    if config_path is None:
+        config_path = get_config_path()
+    else:
+        config_path = Path(config_path)
+    
+    try:
+        # Ensure directory exists
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Validate before saving
+        if not validate_config(config):
+            logger.error("Configuration validation failed, not saving")
+            return False
+        
+        with open(config_path, 'w') as f:
+            json.dump(config, f, indent=2)
+        
+        logger.info(f"Configuration saved to {config_path}")
+        
+        # Clear cache to force reload
+        global _config_cache, _config_file_path
+        _config_cache = None
+        _config_file_path = None
+        
+        return True
+        
+    except (IOError, OSError) as e:
+        logger.error(f"Could not save configuration to {config_path}: {e}")
+        return False
+
+
+def get_model_list(model_type: str = 'gpt_models') -> list:
+    """Get list of models from configuration."""
+    config = load_config()
+    return config.get('models', {}).get(model_type, [])
+
+
+def get_api_url(api_name: str) -> str:
+    """Get API URL from configuration."""
+    config = load_config()
+    return config.get('apis', {}).get(f"{api_name}_base_url", "")
+
+
+def get_model_pricing(model_name: str) -> Dict[str, float]:
+    """Get pricing information for a model."""
+    config = load_config()
+    return config.get('pricing', {}).get(model_name, {})
+
+
+def get_timeout(timeout_type: str) -> Union[int, float]:
+    """Get timeout value from configuration."""
+    config = load_config()
+    return config.get('timeouts', {}).get(timeout_type, 30)
+
+
+# Initialize configuration on import
+try:
+    load_config()
+except Exception as e:
+    logger.warning(f"Could not initialize configuration: {e}")

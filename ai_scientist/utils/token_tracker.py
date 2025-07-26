@@ -22,31 +22,47 @@ class TokenTracker:
         )
         self.interactions = defaultdict(list)
 
-        self.MODEL_PRICES = {
-            "gpt-4o-2024-11-20": {
-                "prompt": 2.5 / 1000000,  # $2.50 per 1M tokens
-                "cached": 1.25 / 1000000,  # $1.25 per 1M tokens
-                "completion": 10 / 1000000,  # $10.00 per 1M tokens
-            },
-            "gpt-4o-2024-08-06": {
-                "prompt": 2.5 / 1000000,  # $2.50 per 1M tokens
-                "cached": 1.25 / 1000000,  # $1.25 per 1M tokens
-                "completion": 10 / 1000000,  # $10.00 per 1M tokens
-            },
-            "gpt-4o-2024-05-13": {  # this ver does not support cached tokens
-                "prompt": 5.0 / 1000000,  # $5.00 per 1M tokens
-                "completion": 15 / 1000000,  # $15.00 per 1M tokens
-            },
-            "gpt-4o-mini-2024-07-18": {
-                "prompt": 0.15 / 1000000,  # $0.15 per 1M tokens
-                "cached": 0.075 / 1000000,  # $0.075 per 1M tokens
-                "completion": 0.6 / 1000000,  # $0.60 per 1M tokens
-            },
-            "o1-2024-12-17": {
-                "prompt": 15 / 1000000,  # $15.00 per 1M tokens
-                "cached": 7.5 / 1000000,  # $7.50 per 1M tokens
-                "completion": 60 / 1000000,  # $60.00 per 1M tokens
-            },
+        # Load pricing from configuration system
+        try:
+            from .config import load_config
+            config = load_config()
+            self.MODEL_PRICES = config.get('pricing', {})
+            # Add any additional models not in config
+            additional_models = {
+                "o1-2024-12-17": {
+                    "prompt": 15 / 1000000,  # $15.00 per 1M tokens
+                    "cached": 7.5 / 1000000,  # $7.50 per 1M tokens
+                    "completion": 60 / 1000000,  # $60.00 per 1M tokens
+                },
+            }
+            self.MODEL_PRICES.update(additional_models)
+        except ImportError:
+            # Fallback to hardcoded prices if config system not available
+            self.MODEL_PRICES = {
+                "gpt-4o-2024-11-20": {
+                    "prompt": 2.5 / 1000000,  # $2.50 per 1M tokens
+                    "cached": 1.25 / 1000000,  # $1.25 per 1M tokens
+                    "completion": 10 / 1000000,  # $10.00 per 1M tokens
+                },
+                "gpt-4o-2024-08-06": {
+                    "prompt": 2.5 / 1000000,  # $2.50 per 1M tokens
+                    "cached": 1.25 / 1000000,  # $1.25 per 1M tokens
+                    "completion": 10 / 1000000,  # $10.00 per 1M tokens
+                },
+                "gpt-4o-2024-05-13": {  # this ver does not support cached tokens
+                    "prompt": 5.0 / 1000000,  # $5.00 per 1M tokens
+                    "completion": 15 / 1000000,  # $15.00 per 1M tokens
+                },
+                "gpt-4o-mini-2024-07-18": {
+                    "prompt": 0.15 / 1000000,  # $0.15 per 1M tokens
+                    "cached": 0.075 / 1000000,  # $0.075 per 1M tokens
+                    "completion": 0.6 / 1000000,  # $0.60 per 1M tokens
+                },
+                "o1-2024-12-17": {
+                    "prompt": 15 / 1000000,  # $15.00 per 1M tokens
+                    "cached": 7.5 / 1000000,  # $7.50 per 1M tokens
+                    "completion": 60 / 1000000,  # $60.00 per 1M tokens
+                },
             "o1-preview-2024-09-12": {
                 "prompt": 15 / 1000000,  # $15.00 per 1M tokens
                 "cached": 7.5 / 1000000,  # $7.50 per 1M tokens

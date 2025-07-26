@@ -67,7 +67,13 @@ def cleanup_child_processes(processes: List[multiprocessing.Process], timeout: i
                 continue
         alive_processes = still_alive
         if alive_processes:
-            time.sleep(0.1)
+            # Get cleanup interval from configuration
+            try:
+                from .config import get_timeout
+                sleep_interval = get_timeout("process_cleanup_interval")
+            except ImportError:
+                sleep_interval = 0.1
+            time.sleep(sleep_interval)
     
     # Step 3: Force kill remaining processes
     if alive_processes:

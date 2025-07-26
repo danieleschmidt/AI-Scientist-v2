@@ -3,18 +3,63 @@ import os
 import re
 from typing import Any
 from ai_scientist.utils.token_tracker import track_token_usage
-from ai_scientist.utils.config import get_config
 
 import anthropic
 import backoff
 import openai
 
-# Load configuration
-config = get_config()
-MAX_NUM_TOKENS = config.get("MAX_LLM_TOKENS")
+# Load configuration for API URLs
+try:
+    from .utils.config import get_api_url
+except ImportError:
+    def get_api_url(api_name: str) -> str:
+        """Fallback function if config not available."""
+        return ""
 
-# Load available LLM models from configuration
-AVAILABLE_LLMS = config.get("AVAILABLE_LLM_MODELS")
+MAX_NUM_TOKENS = 4096
+
+AVAILABLE_LLMS = [
+    "claude-3-5-sonnet-20240620",
+    "claude-3-5-sonnet-20241022",
+    # OpenAI models
+    "gpt-4o-mini",
+    "gpt-4o-mini-2024-07-18",
+    "gpt-4o",
+    "gpt-4o-2024-05-13",
+    "gpt-4o-2024-08-06",
+    "gpt-4.1",
+    "gpt-4.1-2025-04-14",
+    "gpt-4.1-mini",
+    "gpt-4.1-mini-2025-04-14",
+    "o1",
+    "o1-2024-12-17",
+    "o1-preview-2024-09-12",
+    "o1-mini",
+    "o1-mini-2024-09-12",
+    "o3-mini",
+    "o3-mini-2025-01-31",
+    # DeepSeek Models
+    "deepseek-coder-v2-0724",
+    "deepcoder-14b",
+    # Llama 3 models
+    "llama3.1-405b",
+    # Anthropic Claude models via Amazon Bedrock
+    "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
+    "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
+    "bedrock/anthropic.claude-3-opus-20240229-v1:0",
+    # Anthropic Claude models Vertex AI
+    "vertex_ai/claude-3-opus@20240229",
+    "vertex_ai/claude-3-5-sonnet@20240620",
+    "vertex_ai/claude-3-5-sonnet@20241022",
+    "vertex_ai/claude-3-sonnet@20240229",
+    "vertex_ai/claude-3-haiku@20240307",
+    # Google Gemini models
+    "gemini-2.0-flash",
+    "gemini-2.5-flash-preview-04-17",
+    "gemini-2.5-pro-preview-03-25",
+]
 
 
 # Get N responses from a single message, used for ensembling.
@@ -54,7 +99,7 @@ def get_batch_responses_from_llm(
             max_tokens=MAX_NUM_TOKENS,
             n=n_responses,
             stop=None,
-            seed=config.get("DEFAULT_MODEL_SEED"),
+            seed=0,
         )
         content = [r.message.content for r in response.choices]
         new_msg_history = [
@@ -152,7 +197,7 @@ def make_llm_call(client, model, temperature, system_message, prompt):
             max_tokens=MAX_NUM_TOKENS,
             n=1,
             stop=None,
-            seed=config.get("DEFAULT_MODEL_SEED"),
+            seed=0,
         )
     elif "o1" in model or "o3" in model:
         return client.chat.completions.create(
@@ -163,7 +208,7 @@ def make_llm_call(client, model, temperature, system_message, prompt):
             ],
             temperature=1,
             n=1,
-            seed=config.get("DEFAULT_MODEL_SEED"),
+            seed=0,
         )
     
     else:
@@ -297,8 +342,15 @@ def get_response_from_llm(
                     "return_full_text": False
                 }
             }
+            # Get HuggingFace URL from configuration
+            try:
+                from .utils.config import get_api_url
+                hf_url = get_api_url("huggingface")
+            except ImportError:
+                hf_url = "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview"
+            
             response = requests.post(
-                "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
+                hf_url,
                 headers=headers,
                 json=payload
             )
@@ -416,7 +468,7 @@ def create_client(model) -> tuple[Any, str]:
         return (
             openai.OpenAI(
                 api_key=api_key,
-                base_url=config.get("API_DEEPSEEK_BASE_URL"),
+                base_url=get_api_url("deepseek") or "https://api.deepseek.com",
             ),
             model,
         )
@@ -428,7 +480,7 @@ def create_client(model) -> tuple[Any, str]:
         return (
             openai.OpenAI(
                 api_key=api_key,
-                base_url=config.get("API_HUGGINGFACE_BASE_URL"),
+                base_url=get_api_url("huggingface") or "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
             ),
             model,
         )
@@ -439,7 +491,7 @@ def create_client(model) -> tuple[Any, str]:
         return (
             openai.OpenAI(
                 api_key=api_key,
-                base_url=config.get("API_OPENROUTER_BASE_URL"),
+                base_url=get_api_url("openrouter") or "https://openrouter.ai/api/v1",
             ),
             "meta-llama/llama-3.1-405b-instruct",
         )

@@ -66,6 +66,36 @@ categories:
 backlog_items:
   # HIGH PRIORITY (WSJF > 6.0)
   
+  - id: "anthropic-function-calling"
+    title: "Implement Anthropic function calling support"
+    description: "Replace NotImplementedError with full function calling implementation"
+    type: "Feature"
+    status: "DONE"
+    business_value: 8
+    time_criticality: 8
+    risk_reduction: 8
+    effort: 3
+    wsjf_score: 8.0
+    age_days: 0
+    aging_multiplier: 1.0
+    final_score: 8.0
+    files:
+      - "ai_scientist/treesearch/backend/backend_anthropic.py:40-42"
+    acceptance_criteria:
+      - "Remove NotImplementedError for function calling"
+      - "Implement tool use with Anthropic API"
+      - "Add proper error handling and response parsing"
+      - "Maintain backward compatibility for non-function calls"
+    test_plan:
+      - "Test function calling with mock Anthropic client"
+      - "Verify tool use response parsing"
+      - "Test backward compatibility without function specs"
+    security_notes:
+      - "Validate function specifications before use"
+      - "Ensure proper error handling for malformed responses"
+
+  # MEDIUM PRIORITY (WSJF 2.0-6.0)
+  
   - id: "interpreter-timeout-handling"
     title: "Improve REPL timeout handling in interpreter"
     description: "Replace TODO comment with robust timeout handling for REPL execution"
@@ -147,7 +177,7 @@ backlog_items:
     title: "Centralized configuration management"
     description: "Replace hardcoded values with centralized configuration"
     type: "Refactor"
-    status: "REFINED"
+    status: "DONE"
     business_value: 6
     time_criticality: 4
     risk_reduction: 4
@@ -229,6 +259,16 @@ backlog_items:
       - "Document deployment procedures"
 
 completed_items:
+  - id: "anthropic-function-calling"
+    title: "Implement Anthropic function calling support"
+    completion_date: "2025-07-26"
+    wsjf_score: 8.0
+    
+  - id: "configuration-management"
+    title: "Centralized configuration management"
+    completion_date: "2025-07-26"
+    wsjf_score: 3.5
+    
   - id: "interpreter-timeout-handling"
     title: "Improve REPL timeout handling in interpreter"
     completion_date: "2025-07-26"
@@ -303,7 +343,7 @@ metrics:
   ready_items: 0
   in_progress_items: 0
   blocked_items: 0
-  completed_items: 12
+  completed_items: 14
   average_cycle_time_days: 2.2
   security_issues_resolved: 6
   test_coverage_improvement: "0% → 90%"

@@ -36,10 +36,19 @@ def query(
     if "max_tokens" not in filtered_kwargs:
         filtered_kwargs["max_tokens"] = 8192  # default for Claude models
 
+    # Handle function specification for tool use
     if func_spec is not None:
-        raise NotImplementedError(
-            "Anthropic does not support function calling for now."
-        )
+        # Convert FunctionSpec to Anthropic's tool format
+        filtered_kwargs["tools"] = [{
+            "name": func_spec.name,
+            "description": func_spec.description,
+            "input_schema": func_spec.json_schema,
+        }]
+        # Force the model to use the function
+        filtered_kwargs["tool_choice"] = {
+            "type": "tool",
+            "name": func_spec.name
+        }
 
     # Anthropic doesn't allow not having a user messages
     # if we only have system msg -> use it as user msg
@@ -62,16 +71,32 @@ def query(
     req_time = time.time() - t0
     print(filtered_kwargs)
 
-    if "thinking" in filtered_kwargs:
-        assert (
-            len(message.content) == 2
-            and message.content[0].type == "thinking"
-            and message.content[1].type == "text"
-        )
-        output: str = message.content[1].text
+    # Handle tool use responses
+    if func_spec is not None:
+        # Extract tool use from response
+        tool_use_block = None
+        for content_block in message.content:
+            if content_block.type == "tool_use":
+                tool_use_block = content_block
+                break
+        
+        assert tool_use_block is not None, f"Expected tool_use in response but got: {message.content}"
+        assert tool_use_block.name == func_spec.name, f"Function name mismatch: expected {func_spec.name}, got {tool_use_block.name}"
+        
+        # Return the tool input as the output (similar to OpenAI backend)
+        output = tool_use_block.input
     else:
-        assert len(message.content) == 1 and message.content[0].type == "text"
-        output: str = message.content[0].text
+        # Handle regular text responses
+        if "thinking" in filtered_kwargs:
+            assert (
+                len(message.content) == 2
+                and message.content[0].type == "thinking"
+                and message.content[1].type == "text"
+            )
+            output: str = message.content[1].text
+        else:
+            assert len(message.content) == 1 and message.content[0].type == "text"
+            output: str = message.content[0].text
 
     in_tokens = message.usage.input_tokens
     out_tokens = message.usage.output_tokens

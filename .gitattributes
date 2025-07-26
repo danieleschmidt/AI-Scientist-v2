@@ -1,0 +1,20 @@
+# Safe overwrite – keep incoming side
+package-lock.json merge=theirs
+poetry.lock      merge=theirs
+*.snap           merge=theirs
+
+# Line-union for documentation
+*.md             merge=union
+CHANGELOG.md     merge=union
+
+# Guard-rails: lock binaries from auto-merge
+*.png            merge=lock
+*.jpg            merge=lock
+*.jpeg           merge=lock
+*.gif            merge=lock
+*.pdf            merge=lock
+*.zip            merge=lock
+*.tar.gz         merge=lock
+*.exe            merge=lock
+*.dll            merge=lock
+*.so             merge=lock

@@ -62,8 +62,15 @@ class SemanticScholarSearchTool(BaseTool):
         if self.S2_API_KEY:
             headers["X-API-KEY"] = self.S2_API_KEY
         
+        # Get Semantic Scholar URL from configuration
+        try:
+            from ..utils.config import get_api_url
+            ss_url = get_api_url("semantic_scholar")
+        except ImportError:
+            ss_url = "https://api.semanticscholar.org/graph/v1/paper/search"
+        
         rsp = requests.get(
-            "https://api.semanticscholar.org/graph/v1/paper/search",
+            ss_url,
             headers=headers,
             params={
                 "query": query,

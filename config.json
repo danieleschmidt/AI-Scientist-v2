@@ -1,0 +1,67 @@
+{
+  "models": {
+    "gpt_models": [
+      "gpt-4o-2024-05-13",
+      "gpt-4o-2024-08-06",
+      "gpt-4o-2024-11-20",
+      "gpt-4o-mini-2024-07-18"
+    ],
+    "default_max_tokens": 4096,
+    "anthropic_max_tokens": 8192,
+    "vision_capable_models": [
+      "gpt-4o-2024-05-13",
+      "gpt-4o-2024-08-06",
+      "gpt-4o-2024-11-20",
+      "gpt-4o-mini-2024-07-18"
+    ]
+  },
+  "apis": {
+    "semantic_scholar_base_url": "https://api.semanticscholar.org/graph/v1/paper/search",
+    "huggingface_base_url": "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
+    "deepseek_base_url": "https://api.deepseek.com",
+    "openrouter_base_url": "https://openrouter.ai/api/v1"
+  },
+  "pricing": {
+    "gpt-4o-2024-11-20": {
+      "prompt": 0.0000025,
+      "completion": 0.00001,
+      "cached_prompt": 0.00000125
+    },
+    "gpt-4o-2024-08-06": {
+      "prompt": 0.0000025,
+      "completion": 0.00001,
+      "cached_prompt": 0.00000125
+    },
+    "gpt-4o-2024-05-13": {
+      "prompt": 0.000005,
+      "completion": 0.000015
+    },
+    "gpt-4o-mini-2024-07-18": {
+      "prompt": 0.00000015,
+      "completion": 0.0000006
+    }
+  },
+  "timeouts": {
+    "process_cleanup_interval": 0.1,
+    "default_request_timeout": 30,
+    "anthropic_function_call_timeout": 60
+  },
+  "cdn": {
+    "p5js_url": "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js",
+    "highlight_css_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
+    "highlight_js_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",
+    "highlight_python_url": "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"
+  },
+  "resource_management": {
+    "max_memory_mb_per_process": 1024,
+    "orphaned_process_keywords": [
+      "python",
+      "torch",
+      "mp",
+      "bfts",
+      "experiment",
+      "ai_scientist"
+    ],
+    "gpu_cleanup_force": true
+  }
+}
