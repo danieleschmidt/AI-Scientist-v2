@@ -1,0 +1,12 @@
+#!/bin/bash
+# prepare-commit-msg hook to enable rerere
+
+# Enable rerere for this commit
+git config rerere.enabled true
+git config rerere.autoupdate true
+
+# Check if this is an automated commit from autonomous system
+if [[ "$2" == "message" ]] && [[ "$3" =~ "🤖 Generated with.*Claude Code" ]]; then
+    # This is an autonomous commit - ensure rerere is active
+    echo "# Autonomous commit with rerere enabled" >> "$1"
+fi
