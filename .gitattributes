@@ -1,0 +1,23 @@
+# Merge strategies for automated conflict resolution
+package-lock.json merge=theirs
+poetry.lock      merge=theirs
+*.snap           merge=theirs
+*.md             merge=union
+CHANGELOG.md     merge=union
+*.svg *.png *.jpg *.zip merge=lock
+
+# Binary files should not be merged
+*.pdf binary
+*.pkl binary
+*.pth binary
+*.weights binary
+
+# Documentation files use union merge for better collaboration
+docs/**/*.md merge=union
+README*.md merge=union
+
+# Configuration files need careful handling
+requirements.txt merge=union
+*.yml merge=manual
+*.yaml merge=manual
+*.json merge=manual

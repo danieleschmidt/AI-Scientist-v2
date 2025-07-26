@@ -1,0 +1,32 @@
+#!/bin/bash
+# pre-push hook for autonomous backlog management
+
+# Ensure we're up to date with main branch
+git fetch origin main
+
+# Check if rebase is needed
+if ! git merge-base --is-ancestor origin/main HEAD; then
+    echo "Rebasing onto latest main..."
+    
+    # Enable rerere for rebase
+    git config rerere.enabled true
+    git config rerere.autoupdate true
+    
+    # Attempt rebase
+    if ! git rebase origin/main; then
+        echo "ERROR: Rebase failed with conflicts"
+        echo "Manual intervention required"
+        exit 1
+    fi
+fi
+
+# Run tests before push
+if [[ -f "pytest.ini" ]]; then
+    echo "Running tests before push..."
+    if ! python -m pytest -x; then
+        echo "ERROR: Tests failed, push aborted"
+        exit 1
+    fi
+fi
+
+echo "Pre-push checks passed"
