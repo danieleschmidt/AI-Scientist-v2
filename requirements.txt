@@ -27,3 +27,7 @@ jsonschema
 omegaconf
 botocore
 boto3
+# Process monitoring and resource management
+psutil
+# Configuration management
+PyYAML

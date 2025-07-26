@@ -1,0 +1,72 @@
+# AI Scientist Configuration File
+# This file contains all configurable values for the AI Scientist system
+# Environment variables with prefix AI_SCIENTIST_ will override these values
+
+# API Configuration
+API_DEEPSEEK_BASE_URL: "https://api.deepseek.com"
+API_HUGGINGFACE_BASE_URL: "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview"
+API_OPENROUTER_BASE_URL: "https://openrouter.ai/api/v1"
+API_GEMINI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+API_SEMANTIC_SCHOLAR_BASE_URL: "https://api.semanticscholar.org/graph/v1/paper/search"
+
+# Model Configuration
+AVAILABLE_LLM_MODELS:
+  - "claude-3-5-sonnet-20240620"
+  - "gpt-4o-mini"
+  - "o1-2024-12-17"
+  - "gpt-4o-2024-11-20"
+  - "o1-preview-2024-09-12"
+  - "o3-mini-2025-01-31"
+
+AVAILABLE_VLM_MODELS:
+  - "gpt-4o"
+  - "gpt-4o-mini"
+  - "claude-3-5-sonnet-20240620"
+
+# Default Models for Different Tasks
+DEFAULT_MODEL_PLOT_AGG: "o3-mini-2025-01-31"
+DEFAULT_MODEL_WRITEUP: "o1-preview-2024-09-12"
+DEFAULT_MODEL_CITATION: "gpt-4o-2024-11-20"
+DEFAULT_MODEL_REVIEW: "gpt-4o-2024-11-20"
+
+# Token Limits
+MAX_LLM_TOKENS: 4096
+MAX_VLM_TOKENS: 4096
+DEFAULT_CLAUDE_MAX_TOKENS: 8192
+
+# Timeout Configuration (in seconds)
+LATEX_COMPILE_TIMEOUT: 30
+PDF_DETECTION_TIMEOUT: 30
+CHKTEX_TIMEOUT: 60
+INTERPRETER_TIMEOUT: 3600
+
+# File Paths
+LATEX_TEMPLATE_DIR_ICML: "ai_scientist/blank_icml_latex"
+LATEX_TEMPLATE_DIR_ICBINB: "ai_scientist/blank_icbinb_latex"
+FEWSHOT_EXAMPLES_DIR: "ai_scientist/fewshot_examples"
+
+# Default Settings
+MAX_FIGURES_ALLOWED: 12
+DEFAULT_WRITEUP_RETRIES: 3
+DEFAULT_CITATION_ROUNDS: 20
+DEFAULT_VLM_MAX_IMAGES: 25
+BATCH_VLM_MAX_IMAGES: 200
+VLM_REVIEW_MAX_TOKENS: 1000
+
+# Temperature Values
+TEMP_REPORT: 1.0
+TEMP_CODE: 1.0
+TEMP_FEEDBACK: 0.5
+TEMP_VLM_FEEDBACK: 0.5
+TEMP_REVIEW_DEFAULT: 0.75
+
+# Other Settings
+DEFAULT_MODEL_SEED: 0
+PAGE_LIMIT_NORMAL: 8
+PAGE_LIMIT_ICBINB: 4
+SEMANTIC_SCHOLAR_RATE_LIMIT_DELAY: 1.0
+
+# Execution Configuration
+EXEC_TIMEOUT: 3600
+NUM_WORKERS: 4
+EVAL_NUM_SEEDS: 3
