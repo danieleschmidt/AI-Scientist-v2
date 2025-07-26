@@ -1,0 +1,32 @@
+name: rerere-audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure rerere
+        run: |
+          git config rerere.enabled true
+          git config rerere.autoupdate true
+      - name: Generate rerere audit
+        run: |
+          mkdir -p audit-output
+          if git rerere diff > audit-output/rerere-diff.txt 2>/dev/null; then
+            echo "Rerere diff generated successfully"
+          else
+            echo "No rerere resolutions found" > audit-output/rerere-diff.txt
+          fi
+          date > audit-output/audit-timestamp.txt
+      - name: Upload rerere audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: rerere-audit
+          path: audit-output/
+          retention-days: 30

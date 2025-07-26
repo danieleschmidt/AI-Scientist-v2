@@ -1,0 +1,22 @@
+name: auto-rebase
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+      - run: |
+          git config --global rerere.enabled true
+          git config --global rerere.autoupdate true
+          git fetch origin ${{ github.base_ref }}
+          git rebase origin/${{ github.base_ref }} || echo "::error::Manual merge required"
+      - if: success()
+        run: git push origin HEAD:${{ github.head_ref }}
