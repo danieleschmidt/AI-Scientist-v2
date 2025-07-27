@@ -1,0 +1,97 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+DOCS/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+experiments/
+aisci_outputs/
+slurm_logs/
+results/
+data/
+cache/
+huggingface/
+final_papers/
+*.zip
+*.ckpt.pt
+*.out
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Logs
+*.log
+logs/
+
+# AI model artifacts
+*.bin
+*.safetensors
+*.h5
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Development tools
+.aider*
+Dockerfile*
+docker-compose*
+.github/

@@ -1,0 +1,437 @@
+name: 🚀 Continuous Deployment
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      force_deploy:
+        description: 'Force deployment even if checks fail'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.11"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Pre-deployment validation
+  validate:
+    name: 🔍 Pre-deployment Validation
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.environment.outputs.environment }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Extract version
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION=$(python -c "import sys; sys.path.append('.'); from ai_scientist import __version__; print(__version__)")
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Deploying version: $VERSION"
+    
+    - name: Determine environment
+      id: environment
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          ENV="${{ github.event.inputs.environment }}"
+        elif [[ "${{ github.event_name }}" == "release" ]]; then
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            ENV="staging"
+          else
+            ENV="production"
+          fi
+        elif [[ $GITHUB_REF == refs/tags/* ]]; then
+          if [[ $GITHUB_REF == *"rc"* || $GITHUB_REF == *"alpha"* || $GITHUB_REF == *"beta"* ]]; then
+            ENV="staging"
+          else
+            ENV="production"
+          fi
+        else
+          ENV="staging"
+        fi
+        echo "environment=$ENV" >> $GITHUB_OUTPUT
+        echo "Target environment: $ENV"
+    
+    - name: Validate deployment conditions
+      run: |
+        if [[ "${{ steps.environment.outputs.environment }}" == "production" ]]; then
+          if [[ "${{ github.event_name }}" != "release" && "${{ github.event.inputs.force_deploy }}" != "true" ]]; then
+            echo "⚠️ Production deployments should only happen from releases"
+            echo "Use force_deploy=true to override this check"
+            exit 1
+          fi
+        fi
+
+  # Build and push Docker images
+  build-images:
+    name: 🐳 Build & Push Images
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha,prefix={{branch}}-
+        labels: |
+          org.opencontainers.image.title=AI Scientist v2
+          org.opencontainers.image.description=Workshop-Level Automated Scientific Discovery
+          org.opencontainers.image.version=${{ needs.validate.outputs.version }}
+    
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        target: production
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          VERSION=${{ needs.validate.outputs.version }}
+          BUILD_DATE=${{ github.event.head_commit.timestamp }}
+          VCS_REF=${{ github.sha }}
+
+  # Build and publish Python package
+  publish-package:
+    name: 📦 Publish Package
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ai-scientist-v2
+    permissions:
+      id-token: write  # for trusted publishing
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build package
+      run: python -m build
+    
+    - name: Publish to Test PyPI
+      if: needs.validate.outputs.environment == 'staging'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+    
+    - name: Publish to PyPI
+      if: needs.validate.outputs.environment == 'production'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: 🚧 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [validate, build-images]
+    if: needs.validate.outputs.environment == 'staging' || github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.ai-scientist.terragonlabs.ai
+    
+    steps:
+    - name: Checkout deployment scripts
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          scripts/deploy
+          k8s/
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.STAGING_KUBECONFIG }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl config current-context
+    
+    - name: Deploy to staging
+      run: |
+        export KUBECONFIG=kubeconfig
+        export IMAGE_TAG="${{ needs.build-images.outputs.image-tag }}"
+        export VERSION="${{ needs.validate.outputs.version }}"
+        envsubst < k8s/staging/deployment.yaml | kubectl apply -f -
+        kubectl rollout status deployment/ai-scientist-staging -n ai-scientist-staging
+    
+    - name: Run smoke tests
+      run: |
+        export KUBECONFIG=kubeconfig
+        export STAGING_URL="https://staging.ai-scientist.terragonlabs.ai"
+        python scripts/smoke_tests.py --url "$STAGING_URL" --timeout 300
+    
+    - name: Notify staging deployment
+      run: |
+        echo "🚧 Staging deployment completed"
+        echo "Version: ${{ needs.validate.outputs.version }}"
+        echo "Image: ${{ needs.build-images.outputs.image-tag }}"
+        echo "URL: https://staging.ai-scientist.terragonlabs.ai"
+
+  # Deploy to production environment
+  deploy-production:
+    name: 🌟 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate, build-images, deploy-staging]
+    if: needs.validate.outputs.environment == 'production'
+    environment:
+      name: production
+      url: https://ai-scientist.terragonlabs.ai
+    
+    steps:
+    - name: Checkout deployment scripts
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          scripts/deploy
+          k8s/
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.PRODUCTION_KUBECONFIG }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl config current-context
+    
+    - name: Pre-deployment backup
+      run: |
+        export KUBECONFIG=kubeconfig
+        python scripts/backup_production.py
+    
+    - name: Deploy to production
+      run: |
+        export KUBECONFIG=kubeconfig
+        export IMAGE_TAG="${{ needs.build-images.outputs.image-tag }}"
+        export VERSION="${{ needs.validate.outputs.version }}"
+        envsubst < k8s/production/deployment.yaml | kubectl apply -f -
+        kubectl rollout status deployment/ai-scientist-production -n ai-scientist-production
+    
+    - name: Run health checks
+      run: |
+        export KUBECONFIG=kubeconfig
+        export PRODUCTION_URL="https://ai-scientist.terragonlabs.ai"
+        python scripts/health_checks.py --url "$PRODUCTION_URL" --timeout 600
+    
+    - name: Run integration tests
+      run: |
+        export PRODUCTION_URL="https://ai-scientist.terragonlabs.ai"
+        python scripts/integration_tests.py --url "$PRODUCTION_URL" --env production
+    
+    - name: Notify production deployment
+      run: |
+        echo "🌟 Production deployment completed"
+        echo "Version: ${{ needs.validate.outputs.version }}"
+        echo "Image: ${{ needs.build-images.outputs.image-tag }}"
+        echo "URL: https://ai-scientist.terragonlabs.ai"
+
+  # Security scanning of deployed services
+  security-scan-deployed:
+    name: 🔒 Security Scan Deployed Services
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    
+    steps:
+    - name: Run OWASP ZAP baseline scan
+      uses: zaproxy/action-baseline@v0.10.0
+      with:
+        target: 'https://staging.ai-scientist.terragonlabs.ai'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+    
+    - name: Upload ZAP scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: zap-scan-results
+        path: report_html.html
+
+  # Post-deployment monitoring and alerts
+  post-deployment:
+    name: 📊 Post-deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: [validate, deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    
+    steps:
+    - name: Update monitoring dashboards
+      run: |
+        echo "Updating Grafana dashboards for version ${{ needs.validate.outputs.version }}"
+        # Add Grafana API calls to update dashboards
+    
+    - name: Set up alerts
+      run: |
+        echo "Configuring alerts for new deployment"
+        # Add AlertManager configuration updates
+    
+    - name: Create deployment record
+      run: |
+        echo "Recording deployment in monitoring system"
+        # Add deployment event to monitoring system
+
+  # Rollback capability
+  rollback:
+    name: 🔄 Rollback
+    runs-on: ubuntu-latest
+    if: failure() && (github.event_name == 'workflow_dispatch' && github.event.inputs.force_deploy == 'true')
+    needs: [validate, deploy-staging, deploy-production]
+    environment:
+      name: ${{ needs.validate.outputs.environment }}-rollback
+    
+    steps:
+    - name: Checkout deployment scripts
+      uses: actions/checkout@v4
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+    
+    - name: Configure kubectl
+      run: |
+        if [[ "${{ needs.validate.outputs.environment }}" == "production" ]]; then
+          echo "${{ secrets.PRODUCTION_KUBECONFIG }}" | base64 -d > kubeconfig
+        else
+          echo "${{ secrets.STAGING_KUBECONFIG }}" | base64 -d > kubeconfig
+        fi
+        export KUBECONFIG=kubeconfig
+    
+    - name: Rollback deployment
+      run: |
+        export KUBECONFIG=kubeconfig
+        NAMESPACE="ai-scientist-${{ needs.validate.outputs.environment }}"
+        kubectl rollout undo deployment/ai-scientist-${{ needs.validate.outputs.environment }} -n $NAMESPACE
+        kubectl rollout status deployment/ai-scientist-${{ needs.validate.outputs.environment }} -n $NAMESPACE
+    
+    - name: Verify rollback
+      run: |
+        echo "Verifying rollback was successful"
+        python scripts/health_checks.py --env ${{ needs.validate.outputs.environment }}
+
+  # Deployment summary and notifications
+  summary:
+    name: 📋 Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [validate, build-images, publish-package, deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: Generate deployment summary
+      run: |
+        echo "# 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Version: ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "## Environment: ${{ needs.validate.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "## Status:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🐳 Image Build: ${{ needs.build-images.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 Package Publish: ${{ needs.publish-package.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🚧 Staging Deploy: ${{ needs.deploy-staging.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌟 Production Deploy: ${{ needs.deploy-production.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.deploy-production.result }}" == "success" ]]; then
+          echo "## 🎉 Production deployment successful!" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://ai-scientist.terragonlabs.ai" >> $GITHUB_STEP_SUMMARY
+        elif [[ "${{ needs.deploy-staging.result }}" == "success" ]]; then
+          echo "## ✅ Staging deployment successful!" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://staging.ai-scientist.terragonlabs.ai" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Notify Slack
+      if: always()
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+          STATUS_EMOJI="✅"
+          if [[ "${{ needs.deploy-production.result }}" == "failure" || "${{ needs.deploy-staging.result }}" == "failure" ]]; then
+            STATUS_EMOJI="❌"
+          fi
+          
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \"$STATUS_EMOJI AI Scientist v2 Deployment\",
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"*AI Scientist v2 Deployment*\n*Version:* ${{ needs.validate.outputs.version }}\n*Environment:* ${{ needs.validate.outputs.environment }}\n*Status:* ${{ needs.deploy-production.result || needs.deploy-staging.result }}\"
+                  }
+                }
+              ]
+            }" \
+            $SLACK_WEBHOOK_URL
+        fi

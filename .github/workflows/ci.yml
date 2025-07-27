@@ -1,0 +1,423 @@
+name: 🚀 Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
+
+jobs:
+  # Security and dependency scanning
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python
+    
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  # Dependency review for PRs
+  dependency-review:
+    name: 📦 Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
+
+  # Code quality checks
+  code-quality:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install flake8 mypy bandit safety semgrep black isort
+    
+    - name: Run black code formatter check
+      run: black --check --diff ai_scientist/ tests/
+    
+    - name: Run isort import sorting check
+      run: isort --check-only --diff ai_scientist/ tests/
+    
+    - name: Run flake8 linting
+      run: |
+        flake8 ai_scientist/ tests/ \
+          --max-line-length=88 \
+          --extend-ignore=E203,W503 \
+          --format=github
+    
+    - name: Run mypy type checking
+      run: mypy ai_scientist/ --ignore-missing-imports
+    
+    - name: Run bandit security analysis
+      run: |
+        bandit -r ai_scientist/ \
+          -f json \
+          -o bandit-report.json
+    
+    - name: Run safety dependency check
+      run: safety check --json --output safety-report.json
+      continue-on-error: true
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  # Unit and integration tests
+  test:
+    name: 🧪 Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12"]
+        include:
+          - os: ubuntu-latest
+            python-version: "3.11"
+            coverage: true
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          texlive-latex-recommended \
+          texlive-latex-extra \
+          poppler-utils \
+          chktex
+    
+    - name: Install system dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install --cask mactex
+        brew install poppler
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install pytest pytest-cov pytest-xdist pytest-mock
+    
+    - name: Run unit tests
+      run: |
+        pytest tests/unit/ \
+          -v \
+          --tb=short \
+          --strict-markers \
+          -m "not slow"
+    
+    - name: Run integration tests
+      run: |
+        pytest tests/integration/ \
+          -v \
+          --tb=short \
+          --strict-markers \
+          -m "not slow"
+      env:
+        # Use mock API keys for testing
+        OPENAI_API_KEY: sk-test-openai-key
+        ANTHROPIC_API_KEY: sk-ant-test-anthropic-key
+    
+    - name: Run tests with coverage
+      if: matrix.coverage
+      run: |
+        pytest \
+          --cov=ai_scientist \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term-missing \
+          --junit-xml=test-results.xml \
+          -v
+    
+    - name: Upload coverage to Codecov
+      if: matrix.coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
+        path: |
+          test-results.xml
+          htmlcov/
+          coverage.xml
+
+  # Performance and load testing
+  performance:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install pytest memory-profiler
+    
+    - name: Run performance tests
+      run: |
+        pytest tests/performance/ \
+          -v \
+          --tb=short \
+          -m "not slow" \
+          --junit-xml=performance-results.xml
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results
+        path: performance-results.xml
+
+  # Build and packaging
+  build:
+    name: 🏗️ Build Package
+    runs-on: ubuntu-latest
+    needs: [code-quality, test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine check-manifest
+    
+    - name: Check manifest
+      run: check-manifest
+    
+    - name: Build package
+      run: python -m build
+    
+    - name: Check package
+      run: python -m twine check dist/*
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          dist/
+          build/
+
+  # Docker image build and security scan
+  docker:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [code-quality, test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        target: production
+        tags: ai-scientist:latest
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Run Trivy vulnerability scanner on Docker image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'ai-scientist:latest'
+        format: 'sarif'
+        output: 'trivy-docker.sarif'
+    
+    - name: Upload Docker scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-docker.sarif'
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm ai-scientist:latest python --version
+        docker run --rm ai-scientist:latest python -c "import ai_scientist; print('Import successful')"
+
+  # Documentation build
+  docs:
+    name: 📚 Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install sphinx sphinx-rtd-theme myst-parser
+    
+    - name: Build documentation
+      run: |
+        cd docs
+        make html
+    
+    - name: Upload documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: docs/_build/html/
+
+  # Accessibility and compliance testing
+  compliance:
+    name: 📋 Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check license headers
+      run: |
+        find ai_scientist/ -name "*.py" | xargs grep -L "Licensed under" || true
+    
+    - name: Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  # Notify on status
+  notify:
+    name: 📢 Notify Status
+    runs-on: ubuntu-latest
+    needs: [security-scan, code-quality, test, build, docker, docs]
+    if: always()
+    
+    steps:
+    - name: Notify success
+      if: |
+        needs.security-scan.result == 'success' &&
+        needs.code-quality.result == 'success' &&
+        needs.test.result == 'success' &&
+        needs.build.result == 'success' &&
+        needs.docker.result == 'success' &&
+        needs.docs.result == 'success'
+      run: |
+        echo "✅ All CI checks passed successfully!"
+    
+    - name: Notify failure
+      if: |
+        needs.security-scan.result == 'failure' ||
+        needs.code-quality.result == 'failure' ||
+        needs.test.result == 'failure' ||
+        needs.build.result == 'failure' ||
+        needs.docker.result == 'failure' ||
+        needs.docs.result == 'failure'
+      run: |
+        echo "❌ CI checks failed. Please review the logs."
+        exit 1

@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # Main AI Scientist application
+  ai-scientist:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: ai-scientist-dev
+    environment:
+      - PYTHONPATH=/app
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - S2_API_KEY=${S2_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION_NAME=${AWS_REGION_NAME:-us-east-1}
+    volumes:
+      - .:/app
+      - ai-scientist-experiments:/app/experiments
+      - ai-scientist-data:/app/data
+      - ai-scientist-cache:/app/cache
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8000:8000"
+      - "8888:8888"  # Jupyter notebook
+    networks:
+      - ai-scientist-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import ai_scientist; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for caching and task queues
+  redis:
+    image: redis:7-alpine
+    container_name: ai-scientist-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ai-scientist-redis:/data
+    networks:
+      - ai-scientist-network
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  # PostgreSQL for metadata and experiment tracking
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-scientist-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=ai_scientist
+      - POSTGRES_USER=ai_scientist
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ai-scientist-postgres:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - ai-scientist-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_scientist"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ai-scientist-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ai-scientist-prometheus:/prometheus
+    networks:
+      - ai-scientist-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ai-scientist-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - ai-scientist-grafana:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - ai-scientist-network
+    depends_on:
+      - prometheus
+
+  # Jupyter notebook for development
+  jupyter:
+    build:
+      context: .
+      target: development
+    container_name: ai-scientist-jupyter
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-ai-scientist}
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/workspace
+      - ai-scientist-notebooks:/workspace/notebooks
+    networks:
+      - ai-scientist-network
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --notebook-dir=/workspace
+
+networks:
+  ai-scientist-network:
+    driver: bridge
+
+volumes:
+  ai-scientist-experiments:
+    driver: local
+  ai-scientist-data:
+    driver: local
+  ai-scientist-cache:
+    driver: local
+  ai-scientist-redis:
+    driver: local
+  ai-scientist-postgres:
+    driver: local
+  ai-scientist-prometheus:
+    driver: local
+  ai-scientist-grafana:
+    driver: local
+  ai-scientist-notebooks:
+    driver: local
