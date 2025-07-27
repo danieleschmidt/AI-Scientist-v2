@@ -4,7 +4,11 @@ poetry.lock      merge=theirs
 *.snap           merge=theirs
 *.md             merge=union
 CHANGELOG.md     merge=union
-*.svg *.png *.jpg *.zip merge=lock
+*.svg binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.zip binary
 
 # Binary files should not be merged
 *.pdf binary
