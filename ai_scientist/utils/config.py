@@ -14,12 +14,19 @@ Features:
 """
 
 import os
-import yaml
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List
 from dataclasses import dataclass
 import logging
+
+# Optional YAML support
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+    yaml = None
 
 logger = logging.getLogger(__name__)
 
@@ -292,6 +299,9 @@ class ConfigurationManager:
         try:
             with open(config_path, 'r') as f:
                 if config_path.suffix.lower() in ['.yaml', '.yml']:
+                    if not HAS_YAML:
+                        logger.warning(f"PyYAML not available, skipping YAML config file: {config_path}")
+                        return
                     file_config = yaml.safe_load(f) or {}
                 elif config_path.suffix.lower() == '.json':
                     file_config = json.load(f)
@@ -406,6 +416,8 @@ class ConfigurationManager:
         try:
             with open(output_path, 'w') as f:
                 if format.lower() == 'yaml':
+                    if not HAS_YAML:
+                        raise ValueError("PyYAML not available for YAML export")
                     yaml.dump(self._config, f, default_flow_style=False, sort_keys=True)
                 elif format.lower() == 'json':
                     json.dump(self._config, f, indent=2, sort_keys=True)

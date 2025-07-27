@@ -13,11 +13,18 @@ Acceptance criteria:
 import unittest
 import tempfile
 import os
-import yaml
 import json
 from pathlib import Path
 from unittest.mock import patch
 import sys
+
+# Optional YAML support for testing
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+    yaml = None
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -74,6 +81,7 @@ class TestConfigurationManagement(unittest.TestCase):
         self.assertIn("claude-3-5-sonnet-20240620", llm_models)
         self.assertIn("gpt-4o-2024-11-20", llm_models)
     
+    @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_yaml_config_file_loading(self):
         """Test loading configuration from YAML file."""
         # Create test YAML config
@@ -117,8 +125,9 @@ class TestConfigurationManagement(unittest.TestCase):
         self.assertEqual(config.get("INTERPRETER_TIMEOUT"), 7200)
         self.assertEqual(config.get("NUM_WORKERS"), 8)
     
+    @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_environment_variable_overrides(self):
-        """Test that environment variables override config file values."""
+        """Test that environment variables override config file values.""
         # Set up environment variables
         os.environ["AI_SCIENTIST_API_DEEPSEEK_BASE_URL"] = "https://env.deepseek.com"
         os.environ["AI_SCIENTIST_MAX_LLM_TOKENS"] = "16384"
@@ -181,8 +190,9 @@ class TestConfigurationManagement(unittest.TestCase):
         temp = get_temp_config("report")
         self.assertEqual(temp, 1.0)
     
+    @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_config_export(self):
-        """Test configuration export functionality."""
+        """Test configuration export functionality.""
         config = ConfigurationManager()
         
         # Export to YAML
@@ -236,8 +246,9 @@ class TestConfigurationManagement(unittest.TestCase):
         # Should have default values despite invalid file
         self.assertEqual(config.get("API_DEEPSEEK_BASE_URL"), "https://api.deepseek.com")
     
+    @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_unknown_config_keys(self):
-        """Test handling of unknown configuration keys."""
+        """Test handling of unknown configuration keys.""
         test_config = {
             "API_DEEPSEEK_BASE_URL": "https://custom.deepseek.com",
             "UNKNOWN_CONFIG_KEY": "unknown_value",
