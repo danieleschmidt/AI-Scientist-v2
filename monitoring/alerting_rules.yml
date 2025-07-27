@@ -1,0 +1,263 @@
+groups:
+  - name: ai_scientist_alerts
+    rules:
+      # System Health Alerts
+      - alert: AIScientistDown
+        expr: up{job="ai-scientist"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: ai-scientist
+        annotations:
+          summary: "AI Scientist service is down"
+          description: "AI Scientist service has been down for more than 1 minute."
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Low disk space"
+          description: "Root filesystem has less than 10% free space."
+
+      # GPU Alerts
+      - alert: GPUHighTemperature
+        expr: DCGM_FI_DEV_GPU_TEMP > 85
+        for: 2m
+        labels:
+          severity: warning
+          service: gpu
+        annotations:
+          summary: "GPU temperature too high"
+          description: "GPU {{$labels.gpu}} temperature is {{$value}}°C."
+
+      - alert: GPUHighUtilization
+        expr: DCGM_FI_DEV_GPU_UTIL > 95
+        for: 10m
+        labels:
+          severity: warning
+          service: gpu
+        annotations:
+          summary: "GPU utilization consistently high"
+          description: "GPU {{$labels.gpu}} utilization is {{$value}}% for more than 10 minutes."
+
+      - alert: GPUMemoryHigh
+        expr: (DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: gpu
+        annotations:
+          summary: "GPU memory usage high"
+          description: "GPU {{$labels.gpu}} memory usage is {{$value}}%."
+
+      # Application Performance Alerts
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, ai_scientist_http_request_duration_seconds_bucket) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High API latency"
+          description: "95th percentile API latency is {{$value}}s."
+
+      - alert: HighErrorRate
+        expr: rate(ai_scientist_http_requests_total{status=~"4..|5.."}[5m]) / rate(ai_scientist_http_requests_total[5m]) * 100 > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High HTTP error rate"
+          description: "HTTP error rate is {{$value}}%."
+
+      - alert: ExperimentFailureRate
+        expr: rate(ai_scientist_experiments_failed_total[5m]) / rate(ai_scientist_experiments_started_total[5m]) * 100 > 20
+        for: 5m
+        labels:
+          severity: warning
+          service: experiments
+        annotations:
+          summary: "High experiment failure rate"
+          description: "Experiment failure rate is {{$value}}%."
+
+      # LLM API Alerts
+      - alert: LLMAPILatencyHigh
+        expr: histogram_quantile(0.95, ai_scientist_llm_request_duration_seconds_bucket) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: llm-api
+        annotations:
+          summary: "LLM API latency high"
+          description: "95th percentile LLM API latency is {{$value}}s for provider {{$labels.provider}}."
+
+      - alert: LLMAPIErrors
+        expr: rate(ai_scientist_llm_request_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: llm-api
+        annotations:
+          summary: "LLM API errors detected"
+          description: "LLM API error rate is {{$value}} errors/second for provider {{$labels.provider}}."
+
+      - alert: HighTokenUsage
+        expr: rate(ai_scientist_tokens_consumed_total[1h]) > 1000000
+        for: 5m
+        labels:
+          severity: warning
+          service: cost
+        annotations:
+          summary: "High token usage rate"
+          description: "Token consumption rate is {{$value}} tokens/hour."
+
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is unreachable."
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache is unreachable."
+
+      - alert: DatabaseConnections
+        expr: postgres_connections > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database connections"
+          description: "PostgreSQL has {{$value}} active connections."
+
+      # Security Alerts
+      - alert: UnauthorizedAccess
+        expr: rate(ai_scientist_http_requests_total{status="401"}[5m]) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "Unauthorized access attempts: {{$value}} requests/second."
+
+      - alert: SuspiciousActivity
+        expr: rate(ai_scientist_http_requests_total{status="403"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "High rate of forbidden requests: {{$value}} requests/second."
+
+      # Research Pipeline Alerts
+      - alert: LongRunningExperiment
+        expr: ai_scientist_experiment_duration_seconds > 3600
+        for: 0m
+        labels:
+          severity: warning
+          service: experiments
+        annotations:
+          summary: "Long-running experiment detected"
+          description: "Experiment {{$labels.experiment_id}} has been running for {{$value}} seconds."
+
+      - alert: QueueBacklog
+        expr: ai_scientist_experiment_queue_size > 50
+        for: 10m
+        labels:
+          severity: warning
+          service: queue
+        annotations:
+          summary: "Large experiment queue backlog"
+          description: "Experiment queue has {{$value}} pending items."
+
+      - alert: PaperGenerationFailures
+        expr: rate(ai_scientist_paper_generation_failed_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: paper-generation
+        annotations:
+          summary: "Paper generation failures"
+          description: "Paper generation failure rate: {{$value}} failures/second."
+
+  - name: ai_scientist_warnings
+    rules:
+      # Performance Warnings
+      - alert: ModerateLatencyIncrease
+        expr: histogram_quantile(0.95, ai_scientist_http_request_duration_seconds_bucket) > 2
+        for: 10m
+        labels:
+          severity: info
+          service: api
+        annotations:
+          summary: "API latency increased"
+          description: "95th percentile API latency is {{$value}}s (moderate increase)."
+
+      - alert: ExperimentSlowdown
+        expr: histogram_quantile(0.95, ai_scientist_experiment_duration_seconds_bucket) > 1800
+        for: 5m
+        labels:
+          severity: info
+          service: experiments
+        annotations:
+          summary: "Experiments taking longer than usual"
+          description: "95th percentile experiment duration is {{$value}}s."
+
+      # Resource Warnings
+      - alert: ModerateMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 70
+        for: 10m
+        labels:
+          severity: info
+          service: system
+        annotations:
+          summary: "Memory usage elevated"
+          description: "Memory usage is {{$value}}%."
+
+      - alert: ModerateDiskUsage
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: info
+          service: system
+        annotations:
+          summary: "Disk space getting low"
+          description: "Root filesystem has {{$value}}% free space remaining."

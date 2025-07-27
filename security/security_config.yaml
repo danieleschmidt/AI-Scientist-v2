@@ -1,0 +1,457 @@
+# AI Scientist v2 Security Configuration
+
+# General Security Settings
+security:
+  # Enable security features
+  enabled: true
+  
+  # Security mode (strict, normal, permissive)
+  mode: "strict"
+  
+  # Enable debug mode (NEVER enable in production)
+  debug: false
+  
+  # Security headers
+  headers:
+    enable_hsts: true
+    enable_csp: true
+    enable_xss_protection: true
+    enable_content_type_nosniff: true
+    enable_frame_options: true
+    enable_referrer_policy: true
+
+# Code Execution Security
+execution:
+  # Enable sandboxing for all code execution
+  sandbox_enabled: true
+  
+  # Sandbox type (docker, firejail, chroot)
+  sandbox_type: "docker"
+  
+  # Maximum execution time (seconds)
+  max_execution_time: 300
+  
+  # Maximum memory usage (MB)
+  max_memory_mb: 4096
+  
+  # Maximum CPU usage (percentage)
+  max_cpu_percent: 80
+  
+  # Network access for experiments
+  network_access: false
+  
+  # File system access restrictions
+  filesystem:
+    # Read-only mode
+    readonly: true
+    
+    # Allowed directories
+    allowed_read_paths:
+      - "/app/data"
+      - "/app/cache"
+      - "/tmp"
+    
+    allowed_write_paths:
+      - "/app/experiments"
+      - "/app/results"
+      - "/tmp"
+    
+    # Forbidden paths
+    forbidden_paths:
+      - "/etc"
+      - "/root"
+      - "/home"
+      - "/proc"
+      - "/sys"
+  
+  # Allowed imports for Python code
+  allowed_imports:
+    - "numpy"
+    - "pandas"
+    - "matplotlib"
+    - "seaborn"
+    - "sklearn"
+    - "torch"
+    - "transformers"
+    - "datasets"
+    - "json"
+    - "csv"
+    - "pickle"
+    - "yaml"
+    - "math"
+    - "statistics"
+    - "random"
+    - "time"
+    - "datetime"
+    - "collections"
+    - "itertools"
+    - "functools"
+    - "typing"
+  
+  # Forbidden imports
+  forbidden_imports:
+    - "os"
+    - "sys"
+    - "subprocess"
+    - "shutil"
+    - "glob"
+    - "socket"
+    - "urllib"
+    - "requests"
+    - "http"
+    - "ftplib"
+    - "smtplib"
+    - "__import__"
+    - "eval"
+    - "exec"
+    - "compile"
+    - "open"  # Use controlled file operations
+
+# API Security
+api:
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    
+    # Requests per minute per IP
+    requests_per_minute: 60
+    
+    # Requests per hour per user
+    requests_per_hour: 1000
+    
+    # LLM API requests per minute
+    llm_requests_per_minute: 30
+    
+    # Experiment creation per hour
+    experiments_per_hour: 10
+  
+  # Authentication
+  authentication:
+    enabled: true
+    
+    # JWT settings
+    jwt:
+      secret_key: "${JWT_SECRET_KEY}"
+      expiration_minutes: 60
+      refresh_expiration_days: 7
+    
+    # API key settings
+    api_keys:
+      enabled: true
+      prefix: "ais_"
+      length: 32
+    
+    # Session settings
+    sessions:
+      timeout_minutes: 30
+      secure: true
+      httponly: true
+      samesite: "strict"
+  
+  # Input validation
+  validation:
+    # Maximum request size (MB)
+    max_request_size_mb: 10
+    
+    # Maximum string length
+    max_string_length: 10000
+    
+    # Maximum array length
+    max_array_length: 1000
+    
+    # Allowed content types
+    allowed_content_types:
+      - "application/json"
+      - "application/x-www-form-urlencoded"
+      - "multipart/form-data"
+    
+    # Input sanitization
+    sanitize_input: true
+    
+    # SQL injection protection
+    sql_injection_protection: true
+    
+    # XSS protection
+    xss_protection: true
+
+# Data Security
+data:
+  # Encryption
+  encryption:
+    # Encrypt data at rest
+    encrypt_at_rest: true
+    
+    # Encrypt data in transit
+    encrypt_in_transit: true
+    
+    # Encryption algorithm
+    algorithm: "AES-256-GCM"
+    
+    # Key rotation (days)
+    key_rotation_days: 90
+  
+  # Data classification
+  classification:
+    # Default classification level
+    default_level: "internal"
+    
+    # Classification levels
+    levels:
+      - "public"
+      - "internal"
+      - "confidential"
+      - "restricted"
+  
+  # Data retention
+  retention:
+    # Default retention period (days)
+    default_days: 365
+    
+    # Log retention (days)
+    logs_days: 90
+    
+    # Experiment data (days)
+    experiments_days: 180
+    
+    # Backup retention (days)
+    backups_days: 30
+  
+  # Privacy
+  privacy:
+    # Enable data anonymization
+    anonymization: true
+    
+    # PII detection and masking
+    pii_detection: true
+    
+    # Data subject rights
+    data_subject_rights: true
+
+# LLM Security
+llm:
+  # Input filtering
+  input_filtering:
+    enabled: true
+    
+    # Maximum input length
+    max_input_length: 10000
+    
+    # Forbidden patterns
+    forbidden_patterns:
+      - "system\\s*\\("
+      - "exec\\s*\\("
+      - "eval\\s*\\("
+      - "__import__"
+      - "subprocess"
+      - "os\\.system"
+      - "shell=True"
+    
+    # Content filtering
+    content_filter:
+      # Block harmful content
+      block_harmful: true
+      
+      # Block personal information
+      block_pii: true
+      
+      # Block inappropriate content
+      block_inappropriate: true
+  
+  # Output filtering
+  output_filtering:
+    enabled: true
+    
+    # Scan for secrets in output
+    secret_scanning: true
+    
+    # Remove sensitive information
+    remove_sensitive: true
+    
+    # Maximum output length
+    max_output_length: 50000
+  
+  # Provider security
+  providers:
+    # OpenAI settings
+    openai:
+      timeout_seconds: 30
+      max_retries: 3
+      verify_ssl: true
+    
+    # Anthropic settings
+    anthropic:
+      timeout_seconds: 30
+      max_retries: 3
+      verify_ssl: true
+    
+    # Local model settings
+    local:
+      enable_gpu: true
+      memory_limit_gb: 8
+      cpu_limit_percent: 80
+
+# Audit and Logging
+audit:
+  # Enable audit logging
+  enabled: true
+  
+  # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  log_level: "INFO"
+  
+  # Log format
+  log_format: "json"
+  
+  # Log retention (days)
+  retention_days: 90
+  
+  # Events to log
+  events:
+    - "authentication"
+    - "authorization"
+    - "data_access"
+    - "data_modification"
+    - "system_configuration"
+    - "security_events"
+    - "errors"
+    - "experiment_creation"
+    - "experiment_execution"
+    - "api_requests"
+  
+  # Sensitive data masking
+  mask_sensitive: true
+  
+  # Log encryption
+  encrypt_logs: true
+  
+  # Remote logging
+  remote_logging:
+    enabled: false
+    endpoint: "${LOG_ENDPOINT}"
+    api_key: "${LOG_API_KEY}"
+
+# Network Security
+network:
+  # TLS settings
+  tls:
+    enabled: true
+    min_version: "1.2"
+    ciphers: "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS"
+  
+  # CORS settings
+  cors:
+    enabled: true
+    allowed_origins:
+      - "https://terragonlabs.ai"
+      - "https://*.terragonlabs.ai"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+    max_age_seconds: 3600
+  
+  # Firewall rules (if applicable)
+  firewall:
+    enabled: false
+    rules: []
+
+# Monitoring and Alerting
+monitoring:
+  # Security monitoring
+  enabled: true
+  
+  # Real-time threat detection
+  threat_detection: true
+  
+  # Anomaly detection
+  anomaly_detection: true
+  
+  # Security metrics collection
+  metrics: true
+  
+  # Alert thresholds
+  alerts:
+    # Failed authentication attempts
+    failed_auth_threshold: 5
+    failed_auth_window_minutes: 5
+    
+    # Suspicious activity
+    suspicious_activity_threshold: 10
+    suspicious_activity_window_minutes: 10
+    
+    # Rate limiting violations
+    rate_limit_violations_threshold: 3
+    rate_limit_violations_window_minutes: 1
+    
+    # Error rate threshold
+    error_rate_threshold: 0.05
+    error_rate_window_minutes: 5
+
+# Incident Response
+incident_response:
+  # Enable automated response
+  automated_response: true
+  
+  # Response actions
+  actions:
+    # Block suspicious IPs
+    block_suspicious_ips: true
+    
+    # Disable compromised accounts
+    disable_compromised_accounts: true
+    
+    # Quarantine suspicious experiments
+    quarantine_experiments: true
+    
+    # Emergency shutdown
+    emergency_shutdown: false
+  
+  # Notification settings
+  notifications:
+    email:
+      enabled: true
+      recipients:
+        - "security@terragonlabs.ai"
+        - "ops@terragonlabs.ai"
+    
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+    
+    pagerduty:
+      enabled: false
+      service_key: "${PAGERDUTY_SERVICE_KEY}"
+
+# Compliance
+compliance:
+  # Enable compliance features
+  enabled: true
+  
+  # Compliance frameworks
+  frameworks:
+    - "SOC2"
+    - "GDPR"
+    - "CCPA"
+    - "HIPAA"
+  
+  # Data sovereignty
+  data_sovereignty:
+    enabled: true
+    allowed_regions:
+      - "US"
+      - "EU"
+  
+  # Export controls
+  export_controls:
+    enabled: true
+    restricted_countries: []
+  
+  # Regular assessments
+  assessments:
+    frequency_days: 90
+    automated: true
