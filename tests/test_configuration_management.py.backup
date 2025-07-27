@@ -127,7 +127,7 @@ class TestConfigurationManagement(unittest.TestCase):
     
     @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_environment_variable_overrides(self):
-        """Test that environment variables override config file values."""
+        """Test that environment variables override config file values.""
         # Set up environment variables
         os.environ["AI_SCIENTIST_API_DEEPSEEK_BASE_URL"] = "https://env.deepseek.com"
         os.environ["AI_SCIENTIST_MAX_LLM_TOKENS"] = "16384"
@@ -248,7 +248,7 @@ class TestConfigurationManagement(unittest.TestCase):
     
     @unittest.skipUnless(HAS_YAML, "PyYAML not available")
     def test_unknown_config_keys(self):
-        """Test handling of unknown configuration keys."""
+        """Test handling of unknown configuration keys.""
         test_config = {
             "API_DEEPSEEK_BASE_URL": "https://custom.deepseek.com",
             "UNKNOWN_CONFIG_KEY": "unknown_value",
