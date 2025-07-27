@@ -1,0 +1,223 @@
+name: 📊 Performance Monitoring
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  performance-tests:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install pytest-benchmark memory-profiler py-spy
+    
+    - name: Run performance tests
+      run: |
+        pytest tests/performance/ -v --benchmark-json=benchmark-results.json
+    
+    - name: Memory profiling
+      run: |
+        python -m memory_profiler scripts/profile_memory.py > memory-profile.txt || echo "Memory profiling script not found"
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: |
+          benchmark-results.json
+          memory-profile.txt
+
+  load-testing:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install locust
+    
+    - name: Start application
+      run: |
+        python -m ai_scientist.api.server &
+        sleep 10
+      env:
+        ENVIRONMENT: test
+    
+    - name: Run load tests
+      run: |
+        locust -f tests/load/locustfile.py --headless -u 10 -r 2 -t 60s --host=http://localhost:8000 --html=load-test-report.html
+      timeout-minutes: 5
+    
+    - name: Upload load test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: load-test-results
+        path: load-test-report.html
+
+  resource-monitoring:
+    name: Resource Usage Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install psutil nvidia-ml-py3
+    
+    - name: Monitor resource usage
+      run: |
+        python scripts/monitor_resources.py --duration=60 --output=resource-usage.json
+    
+    - name: Upload resource monitoring results
+      uses: actions/upload-artifact@v3
+      with:
+        name: resource-monitoring
+        path: resource-usage.json
+
+  performance-regression:
+    name: Performance Regression Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install pytest-benchmark
+    
+    - name: Run baseline benchmarks (main branch)
+      run: |
+        git checkout main
+        pip install -e .
+        pytest tests/performance/ --benchmark-json=baseline-benchmark.json --benchmark-only
+    
+    - name: Run current benchmarks (PR branch)
+      run: |
+        git checkout ${{ github.head_ref }}
+        pip install -e .
+        pytest tests/performance/ --benchmark-json=current-benchmark.json --benchmark-only
+    
+    - name: Compare performance
+      run: |
+        python scripts/compare_benchmarks.py baseline-benchmark.json current-benchmark.json
+    
+    - name: Upload benchmark comparison
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-comparison
+        path: |
+          baseline-benchmark.json
+          current-benchmark.json
+          benchmark-comparison.html
+
+  memory-leak-detection:
+    name: Memory Leak Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install pympler memory-profiler
+    
+    - name: Run memory leak tests
+      run: |
+        python tests/memory_leak_tests.py > memory-leak-report.txt
+    
+    - name: Upload memory leak report
+      uses: actions/upload-artifact@v3
+      with:
+        name: memory-leak-report
+        path: memory-leak-report.txt
+
+  performance-dashboard:
+    name: Update Performance Dashboard
+    runs-on: ubuntu-latest
+    needs: [performance-tests, load-testing, resource-monitoring]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: performance-data
+    
+    - name: Update performance dashboard
+      run: |
+        python scripts/update_performance_dashboard.py performance-data/
+    
+    - name: Commit updated dashboard
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/performance-dashboard.html
+        git commit -m "Update performance dashboard [skip ci]" || exit 0
+        git push
