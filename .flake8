@@ -1,0 +1,93 @@
+[flake8]
+# Configuration for flake8 linter
+
+# Set maximum line length
+max-line-length = 88
+
+# Ignore specific error codes
+extend-ignore = 
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # E501: line too long (handled by black)
+    E501,
+    # F401: imported but unused (handled by autoflake)
+    F401
+
+# Exclude directories and files
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .venv,
+    venv,
+    env,
+    ENV,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    experiments,
+    aisci_outputs,
+    results,
+    cache,
+    huggingface,
+    final_papers,
+    templates,
+    docs/_build
+
+# Enable specific checks
+select = 
+    # Pyflakes
+    F,
+    # Pycodestyle errors
+    E,
+    # Pycodestyle warnings
+    W,
+    # Complexity
+    C90,
+    # Naming conventions
+    N,
+    # Import conventions
+    I
+
+# Set complexity threshold
+max-complexity = 12
+
+# Per-file ignores
+per-file-ignores =
+    # Tests can use assertions and have longer lines
+    tests/*:E501,S101,E701
+    # Init files can have unused imports
+    __init__.py:F401
+    # Scripts can have longer lines
+    scripts/*:E501
+    # Configuration files
+    */config.py:E501
+    # LaTeX template processing
+    ai_scientist/blank_*:E501,W292
+
+# Import order settings
+import-order-style = google
+application-import-names = ai_scientist
+
+# Docstring conventions
+docstring-convention = google
+
+# Enable additional plugins
+enable-extensions = 
+    # flake8-docstrings
+    D,
+    # flake8-bugbear
+    B,
+    # flake8-bandit
+    S,
+    # flake8-comprehensions
+    C4
+
+# Disable specific docstring checks
+ignore-decorators = 
+    property,
+    staticmethod,
+    classmethod

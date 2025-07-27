@@ -1,0 +1,291 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-scientist-v2"
+version = "2.0.0"
+description = "Workshop-Level Automated Scientific Discovery via Agentic Tree Search"
+authors = [
+    {name = "Terragon Labs", email = "contact@terragonlabs.ai"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["artificial-intelligence", "machine-learning", "scientific-research", "automation", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "anthropic>=0.25.0",
+    "backoff>=2.2.0",
+    "openai>=1.0.0",
+    "pypdf>=3.0.0",
+    "pymupdf4llm>=0.0.5",
+    "numpy>=1.21.0",
+    "transformers>=4.21.0",
+    "datasets>=2.0.0",
+    "tiktoken>=0.4.0",
+    "tqdm>=4.64.0",
+    "rich>=12.0.0",
+    "humanize>=4.0.0",
+    "dataclasses-json>=0.5.7",
+    "funcy>=1.17.0",
+    "black>=22.0.0",
+    "genson>=1.2.0",
+    "shutup>=0.2.0",
+    "python-igraph>=0.10.0",
+    "coolname>=2.0.0",
+    "jsonschema>=4.0.0",
+    "omegaconf>=2.2.0",
+    "psutil>=5.9.0",
+    "PyYAML>=6.0",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "pandas>=1.5.0",
+    "IPython>=8.0.0",
+    "Pillow>=9.0.0",
+    "PyMuPDF>=1.23.0",
+    "huggingface_hub>=0.16.0",
+    "requests>=2.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-xdist>=3.0.0",
+    "black>=22.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+    "semgrep>=1.0.0",
+]
+
+security = [
+    "bandit[toml]>=1.7.0",
+    "safety>=2.3.0",
+    "semgrep>=1.0.0",
+    "trivy>=0.40.0",
+]
+
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "myst-parser>=1.0.0",
+    "sphinx-autodoc-typehints>=1.22.0",
+]
+
+monitoring = [
+    "prometheus-client>=0.16.0",
+    "psutil>=5.9.0",
+    "py-spy>=0.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/SakanaAI/AI-Scientist-v2"
+Documentation = "https://docs.terragonlabs.ai/ai-scientist-v2"
+Repository = "https://github.com/SakanaAI/AI-Scientist-v2"
+Issues = "https://github.com/SakanaAI/AI-Scientist-v2/issues"
+
+[project.scripts]
+ai-scientist = "ai_scientist.cli:main"
+
+[tool.setuptools]
+packages = ["ai_scientist"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | experiments
+  | aisci_outputs
+  | results
+  | cache
+  | huggingface
+  | final_papers
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["ai_scientist"]
+known_third_party = [
+    "anthropic",
+    "openai",
+    "torch",
+    "transformers",
+    "numpy",
+    "pandas",
+    "pytest",
+    "yaml",
+    "omegaconf",
+]
+skip_glob = [
+    "experiments/*",
+    "aisci_outputs/*", 
+    "results/*",
+    "cache/*",
+    "huggingface/*",
+    "final_papers/*",
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "transformers.*",
+    "datasets.*",
+    "tiktoken.*",
+    "anthropic.*",
+    "openai.*",
+    "igraph.*",
+    "coolname.*",
+    "genson.*",
+    "shutup.*",
+    "pymupdf4llm.*",
+    "funcy.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=ai_scientist",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "security: marks tests as security tests",
+    "performance: marks tests as performance tests",
+    "gpu: marks tests that require GPU",
+    "api: marks tests that require API keys",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["ai_scientist"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/experiments/*",
+    "*/aisci_outputs/*",
+    "*/results/*",
+    "*/cache/*",
+    "*/templates/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\bProtocol\):",
+    "@(abc\.)?abstractmethod",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "experiments", "aisci_outputs", "results"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection for specific cases
+
+[tool.bandit.assert_used]
+skips = ["*/tests/*"]
+
+[tool.semantic_release]
+version_toml = "pyproject.toml:project.version"
+branch = "main"
+changelog_file = "CHANGELOG.md"
+build_command = "pip install build && python -m build"
+dist_path = "dist/"
+upload_to_repository = false
+upload_to_release = true
+remove_dist = false
+commit_subject = "chore(release): {version}"
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "build",
+    "chore", 
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.package-data]
+ai_scientist = [
+    "blank_icbinb_latex/*",
+    "blank_icml_latex/*", 
+    "fewshot_examples/*",
+    "utils/viz_templates/*",
+]

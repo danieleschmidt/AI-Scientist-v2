@@ -1,0 +1,116 @@
+# Prometheus configuration for AI Scientist v2
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ai-scientist-v2'
+    environment: '${ENVIRONMENT:-development}'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # AI Scientist application metrics
+  - job_name: 'ai-scientist'
+    static_configs:
+      - targets: ['ai-scientist:8000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # System metrics (node exporter)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Docker container metrics (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+  # PostgreSQL metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  # GPU metrics (nvidia-dcgm-exporter)
+  - job_name: 'gpu-metrics'
+    static_configs:
+      - targets: ['dcgm-exporter:9400']
+    scrape_interval: 30s
+
+  # Application-specific experiments metrics
+  - job_name: 'experiment-metrics'
+    static_configs:
+      - targets: ['ai-scientist:8001']
+    scrape_interval: 60s
+    metrics_path: /experiment-metrics
+    honor_timestamps: true
+
+  # Model inference metrics
+  - job_name: 'model-metrics'
+    static_configs:
+      - targets: ['ai-scientist:8002']
+    scrape_interval: 30s
+    metrics_path: /model-metrics
+
+  # Research pipeline metrics
+  - job_name: 'pipeline-metrics'
+    static_configs:
+      - targets: ['ai-scientist:8003']
+    scrape_interval: 45s
+    metrics_path: /pipeline-metrics
+
+  # Health check endpoints
+  - job_name: 'health-checks'
+    static_configs:
+      - targets: 
+        - 'ai-scientist:8000'
+        - 'redis:6379'
+        - 'postgres:5432'
+    scrape_interval: 10s
+    metrics_path: /health
+    scrape_timeout: 5s
+
+# Remote storage configuration (optional)
+remote_write:
+  - url: "${REMOTE_WRITE_URL:-}"
+    headers:
+      "X-Scope-OrgID": "${ORG_ID:-ai-scientist}"
+    queue_config:
+      max_samples_per_send: 1000
+      batch_send_deadline: 5s
+      min_shards: 1
+      max_shards: 10
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+    wal-compression: true
