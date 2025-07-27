@@ -1,0 +1,33 @@
+[flake8]
+max-line-length = 88
+extend-ignore = 
+    E203,  # whitespace before ':'
+    E501,  # line too long (handled by black)
+    W503,  # line break before binary operator (conflicts with black)
+    E231,  # missing whitespace after ','
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    *.egg-info,
+    .venv,
+    venv,
+    env,
+    .env,
+    .pytest_cache,
+    .mypy_cache,
+    experiments,
+    results,
+    cache,
+    logs,
+    tmp
+max-complexity = 15
+per-file-ignores =
+    __init__.py:F401,F403
+    tests/*:S101,S311,S603,S607
+    ai_scientist/ideas/*:E501
+    ai_scientist/blank_*/*:E501,W503,E203
+docstring-convention = google
+statistics = True
+count = True

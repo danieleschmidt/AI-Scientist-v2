@@ -194,3 +194,97 @@ final_papers/
 # HF
 cache/
 huggingface/
+
+# ===== AI Scientist v2 Specific =====
+# API Keys and Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+credentials.json
+secrets.yaml
+
+# Model artifacts and caches
+models/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# Temporary files
+tmp/
+temp/
+temporary/
+.tmp/
+
+# Logs and monitoring
+*.log
+logs/
+monitoring/
+metrics.json
+performance.json
+*.profile
+profile.stats
+
+# Security reports
+security-report.json
+safety-report.json
+bandit-report.json
+semgrep-report.json
+
+# Container and deployment
+docker-compose.override.yml
+kubernetes/secrets/
+deployment/secrets/
+
+# IDE and editor files
+.vscode/settings.json
+.vscode/launch.json
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.orig
+*.save
+
+# Documentation builds
+docs/_build/
+docs/build/
+site/
+
+# Package builds
+*.tar.gz
+*.whl
+*.rpm
+*.deb
+
+# Testing artifacts
+.tox/
+.nox/
+.pytest_cache/
+test-results/
+test-reports/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration overrides
+local_config.yaml
+local_settings.py
+override.conf

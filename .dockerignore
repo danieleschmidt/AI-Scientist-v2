@@ -1,0 +1,207 @@
+# Docker ignore file for AI Scientist v2
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+CHANGELOG.md
+docs/
+*.md
+
+# Development files
+.devcontainer/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+cover/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv_jax
+
+# IDE
+.spyderproject
+.spyproject
+.ropeproject
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+
+# Logs
+*.log
+logs/
+.out
+
+# Data and results directories (keep structure, exclude content)
+data/*
+!data/.gitkeep
+experiments/*
+!experiments/.gitkeep
+results/*
+!results/.gitkeep
+cache/*
+!cache/.gitkeep
+final_papers/
+aisci_outputs/
+slurm_logs/
+
+# Model artifacts
+*ckpt.pt
+*.zip
+*.safetensors
+*.pt
+*.pth
+models/
+checkpoints/
+huggingface/
+
+# Temporary files
+tmp/
+temp/
+temporary/
+.tmp/
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Security and secrets
+*.key
+*.pem
+credentials.json
+secrets.yaml
+.env.*
+!.env.example
+
+# Backup files
+*.bak
+*.backup
+*.orig
+*.save
+
+# Jupyter
+.ipynb_checkpoints
+
+# LaTeX
+templates/*/run_0/
+templates/*/*.png
+
+# Review data
+review_iclr_bench/iclr_papers/
+review_iclr_bench/iclr_parsed_w_img/
+review_iclr_bench/generated_paper/
+review_iclr_bench/iclr_parsed/
+
+# AI Scientist specific outputs
+ai_scientist/blank_icbinb_latex/*.aux
+ai_scientist/blank_icbinb_latex/*.bbl
+ai_scientist/blank_icbinb_latex/*.blg
+ai_scientist/blank_icbinb_latex/*.fdb_latexmk
+ai_scientist/blank_icbinb_latex/*.fls
+ai_scientist/blank_icbinb_latex/*.log
+ai_scientist/blank_icbinb_latex/*.out
+ai_scientist/blank_icbinb_latex/*.synctex.gz
+
+ai_scientist/blank_icml_latex/*.aux
+ai_scientist/blank_icml_latex/*.bbl
+ai_scientist/blank_icml_latex/*.blg
+ai_scientist/blank_icml_latex/*.fdb_latexmk
+ai_scientist/blank_icml_latex/*.fls
+ai_scientist/blank_icml_latex/*.log
+ai_scientist/blank_icml_latex/*.out
+ai_scientist/blank_icml_latex/*.synctex.gz
+
+# Large files and datasets
+*.tar.gz
+*.gz
+*.bz2
+*.xz
+*.7z
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Monitoring and metrics
+monitoring/data/
+metrics.json
+performance.json
+*.profile
+profile.stats
+
+# Security reports
+security-report.json
+safety-report.json
+bandit-report.json
+semgrep-report.json
+
+# Package manager
+node_modules/
+package-lock.json
+yarn.lock
+
+# Configuration overrides
+local_config.yaml
+local_settings.py
+override.conf

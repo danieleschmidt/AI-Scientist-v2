@@ -1,0 +1,270 @@
+version: '3.8'
+
+services:
+  # AI Scientist v2 main application
+  ai-scientist:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: ai-scientist-v2
+    hostname: ai-scientist-v2
+    restart: unless-stopped
+    
+    # GPU access for CUDA operations
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+    # Environment configuration
+    environment:
+      - PYTHONPATH=/home/scientist/ai-scientist-v2
+      - CUDA_VISIBLE_DEVICES=0
+      - LOG_LEVEL=INFO
+      - ENABLE_METRICS=true
+      - SANDBOX_MODE=true
+    
+    # Environment file for API keys (create from .env.example)
+    env_file:
+      - .env
+    
+    # Volume mounts
+    volumes:
+      - ./:/home/scientist/ai-scientist-v2
+      - ai_scientist_data:/home/scientist/data
+      - ai_scientist_experiments:/home/scientist/experiments
+      - ai_scientist_results:/home/scientist/results
+      - ai_scientist_cache:/home/scientist/cache
+      - ai_scientist_logs:/home/scientist/logs
+    
+    # Port mappings
+    ports:
+      - "8888:8888"  # Jupyter Lab
+      - "6006:6006"  # TensorBoard
+      - "8080:8080"  # Web interface
+    
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    mem_limit: 16g
+    cpus: '8.0'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python3.11", "-c", "import ai_scientist; print('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Dependencies
+    depends_on:
+      - redis
+      - monitoring
+    
+    # Networks
+    networks:
+      - ai-scientist-network
+
+  # Redis for caching and task queuing
+  redis:
+    image: redis:7-alpine
+    container_name: ai-scientist-redis
+    hostname: ai-scientist-redis
+    restart: unless-stopped
+    
+    # Redis configuration
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+    
+    # Volume for persistence
+    volumes:
+      - ai_scientist_redis:/data
+    
+    # Port mapping
+    ports:
+      - "6379:6379"
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    mem_limit: 1g
+    cpus: '1.0'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    
+    # Networks
+    networks:
+      - ai-scientist-network
+
+  # Monitoring and metrics
+  monitoring:
+    image: prom/prometheus:latest
+    container_name: ai-scientist-monitoring
+    hostname: ai-scientist-monitoring
+    restart: unless-stopped
+    
+    # Configuration
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ai_scientist_metrics:/prometheus
+    
+    # Port mapping
+    ports:
+      - "9090:9090"
+    
+    # Command
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=168h'
+      - '--web.enable-lifecycle'
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    mem_limit: 2g
+    cpus: '2.0'
+    
+    # Networks
+    networks:
+      - ai-scientist-network
+
+  # Web interface (optional)
+  web-interface:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: ai-scientist-web
+    hostname: ai-scientist-web
+    restart: unless-stopped
+    
+    # Environment
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=web_interface.py
+    
+    # Environment file
+    env_file:
+      - .env
+    
+    # Volumes
+    volumes:
+      - ./web_interface:/home/scientist/web_interface
+    
+    # Port mapping
+    ports:
+      - "5000:5000"
+    
+    # Command
+    command: ["python3.11", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    mem_limit: 2g
+    cpus: '2.0'
+    
+    # Dependencies
+    depends_on:
+      - ai-scientist
+      - redis
+    
+    # Networks
+    networks:
+      - ai-scientist-network
+
+  # Database for experiment tracking (optional)
+  database:
+    image: postgres:15-alpine
+    container_name: ai-scientist-db
+    hostname: ai-scientist-db
+    restart: unless-stopped
+    
+    # Environment
+    environment:
+      POSTGRES_DB: ai_scientist
+      POSTGRES_USER: scientist
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=en_US.UTF-8"
+    
+    # Volumes
+    volumes:
+      - ai_scientist_db:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    
+    # Port mapping
+    ports:
+      - "5432:5432"
+    
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    mem_limit: 2g
+    cpus: '2.0'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scientist -d ai_scientist"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    
+    # Networks
+    networks:
+      - ai-scientist-network
+
+# Networks
+networks:
+  ai-scientist-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  ai_scientist_data:
+    driver: local
+  ai_scientist_experiments:
+    driver: local
+  ai_scientist_results:
+    driver: local
+  ai_scientist_cache:
+    driver: local
+  ai_scientist_logs:
+    driver: local
+  ai_scientist_redis:
+    driver: local
+  ai_scientist_metrics:
+    driver: local
+  ai_scientist_db:
+    driver: local
