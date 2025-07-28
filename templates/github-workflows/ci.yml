@@ -1,9 +1,10 @@
-# AI Scientist v2 - Continuous Integration Workflow Template
+# AI Scientist v2 - Continuous Integration Workflow
 # 
-# To use this workflow:
-# 1. Copy this file to .github/workflows/ci.yml
-# 2. Ensure GitHub Actions has necessary permissions
-# 3. Configure secrets in repository settings
+# Comprehensive CI pipeline with:
+# - Multi-platform testing (Ubuntu, Windows, macOS)
+# - Security scanning (CodeQL, Trivy, Bandit)
+# - Code quality checks (Black, Flake8, MyPy)
+# - Performance benchmarking and load testing
 #
 # Required secrets:
 # - CODECOV_TOKEN (optional, for coverage reporting)
