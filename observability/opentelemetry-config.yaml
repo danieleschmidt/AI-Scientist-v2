@@ -1,0 +1,263 @@
+# OpenTelemetry Configuration for AI Scientist v2
+# Advanced observability and telemetry configuration
+
+receivers:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📊 METRICS COLLECTION
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'ai-scientist-app'
+          static_configs:
+            - targets: ['localhost:8000']
+          scrape_interval: 15s
+          metrics_path: /metrics
+          
+        - job_name: 'ai-scientist-experiments' 
+          static_configs:
+            - targets: ['localhost:8001']
+          scrape_interval: 30s
+          
+        - job_name: 'python-runtime'
+          static_configs:
+            - targets: ['localhost:8002']
+          scrape_interval: 10s
+
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      disk:
+        metrics:
+          system.disk.io:
+            enabled: true
+          system.disk.operations:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.usage:
+            enabled: true
+          system.memory.utilization:
+            enabled: true
+      network:
+        metrics:
+          system.network.io:
+            enabled: true
+      process:
+        metrics:
+          process.cpu.utilization:
+            enabled: true
+          process.memory.usage:  
+            enabled: true
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📋 LOG COLLECTION
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  filelog:
+    include:
+      - ./logs/ai-scientist.log
+      - ./logs/experiments.log
+      - ./logs/security.log
+      - ./logs/performance.log
+    exclude:
+      - ./logs/*.tmp
+    include_file_name: false
+    include_file_path: true
+    operators:
+      - type: json_parser
+        parse_from: attributes.log
+        parse_to: body
+      - type: severity_parser
+        parse_from: attributes.level
+      - type: time_parser
+        parse_from: attributes.timestamp
+        layout: '%Y-%m-%d %H:%M:%S'
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔗 DISTRIBUTED TRACING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+      thrift_compact:
+        endpoint: 0.0.0.0:6831
+
+processors:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔄 DATA PROCESSING PIPELINE
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  resource:
+    attributes:
+      - key: service.name
+        value: ai-scientist-v2
+        action: upsert
+      - key: service.version
+        value: 2.0.0
+        action: upsert
+      - key: deployment.environment
+        from_attribute: ENV
+        action: upsert
+      - key: service.instance.id
+        from_attribute: HOSTNAME
+        action: upsert
+
+  # AI-specific attribute processing
+  attributes:
+    actions:
+      - key: ai.model.name
+        action: upsert
+      - key: ai.experiment.id
+        action: upsert
+      - key: ai.research.topic
+        action: upsert
+      - key: ai.performance.tokens_used
+        action: upsert
+      - key: ai.performance.execution_time
+        action: upsert
+      - key: ai.security.sandbox_enabled
+        action: upsert
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📊 SAMPLING AND FILTERING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  probabilistic_sampler:
+    sampling_percentage: 10
+
+  filter:
+    metrics:
+      exclude:
+        match_type: regexp
+        metric_names:
+          - ".*debug.*"
+          - ".*test.*"
+    logs:
+      exclude:
+        match_type: strict
+        log_records:
+          - body: "DEBUG"
+          - body: "TRACE"
+
+exporters:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📤 EXPORT DESTINATIONS  
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: ai_scientist
+    const_labels:
+      environment: production
+      service: ai-scientist-v2
+
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  otlp:
+    endpoint: "https://api.honeycomb.io"
+    headers:
+      "x-honeycomb-team": "${env:HONEYCOMB_API_KEY}"
+
+  logging:
+    loglevel: info
+    sampling_initial: 2
+    sampling_thereafter: 500
+
+  # File exports for local development
+  file:
+    path: ./observability/telemetry-data.json
+
+  # Grafana Cloud (if configured)
+  otlphttp/grafana:
+    endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
+    headers:
+      authorization: "Basic ${env:GRAFANA_CLOUD_API_KEY}"
+
+extensions:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔧 COLLECTOR EXTENSIONS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /health
+
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+  memory_ballast:
+    size_mib: 256
+
+service:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🚀 SERVICE CONFIGURATION
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  extensions: [health_check, pprof, zpages, memory_ballast]
+  
+  pipelines:
+    # Metrics pipeline
+    metrics:
+      receivers: [prometheus, hostmetrics]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [prometheus, otlp, logging]
+
+    # Traces pipeline  
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [memory_limiter, batch, resource, attributes, probabilistic_sampler]
+      exporters: [jaeger, otlp, logging]
+
+    # Logs pipeline
+    logs:
+      receivers: [filelog, otlp]
+      processors: [memory_limiter, batch, resource, attributes, filter]
+      exporters: [otlp, logging, file]
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📊 TELEMETRY SETTINGS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  telemetry:
+    logs:
+      level: info
+      development: false
+      sampling:
+        enabled: true
+        initial: 2
+        thereafter: 500
+    metrics:
+      level: normal
+      address: 0.0.0.0:8888
+      
+    # AI-specific telemetry
+    resource:
+      ai.scientist.version: 2.0.0
+      ai.scientist.environment: ${env:ENVIRONMENT:-development}
+      ai.scientist.instance.id: ${env:INSTANCE_ID:-local}
+      ai.scientist.deployment.region: ${env:DEPLOYMENT_REGION:-us-east-1}

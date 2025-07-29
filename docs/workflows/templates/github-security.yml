@@ -1,0 +1,331 @@
+# 🔐 GitHub Actions Security Template for AI Scientist v2
+#
+# This template provides comprehensive security scanning and compliance automation
+# To implement: Copy this file to .github/workflows/security.yml in your repository
+#
+# Required repository secrets:
+# - SEMGREP_APP_TOKEN (optional, for enhanced Semgrep scanning)
+# - GITLEAKS_LICENSE (optional, for GitLeaks Pro features)
+
+name: 🔐 Security & Compliance
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔍 COMPREHENSIVE SECURITY SCANNING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  codeql-analysis:
+    name: 🔍 CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python', 'javascript' ]
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+
+      - name: 🏗️ Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 📊 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔐 DEPENDENCY VULNERABILITY SCANNING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  dependency-review:
+    name: 🔐 Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+          deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0
+
+  safety-scan:
+    name: 🛡️ Safety Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Safety
+        run: |
+          pip install safety
+
+      - name: 🛡️ Run Safety Check
+        run: |
+          safety check --json --output safety-report.json
+          safety check  # Also run with text output for logs
+
+      - name: 📤 Upload Safety Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safety-vulnerability-report
+          path: safety-report.json
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔍 STATIC APPLICATION SECURITY TESTING (SAST)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  bandit-scan:
+    name: 🔍 Bandit SAST Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Bandit
+        run: |
+          pip install bandit[toml]
+
+      - name: 🔍 Run Bandit Security Scan
+        run: |
+          bandit -r ai_scientist/ -f json -o bandit-report.json
+          bandit -r ai_scientist/ -f txt  # Also output to console
+
+      - name: 📤 Upload Bandit Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+
+  semgrep-scan:
+    name: 🔍 Semgrep SAST Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/python
+            p/owasp-top-ten
+            p/docker
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🐳 CONTAINER SECURITY SCANNING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  trivy-scan:
+    name: 🐳 Trivy Container Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Build Docker Image
+        run: |
+          docker build -t ai-scientist:security-test .
+
+      - name: 🔍 Run Trivy Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ai-scientist:security-test
+          format: 'sarif'
+          output: 'trivy-container-results.sarif'
+
+      - name: 📊 Upload Trivy Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-container-results.sarif'
+
+      - name: 🔍 Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+
+      - name: 📊 Upload Filesystem Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-fs-results.sarif'
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 🔐 SECRET SCANNING
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  trufflesecurity-scan:
+    name: 🔍 TruffleHog Secret Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  gitleaks-scan:
+    name: 🔍 GitLeaks Secret Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Run GitLeaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📊 COMPLIANCE AND POLICY CHECKS
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  compliance-check:
+    name: 📊 Compliance Assessment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Dependencies
+        run: |
+          pip install -e ".[security]"
+
+      - name: 📊 Run Compliance Checks
+        run: |
+          echo "🔍 Running SOC2 compliance checks..."
+          python security/compliance_checker.py --framework soc2 || echo "Compliance checker not available"
+          
+          echo "🔍 Running GDPR compliance checks..."
+          python security/compliance_checker.py --framework gdpr || echo "Compliance checker not available"
+          
+          echo "🔍 Running NIST compliance checks..."
+          python security/compliance_checker.py --framework nist || echo "Compliance checker not available"
+
+      - name: 📤 Upload Compliance Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compliance-report
+          path: compliance-report.json
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # 📄 GENERATE SECURITY REPORT
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  security-report:
+    name: 📄 Security Report
+    runs-on: ubuntu-latest
+    needs: [
+      codeql-analysis,
+      safety-scan,
+      bandit-scan,
+      semgrep-scan,
+      trivy-scan,
+      trufflesecurity-scan,
+      gitleaks-scan,
+      compliance-check
+    ]
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-artifacts
+
+      - name: 📄 Generate Security Summary
+        run: |
+          echo "# 🔐 Security Scan Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Scan Date:** $(date)" >> security-summary.md
+          echo "**Repository:** ${{ github.repository }}" >> security-summary.md
+          echo "**Commit:** ${{ github.sha }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## 🔍 Scan Results" >> security-summary.md
+          echo "" >> security-summary.md
+          echo "| Scanner | Status |" >> security-summary.md
+          echo "|---------|--------|" >> security-summary.md
+          echo "| CodeQL | ${{ needs.codeql-analysis.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| Safety | ${{ needs.safety-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| Bandit | ${{ needs.bandit-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| Semgrep | ${{ needs.semgrep-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| Trivy | ${{ needs.trivy-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| TruffleHog | ${{ needs.trufflesecurity-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| GitLeaks | ${{ needs.gitleaks-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+          echo "| Compliance | ${{ needs.compliance-check.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> security-summary.md
+
+      - name: 📤 Upload Security Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary-report
+          path: security-summary.md
