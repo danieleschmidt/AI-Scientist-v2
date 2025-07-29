@@ -1,0 +1,219 @@
+# Performance Optimization Configuration for AI Scientist v2
+# This file defines performance tuning parameters and optimization strategies
+
+# Python Runtime Optimizations
+python_optimization:
+  # JIT compilation settings
+  pytorch_jit:
+    enabled: true
+    optimization_level: 3
+    freeze_modules: true
+    
+  # Memory management
+  memory_management:
+    garbage_collection:
+      threshold_0: 700
+      threshold_1: 10
+      threshold_2: 10
+    memory_mapping:
+      enabled: true
+      threshold_mb: 100
+    
+  # Multiprocessing optimizations
+  multiprocessing:
+    start_method: "spawn"  # Safe for CUDA
+    max_workers: null  # Auto-detect based on CPU cores
+    chunk_size: 1
+    
+  # Async optimizations
+  asyncio:
+    event_loop_policy: "uvloop"  # Faster event loop
+    max_concurrent_requests: 50
+    timeout_seconds: 300
+
+# LLM API Optimizations
+llm_optimization:
+  # Connection pooling
+  connection_pool:
+    max_connections: 100
+    max_keepalive_connections: 20
+    keepalive_expiry: 5.0
+    
+  # Request batching
+  batching:
+    enabled: true
+    max_batch_size: 10
+    batch_timeout_ms: 100
+    
+  # Caching strategy
+  caching:
+    response_cache:
+      enabled: true
+      max_size_mb: 512
+      ttl_seconds: 3600
+    embedding_cache:
+      enabled: true
+      max_size_mb: 1024
+      ttl_seconds: 86400
+      
+  # Rate limiting
+  rate_limiting:
+    requests_per_minute: 3000
+    burst_size: 100
+    backoff_strategy: "exponential"
+    max_retries: 3
+
+# GPU Optimizations
+gpu_optimization:
+  # CUDA settings
+  cuda:
+    memory_fraction: 0.9
+    allow_growth: true
+    mixed_precision: true
+    compile_optimization: true
+    
+  # Model optimizations
+  model_optimization:
+    use_half_precision: true
+    gradient_checkpointing: true
+    flash_attention: true
+    tensor_parallel: false
+    
+  # Memory management
+  memory_management:
+    empty_cache_frequency: 5  # Every 5 experiments
+    max_split_size_mb: 512
+    garbage_collect_threshold: 0.8
+
+# Database Performance
+database_optimization:
+  # PostgreSQL tuning
+  postgresql:
+    shared_buffers: "256MB"
+    work_mem: "4MB"
+    maintenance_work_mem: "64MB"
+    effective_cache_size: "1GB"
+    checkpoint_completion_target: 0.9
+    wal_buffers: "16MB"
+    default_statistics_target: 100
+    
+  # Connection pooling
+  connection_pool:
+    min_connections: 5
+    max_connections: 50
+    connection_timeout: 30
+    idle_timeout: 600
+    
+  # Query optimization
+  query_optimization:
+    enable_indexing: true
+    analyze_threshold: 1000
+    vacuum_threshold: 10000
+    explain_analyze_slow_queries: true
+
+# Caching Strategy
+caching_strategy:
+  # Redis configuration
+  redis:
+    max_memory: "512MB"
+    max_memory_policy: "allkeys-lru"
+    save_interval: 900
+    compression: true
+    
+  # Application-level caching
+  application_cache:
+    semantic_scholar_results:
+      ttl_seconds: 86400
+      max_entries: 10000
+    model_predictions:
+      ttl_seconds: 3600
+      max_entries: 5000
+    preprocessing_results:
+      ttl_seconds: 7200
+      max_entries: 1000
+
+# I/O Optimizations
+io_optimization:
+  # File system optimizations
+  filesystem:
+    use_async_io: true
+    buffer_size_kb: 64
+    read_ahead_kb: 256
+    
+  # Network optimizations
+  network:
+    tcp_keepalive: true
+    tcp_nodelay: true
+    socket_buffer_size: 65536
+    connection_timeout: 30
+    read_timeout: 300
+
+# Monitoring and Profiling
+monitoring:
+  # Performance metrics collection
+  metrics:
+    collection_interval: 30
+    detailed_profiling: false
+    memory_profiling: true
+    gpu_monitoring: true
+    
+  # Alerting thresholds
+  thresholds:
+    cpu_usage_percent: 80
+    memory_usage_percent: 85
+    gpu_memory_percent: 90
+    disk_usage_percent: 85
+    api_latency_seconds: 10
+    
+  # Profiling tools
+  profiling:
+    enable_py_spy: false
+    enable_memory_profiler: false
+    enable_line_profiler: false
+    profile_frequency: 100  # Hz
+
+# Auto-scaling Configuration
+autoscaling:
+  # Horizontal scaling
+  horizontal:
+    enabled: false  # Disable for single-node setup
+    min_replicas: 1
+    max_replicas: 5
+    target_cpu_utilization: 70
+    scale_up_threshold: 80
+    scale_down_threshold: 30
+    
+  # Resource scaling
+  resource_scaling:
+    memory_limit_increase_factor: 1.5
+    cpu_limit_increase_factor: 1.2
+    gpu_memory_limit_gb: 16
+
+# Optimization Profiles
+profiles:
+  # Development profile - prioritizes development speed
+  development:
+    python_optimization.pytorch_jit.enabled: false
+    gpu_optimization.cuda.mixed_precision: false
+    monitoring.profiling.enable_py_spy: true
+    
+  # Production profile - prioritizes performance
+  production:
+    python_optimization.pytorch_jit.enabled: true
+    gpu_optimization.cuda.mixed_precision: true
+    llm_optimization.caching.response_cache.enabled: true
+    database_optimization.query_optimization.enable_indexing: true
+    
+  # Research profile - balanced for research workloads
+  research:
+    python_optimization.pytorch_jit.enabled: true
+    gpu_optimization.model_optimization.use_half_precision: false
+    llm_optimization.batching.enabled: true
+    monitoring.profiling.enable_memory_profiler: true
+    
+  # Cost-optimized profile - minimizes resource usage
+  cost_optimized:
+    gpu_optimization.cuda.memory_fraction: 0.7
+    llm_optimization.caching.response_cache.max_size_mb: 256
+    database_optimization.postgresql.shared_buffers: "128MB"
+    python_optimization.multiprocessing.max_workers: 2
