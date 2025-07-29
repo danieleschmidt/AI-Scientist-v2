@@ -1,0 +1,298 @@
+# Advanced Security Configuration for AI Scientist v2
+# Comprehensive security hardening and compliance settings
+
+# SLSA (Supply Chain Levels for Software Artifacts) Configuration
+slsa:
+  level: 3  # Target SLSA level
+  provenance:
+    enabled: true
+    attestation_format: "in-toto"
+    signing_key_path: "~/.sigstore/cosign.key"
+    
+  build_requirements:
+    hermetic_builds: true
+    reproducible_builds: true
+    isolated_build_environment: true
+    
+  source_requirements:
+    version_controlled: true
+    two_person_review: true
+    retention_policy_days: 2555  # 7 years
+
+# SBOM (Software Bill of Materials) Generation
+sbom:
+  enabled: true
+  format: "spdx-json"
+  generators:
+    - "syft"
+    - "cdxgen"
+  output_directory: "security/sbom/"
+  
+  scanning:
+    vulnerability_databases:
+      - "nvd"
+      - "ghsa"
+      - "osv"
+    severity_threshold: "medium"
+    fail_on_critical: true
+    
+  metadata:
+    supplier: "Terragon Labs"
+    namespace: "https://terragonlabs.ai/sbom"
+    license_detection: true
+    include_dev_dependencies: false
+
+# Container Security Scanning
+container_security:
+  image_scanning:
+    enabled: true
+    scanners:
+      - name: "trivy"
+        severity_threshold: "high"
+        scan_layers: true
+        scan_secrets: true
+      - name: "grype"
+        severity_threshold: "medium"
+        fail_on_severity: "critical"
+        
+  runtime_security:
+    enabled: true
+    policies:
+      - "no_privileged_containers"
+      - "read_only_root_filesystem"
+      - "non_root_user"
+      - "drop_all_capabilities"
+      - "no_host_network"
+      - "no_host_pid"
+      
+  admission_control:
+    policy_engine: "open-policy-agent"
+    default_deny: true
+    allowed_registries:
+      - "docker.io/library"
+      - "ghcr.io/terragonlabs"
+      - "registry.terragonlabs.ai"
+
+# API Security Configuration
+api_security:
+  authentication:
+    method: "jwt"
+    token_expiry: 3600  # 1 hour
+    refresh_token_expiry: 604800  # 7 days
+    issuer: "ai-scientist.terragonlabs.ai"
+    
+  authorization:
+    rbac_enabled: true
+    default_role: "viewer"
+    permission_model: "least_privilege"
+    
+  rate_limiting:
+    global_limit: "1000/hour"
+    per_user_limit: "100/hour"
+    burst_allowance: 10
+    
+  input_validation:
+    max_payload_size: "10MB"
+    content_type_validation: true
+    schema_validation: true
+    sanitization_enabled: true
+    
+  security_headers:
+    hsts_max_age: 31536000
+    content_security_policy: "default-src 'self'; script-src 'self' 'unsafe-inline'"
+    x_frame_options: "DENY"
+    x_content_type_options: "nosniff"
+
+# Secrets Management
+secrets_management:
+  vault_integration:
+    enabled: true
+    vault_address: "${VAULT_ADDR}"
+    auth_method: "kubernetes"
+    
+  secret_rotation:
+    enabled: true
+    rotation_interval_days: 90
+    pre_expiry_notification_days: 7
+    
+  secret_scanning:
+    pre_commit_hooks: true
+    continuous_monitoring: true
+    entropy_analysis: true
+    known_patterns: true
+    
+  encryption:
+    at_rest: "aes-256-gcm"
+    in_transit: "tls-1.3"
+    key_management: "vault-transit"
+
+# Network Security
+network_security:
+  encryption:
+    min_tls_version: "1.3"
+    cipher_suites:
+      - "TLS_AES_256_GCM_SHA384"
+      - "TLS_CHACHA20_POLY1305_SHA256"
+      - "TLS_AES_128_GCM_SHA256"
+      
+  firewall_rules:
+    default_policy: "deny"
+    allowed_inbound:
+      - port: 443
+        protocol: "tcp"
+        source: "0.0.0.0/0"
+      - port: 22
+        protocol: "tcp"
+        source: "10.0.0.0/8"
+        
+  network_monitoring:
+    intrusion_detection: true
+    traffic_analysis: true
+    anomaly_detection: true
+    log_retention_days: 365
+
+# Compliance Frameworks
+compliance:
+  frameworks:
+    - "SOC2-Type2"
+    - "ISO27001"
+    - "NIST-Cybersecurity-Framework"
+    - "GDPR"
+    
+  auditing:
+    enabled: true
+    audit_log_retention_days: 2555  # 7 years
+    log_integrity_verification: true
+    real_time_monitoring: true
+    
+  data_protection:
+    classification_levels:
+      - "public"
+      - "internal"
+      - "confidential"
+      - "restricted"
+    encryption_required: true
+    data_loss_prevention: true
+    
+  access_controls:
+    mfa_required: true
+    session_timeout_minutes: 30
+    password_policy:
+      min_length: 16
+      complexity_required: true
+      history_count: 12
+      max_age_days: 90
+
+# Incident Response
+incident_response:
+  automated_response:
+    enabled: true
+    severity_thresholds:
+      critical: "immediate"
+      high: "15min"
+      medium: "1hour"
+      low: "24hour"
+      
+  notification_channels:
+    - type: "pagerduty"
+      severity: ["critical", "high"]
+    - type: "slack"
+      severity: ["medium", "low"]
+    - type: "email"
+      severity: ["critical", "high", "medium"]
+      
+  playbooks:
+    data_breach: "runbooks/data-breach-response.md"
+    security_incident: "runbooks/security-incident-response.md"
+    vulnerability_disclosure: "runbooks/vulnerability-response.md"
+
+# Vulnerability Management
+vulnerability_management:
+  scanning_schedule:
+    dependency_scan: "daily"
+    container_scan: "on_build"
+    infrastructure_scan: "weekly"
+    
+  severity_classification:
+    critical: 
+      sla_hours: 24
+      auto_patch: false
+    high:
+      sla_hours: 72
+      auto_patch: false
+    medium:
+      sla_days: 7
+      auto_patch: true
+    low:
+      sla_days: 30
+      auto_patch: true
+      
+  reporting:
+    stakeholder_notifications: true
+    dashboard_updates: true
+    trend_analysis: true
+    compliance_mapping: true
+
+# Security Testing
+security_testing:
+  static_analysis:
+    tools:
+      - "semgrep"
+      - "bandit"
+      - "safety"
+      - "codeql"
+    severity_threshold: "medium"
+    
+  dynamic_analysis:
+    tools:
+      - "zap"
+      - "nikto"
+    automated_testing: true
+    
+  penetration_testing:
+    frequency: "quarterly"
+    scope: "full_application"
+    external_vendor: true
+    
+  fuzzing:
+    enabled: true
+    targets:
+      - "api_endpoints"
+      - "file_parsers"
+      - "llm_inputs"
+
+# Monitoring and Logging
+security_monitoring:
+  siem_integration:
+    enabled: true
+    platform: "splunk"
+    log_forwarding: true
+    
+  metrics_collection:
+    failed_authentications: true
+    privilege_escalations: true
+    suspicious_api_calls: true
+    unusual_data_access: true
+    
+  alerting:
+    real_time_alerts: true
+    batch_processing: false
+    alert_correlation: true
+    false_positive_reduction: true
+
+# Backup and Recovery Security
+backup_security:
+  encryption:
+    enabled: true
+    algorithm: "aes-256-gcm"
+    key_rotation: true
+    
+  access_controls:
+    rbac_enabled: true
+    audit_logging: true
+    integrity_checks: true
+    
+  testing:
+    recovery_testing_frequency: "monthly"
+    automated_validation: true
+    disaster_recovery_drills: true

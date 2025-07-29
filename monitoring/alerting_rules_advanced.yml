@@ -1,0 +1,181 @@
+# Advanced Alerting Rules for AI Scientist v2
+groups:
+  - name: ai_scientist_performance
+    rules:
+      # High-level system performance alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 2 minutes on {{ $labels.instance }}"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/high-cpu"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/high-memory"
+
+      - alert: DiskSpaceLow
+        expr: 100 - ((node_filesystem_avail_bytes{mountpoint!~".*tmp.*"} * 100) / node_filesystem_size_bytes) > 85
+        for: 10m
+        labels:
+          severity: critical
+          component: storage
+        annotations:
+          summary: "Disk space running low"
+          description: "Disk usage is above 85% on {{ $labels.mountpoint }} for {{ $labels.instance }}"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/disk-space"
+
+  - name: ai_scientist_application
+    rules:
+      # AI Scientist specific alerts
+      - alert: ExperimentFailureRate
+        expr: rate(ai_scientist_experiments_failed_total[5m]) / rate(ai_scientist_experiments_total[5m]) > 0.3
+        for: 3m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High experiment failure rate"
+          description: "Experiment failure rate is above 30% for the last 5 minutes"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/experiment-failures"
+
+      - alert: LLMAPILatencyHigh
+        expr: histogram_quantile(0.95, rate(ai_scientist_llm_request_duration_seconds_bucket[5m])) > 30
+        for: 2m
+        labels:
+          severity: warning
+          component: llm_api
+        annotations:
+          summary: "LLM API latency is high"
+          description: "95th percentile latency for LLM API calls is above 30 seconds"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/llm-latency"
+
+      - alert: GPUUtilizationLow
+        expr: nvidia_gpu_utilization_gpu < 20
+        for: 15m
+        labels:
+          severity: info
+          component: gpu
+        annotations:
+          summary: "GPU utilization is low"
+          description: "GPU {{ $labels.gpu }} utilization is below 20% for more than 15 minutes"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/gpu-utilization"
+
+      - alert: ExperimentQueueBacklog
+        expr: ai_scientist_experiment_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: queue
+        annotations:
+          summary: "Experiment queue backlog is high"
+          description: "Experiment queue has {{ $value }} pending experiments"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/queue-backlog"
+
+  - name: ai_scientist_security
+    rules:
+      # Security-related alerts
+      - alert: UnauthorizedAccess
+        expr: increase(ai_scientist_unauthorized_access_attempts_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Unauthorized access attempts detected"
+          description: "{{ $value }} unauthorized access attempts in the last 5 minutes"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/security-breach"
+
+      - alert: SuspiciousProcessExecution
+        expr: increase(ai_scientist_suspicious_process_executions_total[10m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Suspicious process executions detected"
+          description: "{{ $value }} suspicious process executions in the last 10 minutes"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/suspicious-activity"
+
+  - name: ai_scientist_infrastructure
+    rules:
+      # Container and infrastructure alerts
+      - alert: ContainerRestartLoop
+        expr: increase(kube_pod_container_status_restarts_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "Container restart loop detected"
+          description: "Container {{ $labels.container }} in pod {{ $labels.pod }} has restarted {{ $value }} times in the last hour"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/restart-loop"
+
+      - alert: RedisConnectionFailure
+        expr: redis_connected_clients == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis connection failure"
+          description: "No clients connected to Redis for more than 2 minutes"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/redis-failure"
+
+      - alert: PostgreSQLConnectionFailure
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: postgresql
+        annotations:
+          summary: "PostgreSQL connection failure"
+          description: "PostgreSQL database is not responding"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/postgres-failure"
+
+  - name: ai_scientist_business_logic
+    rules:
+      # Business logic and research quality alerts
+      - alert: LowResearchQualityScore
+        expr: avg_over_time(ai_scientist_research_quality_score[1h]) < 0.6
+        for: 30m
+        labels:
+          severity: warning
+          component: research_quality
+        annotations:
+          summary: "Research quality score is low"
+          description: "Average research quality score is {{ $value }} over the last hour"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/research-quality"
+
+      - alert: TokenUsageAnomaly
+        expr: abs(ai_scientist_token_usage_rate - avg_over_time(ai_scientist_token_usage_rate[24h])) > (2 * stddev_over_time(ai_scientist_token_usage_rate[24h]))
+        for: 10m
+        labels:
+          severity: info
+          component: cost_optimization
+        annotations:
+          summary: "Token usage anomaly detected"
+          description: "Current token usage rate deviates significantly from normal patterns"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/token-anomaly"
+
+      - alert: ExperimentDurationAnomaly
+        expr: histogram_quantile(0.95, rate(ai_scientist_experiment_duration_seconds_bucket[30m])) > 7200
+        for: 15m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Experiment duration anomaly"
+          description: "95th percentile experiment duration is above 2 hours"
+          runbook_url: "https://docs.terragonlabs.ai/runbooks/long-experiments"
