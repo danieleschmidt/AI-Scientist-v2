@@ -1,0 +1,80 @@
+{
+  "// VSCode Settings Template for AI Scientist v2": "Copy to .vscode/settings.json",
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.banditEnabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.formatting.provider": "black",
+  "python.sortImports.args": ["--profile", "black"],
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "experiments/": true,
+    "aisci_outputs/": true,
+    "results/": true,
+    "cache/": true,
+    "huggingface/": true,
+    "final_papers/": true
+  },
+  "files.watcherExclude": {
+    "**/experiments/**": true,
+    "**/aisci_outputs/**": true,
+    "**/results/**": true,
+    "**/cache/**": true,
+    "**/huggingface/**": true
+  },
+  "search.exclude": {
+    "experiments/": true,
+    "aisci_outputs/": true,
+    "results/": true,
+    "cache/": true,
+    "huggingface/": true,
+    "final_papers/": true
+  },
+  "emmet.includeLanguages": {
+    "markdown": "html"
+  },
+  "markdown.preview.fontSize": 14,
+  "markdown.preview.lineHeight": 1.6,
+  "git.ignoreLimitWarning": true,
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "extensions.ignoreRecommendations": false,
+  "workbench.colorTheme": "Dark+ (default dark)",
+  "workbench.iconTheme": "vs-seti",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": [
+      ".github/workflows/*.yml",
+      ".github/workflows/*.yaml"
+    ],
+    "https://json.schemastore.org/docker-compose.json": [
+      "docker-compose*.yml",
+      "docker-compose*.yaml"
+    ]
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["pyproject.toml"],
+      "url": "https://json.schemastore.org/pyproject.json"
+    }
+  ]
+}

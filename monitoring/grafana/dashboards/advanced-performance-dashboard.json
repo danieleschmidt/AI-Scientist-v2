@@ -1,0 +1,354 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Scientist v2 - Advanced Performance Dashboard",
+    "tags": ["ai-scientist", "performance", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 38,
+    "version": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🧠 LLM Performance Metrics",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "ai_scientist_llm_requests_total",
+            "legendFormat": "Total LLM Requests",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_scientist_llm_tokens_used_total",
+            "legendFormat": "Total Tokens Used",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_scientist_llm_response_time_seconds",
+            "legendFormat": "Avg Response Time",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1000},
+                {"color": "red", "value": 5000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "🔬 Experiment Execution Timeline",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "ai_scientist_experiments_running",
+            "legendFormat": "Running Experiments",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_scientist_experiments_completed_total",
+            "legendFormat": "Completed Experiments",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_scientist_experiments_failed_total",
+            "legendFormat": "Failed Experiments", 
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "💻 System Resource Utilization",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "100 - (avg(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage %",
+            "refId": "A"
+          },
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "Memory Usage %",
+            "refId": "B"
+          },
+          {
+            "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\"})",
+            "legendFormat": "Disk Usage %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent",
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "🧪 Experiment Success Rate",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "(ai_scientist_experiments_completed_total / (ai_scientist_experiments_completed_total + ai_scientist_experiments_failed_total)) * 100",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "unit": "percent",
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 80}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "💰 API Cost Tracking",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "targets": [
+          {
+            "expr": "ai_scientist_api_cost_total",
+            "legendFormat": "Total API Cost ($)",
+            "refId": "A"
+          },
+          {
+            "expr": "increase(ai_scientist_api_cost_total[1h])",
+            "legendFormat": "Hourly Cost ($)",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "🔐 Security Events",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "targets": [
+          {
+            "expr": "{job=\"ai-scientist\", level=\"SECURITY\"}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "showCommonLabels": true,
+          "wrapLogMessage": true,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        }
+      },
+      {
+        "id": 7,
+        "title": "🌳 Tree Search Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "ai_scientist_tree_nodes_explored_total",
+            "legendFormat": "Nodes Explored",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_scientist_tree_depth_current",
+            "legendFormat": "Current Depth",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_scientist_tree_branches_active",
+            "legendFormat": "Active Branches",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "📊 Model Performance Comparison",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "ai_scientist_model_performance by (model_name)",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.5},
+                {"color": "red", "value": 0.8}
+              ]
+            }
+          }
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "model_name": "Model",
+                "Value": "Performance Score"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "🚨 Error Rate Analysis",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(ai_scientist_errors_total[5m])",
+            "legendFormat": "Error Rate (per second)",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_scientist_errors_total by (error_type)",
+            "legendFormat": "{{error_type}}",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "📈 Performance Trends",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "avg_over_time(ai_scientist_experiment_duration_seconds[24h])",
+            "legendFormat": "Avg Experiment Duration (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "increase(ai_scientist_papers_generated_total[24h])",
+            "legendFormat": "Papers Generated (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(ai_scientist_quality_score[24h])",
+            "legendFormat": "Avg Quality Score (24h)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short",
+            "decimals": 2
+          }
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [],
+    "preload": false,
+    "weekStart": ""
+  }
+}
