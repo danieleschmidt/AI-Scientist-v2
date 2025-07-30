@@ -1,0 +1,254 @@
+# Advanced Telemetry Configuration for AI Scientist v2
+# Enterprise-grade observability with OpenTelemetry, Prometheus, and custom metrics
+
+# OpenTelemetry Configuration
+service:
+  name: ai-scientist-v2
+  version: "2.0.0"
+  namespace: terragon-labs
+  
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [batch, memory_limiter, resource]
+      exporters: [jaeger, otlp/datadog, logging]
+    
+    metrics:
+      receivers: [otlp, prometheus/internal]
+      processors: [batch, memory_limiter, resource, filter/research]
+      exporters: [prometheus/external, otlp/datadog, logging]
+    
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch, memory_limiter, resource, attributes/research]
+      exporters: [loki, otlp/datadog, logging]
+
+# Research-Specific Metrics
+research_metrics:
+  experiment_performance:
+    - name: experiment_duration_seconds
+      description: "Time taken for full experiment pipeline"
+      type: histogram
+      buckets: [1, 5, 15, 30, 60, 300, 900, 1800, 3600]
+      labels: [experiment_type, model_backend, success]
+    
+    - name: idea_generation_count
+      description: "Number of research ideas generated"
+      type: counter
+      labels: [topic, model, novelty_score]
+    
+    - name: paper_quality_score
+      description: "Generated paper quality metrics"
+      type: gauge
+      labels: [paper_id, review_score, acceptance_probability]
+    
+    - name: tree_search_nodes_explored
+      description: "Number of nodes explored in tree search"
+      type: histogram
+      buckets: [10, 50, 100, 500, 1000, 5000]
+      labels: [search_type, depth, success]
+  
+  llm_performance:
+    - name: llm_request_duration_seconds
+      description: "LLM API request latency"
+      type: histogram
+      buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60]
+      labels: [provider, model, operation_type]
+    
+    - name: llm_tokens_consumed
+      description: "Token consumption for LLM requests"
+      type: counter
+      labels: [provider, model, token_type]
+    
+    - name: llm_cost_usd
+      description: "Cost tracking for LLM usage"
+      type: counter
+      labels: [provider, model, cost_category]
+  
+  system_resources:
+    - name: gpu_memory_usage_bytes
+      description: "GPU memory utilization"
+      type: gauge
+      labels: [gpu_id, process_id]
+    
+    - name: experiment_memory_peak_bytes
+      description: "Peak memory usage during experiments"
+      type: gauge
+      labels: [experiment_id, stage]
+    
+    - name: concurrent_experiments
+      description: "Number of running experiments"
+      type: gauge
+      labels: [status, priority]
+
+# Custom Attributes for Research Context
+attributes:
+  research_context:
+    - research.experiment.id
+    - research.experiment.type
+    - research.paper.topic
+    - research.model.backend
+    - research.search.strategy
+    - research.quality.score
+  
+  infrastructure:
+    - infra.environment
+    - infra.region
+    - infra.cluster
+    - infra.node.type
+    - infra.resource.tier
+
+# Alerting Rules for Research Operations
+alerting:
+  groups:
+    - name: research_operations
+      rules:
+        - alert: ExperimentFailureRate
+          expr: rate(experiment_failures_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+            team: ai-research
+          annotations:
+            summary: "High experiment failure rate detected"
+            description: "Experiment failure rate {{ $value }} is above 10% threshold"
+        
+        - alert: LLMCostSpike
+          expr: increase(llm_cost_usd[1h]) > 100
+          for: 5m
+          labels:
+            severity: critical
+            team: finance
+          annotations:
+            summary: "LLM cost spike detected"
+            description: "LLM costs increased by ${{ $value }} in the last hour"
+        
+        - alert: GPUMemoryExhaustion
+          expr: gpu_memory_usage_bytes / gpu_memory_total_bytes > 0.9
+          for: 1m
+          labels:
+            severity: critical
+            team: infrastructure
+          annotations:
+            summary: "GPU memory near exhaustion"
+            description: "GPU {{ $labels.gpu_id }} memory usage at {{ $value }}%"
+        
+        - alert: ExperimentQueueBacklog
+          expr: experiment_queue_size > 50
+          for: 10m
+          labels:
+            severity: warning
+            team: ai-research
+          annotations:
+            summary: "Large experiment queue backlog"
+            description: "{{ $value }} experiments queued, possible resource constraints"
+
+# Sampling and Performance Configuration
+sampling:
+  # High-frequency sampling for critical research metrics
+  research_operations:
+    trace_sampling_rate: 1.0  # 100% for research operations
+    metric_collection_interval: 10s
+  
+  # Standard sampling for infrastructure metrics
+  infrastructure:
+    trace_sampling_rate: 0.1  # 10% for infrastructure
+    metric_collection_interval: 30s
+  
+  # Adaptive sampling based on experiment importance
+  adaptive:
+    high_priority_experiments: 1.0
+    standard_experiments: 0.5
+    background_tasks: 0.1
+
+# Dashboard Configuration Templates
+dashboards:
+  research_overview:
+    title: "AI Scientist Research Operations"
+    panels:
+      - experiment_success_rate
+      - paper_generation_throughput
+      - llm_cost_breakdown
+      - gpu_utilization
+      - tree_search_efficiency
+  
+  performance_monitoring:
+    title: "System Performance"
+    panels:
+      - response_times
+      - resource_utilization
+      - error_rates
+      - scaling_metrics
+  
+  cost_optimization:
+    title: "Cost Management"
+    panels:
+      - llm_cost_trends
+      - resource_efficiency
+      - cost_per_experiment
+      - budget_tracking
+
+# Integration Points
+integrations:
+  prometheus:
+    endpoint: "http://prometheus:9090"
+    scrape_interval: 15s
+    scrape_timeout: 10s
+  
+  jaeger:
+    endpoint: "http://jaeger:14268/api/traces"
+    batch_timeout: 1s
+    send_batch_size: 1024
+  
+  datadog:
+    api_key_env: DD_API_KEY
+    site: datadoghq.com
+    service: ai-scientist-v2
+    
+  custom_webhooks:
+    experiment_completion:
+      url: "${EXPERIMENT_WEBHOOK_URL}"
+      headers:
+        Authorization: "Bearer ${WEBHOOK_TOKEN}"
+    
+    cost_alerts:
+      url: "${COST_ALERT_WEBHOOK_URL}"
+      headers:
+        Authorization: "Bearer ${COST_WEBHOOK_TOKEN}"
+
+# Data Retention and Archival
+retention:
+  traces:
+    short_term: 7d   # High-detail traces for debugging
+    long_term: 30d   # Aggregated traces for analysis
+  
+  metrics:
+    raw: 15d         # Raw metrics for operational monitoring
+    aggregated: 1y   # Aggregated metrics for trend analysis
+  
+  logs:
+    debug: 3d        # Debug logs for immediate troubleshooting
+    application: 30d # Application logs for audit and analysis
+    security: 1y     # Security logs for compliance
+
+# Privacy and Compliance
+privacy:
+  pii_scrubbing:
+    enabled: true
+    patterns:
+      - email_addresses
+      - api_keys
+      - personal_identifiers
+  
+  data_classification:
+    research_data: confidential
+    system_metrics: internal
+    public_metrics: public
+  
+  geographical_restrictions:
+    data_residency: [US, EU]
+    processing_regions: [us-east-1, eu-west-1]
+
+# This configuration provides enterprise-grade observability
+# tailored for AI research operations with cost optimization,
+# performance monitoring, and compliance considerations.
