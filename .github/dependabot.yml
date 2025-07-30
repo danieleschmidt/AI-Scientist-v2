@@ -9,9 +9,10 @@ updates:
       time: "08:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "terragon-labs"
+      - "@terragon-labs/core-maintainers"
+      - "@terragon-labs/security-team"
     assignees:
-      - "terragon-labs"
+      - "@terragon-labs/core-maintainers"
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
@@ -19,15 +20,48 @@ updates:
     labels:
       - "dependencies"
       - "python"
+      - "security"
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
     ignore:
-      # Ignore major version updates for stable packages
+      # Ignore major version updates for ML packages requiring careful testing
       - dependency-name: "torch"
         update-types: ["version-update:semver-major"]
       - dependency-name: "transformers"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "anthropic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "openai"
+        update-types: ["version-update:semver-major"]
+    groups:
+      ml-frameworks:
+        patterns:
+          - "torch*"
+          - "transformers"
+          - "datasets"
+          - "huggingface*"
+        update-types:
+          - "minor"
+          - "patch"
+      llm-apis:
+        patterns:
+          - "anthropic"
+          - "openai"
+        update-types:
+          - "minor"
+          - "patch"
+      development-tools:
+        patterns:
+          - "pytest*"
+          - "black"
+          - "isort"
+          - "flake8"
+          - "mypy"
+          - "pre-commit"
+        update-types:
+          - "minor"
+          - "patch"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -38,13 +72,17 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "terragon-labs"
+      - "@terragon-labs/devops-team"
+      - "@terragon-labs/security-team"
+    assignees:
+      - "@terragon-labs/devops-team"
     commit-message:
       prefix: "ci"
       include: "scope"
     labels:
       - "dependencies"
       - "github-actions"
+      - "security"
 
   # Docker
   - package-ecosystem: "docker"
@@ -55,27 +93,38 @@ updates:
       time: "10:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "terragon-labs"
+      - "@terragon-labs/devops-team"
+      - "@terragon-labs/security-team"
+    assignees:
+      - "@terragon-labs/devops-team"
     commit-message:
       prefix: "chore"
       include: "scope"
     labels:
       - "dependencies"
       - "docker"
+      - "security"
 
-  # Pre-commit hooks
-  - package-ecosystem: "github-actions"
-    directory: "/.pre-commit-hooks"
+  # Security advisories - enable automatic security updates
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "11:00"
+      interval: "daily"
     open-pull-requests-limit: 3
     reviewers:
-      - "terragon-labs"
+      - "@terragon-labs/security-team"
+      - "@terragon-labs/core-maintainers"
+    assignees:
+      - "@terragon-labs/security-team"
     commit-message:
-      prefix: "chore"
+      prefix: "security"
       include: "scope"
     labels:
+      - "security"
       - "dependencies"
-      - "pre-commit"
+      - "vulnerability"
+    allow:
+      - dependency-type: "direct"
+        update-types: ["security"]
+      - dependency-type: "indirect"
+        update-types: ["security"]
