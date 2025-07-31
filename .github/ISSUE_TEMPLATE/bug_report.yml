@@ -1,0 +1,197 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in AI Scientist v2
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees:
+  - terragon-labs/core-maintainers
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please provide as much detail as possible to help us reproduce and fix the issue.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I am running the latest version of AI Scientist v2
+          required: true
+        - label: I have reviewed the documentation and FAQ
+          required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the bug you encountered
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Run command '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+      placeholder: Describe what actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: Error Logs
+      description: If applicable, paste any error messages or stack traces
+      placeholder: Paste error logs here
+      render: shell
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical (System unusable, data loss, security issue)
+        - High (Major feature broken, significant impact)
+        - Medium (Feature partially working, workaround available)
+        - Low (Minor issue, cosmetic problem)
+    validations:
+      required: true
+
+  - type: input
+    id: ai-scientist-version
+    attributes:
+      label: AI Scientist Version
+      description: Which version of AI Scientist are you using?
+      placeholder: "e.g., v2.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: Which Python version are you using?
+      placeholder: "e.g., 3.11.5"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System
+      options:
+        - Ubuntu/Debian
+        - CentOS/RHEL/Fedora
+        - macOS
+        - Windows (WSL)
+        - Windows (Native)
+        - Other Linux distribution
+        - Docker container
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: Specific version of your operating system
+      placeholder: "e.g., Ubuntu 22.04, macOS 13.5"
+
+  - type: dropdown
+    id: llm-provider
+    attributes:
+      label: LLM Provider (if applicable)
+      description: Which LLM provider were you using when the bug occurred?
+      options:
+        - OpenAI (GPT-4, GPT-3.5)
+        - Anthropic (Claude)
+        - Google (Gemini)
+        - AWS Bedrock
+        - Other
+        - Not applicable
+
+  - type: input
+    id: model-name
+    attributes:
+      label: Model Name (if applicable)
+      description: Specific model name if LLM-related
+      placeholder: "e.g., gpt-4o-2024-05-13, claude-3-5-sonnet"
+
+  - type: checkboxes
+    id: gpu-usage
+    attributes:
+      label: GPU Usage
+      options:
+        - label: This issue occurs when using GPU
+        - label: This issue occurs when using CPU only
+        - label: GPU/CPU usage is not relevant to this issue
+
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Information
+      description: Additional system information (GPU, memory, etc.)
+      placeholder: |
+        GPU: NVIDIA RTX 4090
+        RAM: 32GB
+        CUDA Version: 12.1
+        PyTorch Version: 2.0.1
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: Relevant configuration files or settings
+      placeholder: |
+        Share relevant parts of:
+        - ai_scientist_config.yaml
+        - bfts_config.yaml
+        - environment variables
+      render: yaml
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+      placeholder: |
+        - Screenshots
+        - Workarounds you've tried
+        - Related issues
+        - Frequency of occurrence
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a PR to fix this issue
+        - label: I would be willing to help test a fix for this issue

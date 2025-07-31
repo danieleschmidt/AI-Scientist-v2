@@ -1,0 +1,317 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Install dependencies for scanning
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit[toml] semgrep
+        pip install -r requirements.txt
+
+    - name: Run Safety check for known vulnerabilities
+      continue-on-error: true
+      run: |
+        safety check --json --output safety-report.json
+        safety check --full-report
+
+    - name: Run Bandit security linter
+      continue-on-error: true
+      run: |
+        bandit -r ai_scientist/ -f json -o bandit-report.json
+        bandit -r ai_scientist/ -f txt -o bandit-report.txt
+        cat bandit-report.txt
+
+    - name: Run Semgrep static analysis
+      continue-on-error: true
+      run: |
+        semgrep --config=auto ai_scientist/ --json --output=semgrep-report.json
+        semgrep --config=auto ai_scientist/ --text
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports-${{ github.run_id }}
+        path: |
+          safety-report.json
+          bandit-report.json
+          bandit-report.txt
+          semgrep-report.json
+        retention-days: 90
+
+    - name: Upload Semgrep results to GitHub Security
+      if: github.event_name != 'pull_request'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep-report.json
+      continue-on-error: true
+
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ python ]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: +security-extended,security-and-quality
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"
+
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image for scanning
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        load: true
+        tags: ai-scientist:security-scan
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'ai-scientist:security-scan'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Trivy filesystem scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'json'
+        output: 'trivy-fs-results.json'
+
+    - name: Upload filesystem scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: trivy-filesystem-scan
+        path: trivy-fs-results.json
+        retention-days: 30
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run GitLeaks secret scanner
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  supply-chain-scan:
+    name: Supply Chain Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Generate SBOM
+      run: |
+        pip install cyclonedx-bom
+        cyclonedx-py requirements -i requirements.txt -o sbom.json
+        cyclonedx-py requirements -i requirements.txt -o sbom.xml
+
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: software-bill-of-materials
+        path: |
+          sbom.json
+          sbom.xml
+        retention-days: 90
+
+    - name: Run OSV Scanner
+      uses: google/osv-scanner-action@v1.7.4
+      with:
+        scan-args: |-
+          --format=sarif
+          --output=osv-results.sarif
+          --lockfile=requirements.txt
+          ./
+      continue-on-error: true
+
+    - name: Upload OSV scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: osv-results.sarif
+
+  security-policy-check:
+    name: Security Policy Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check security policy files
+      run: |
+        echo "🔍 Checking security policy compliance..."
+        
+        # Check for required security files
+        files_to_check=(
+          "SECURITY.md"
+          ".github/dependabot.yml"
+          "pyproject.toml"
+        )
+        
+        missing_files=()
+        for file in "${files_to_check[@]}"; do
+          if [ ! -f "$file" ]; then
+            missing_files+=("$file")
+          fi
+        done
+        
+        if [ ${#missing_files[@]} -gt 0 ]; then
+          echo "❌ Missing required security files:"
+          printf '  - %s\n' "${missing_files[@]}"
+          exit 1
+        fi
+        
+        echo "✅ All required security files are present"
+
+    - name: Validate security configuration
+      run: |
+        echo "🔍 Validating security configurations..."
+        
+        # Check if bandit configuration exists in pyproject.toml
+        if grep -q "\[tool\.bandit\]" pyproject.toml; then
+          echo "✅ Bandit configuration found"
+        else
+          echo "⚠️  Bandit configuration not found in pyproject.toml"
+        fi
+        
+        # Check if security dependencies are specified
+        if grep -q "bandit\|safety\|semgrep" pyproject.toml; then
+          echo "✅ Security dependencies configured"
+        else
+          echo "❌ Security dependencies not found in pyproject.toml"
+          exit 1
+        fi
+
+  security-report:
+    name: Security Report Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [dependency-scan, codeql-analysis, container-scan, secret-scan, supply-chain-scan, security-policy-check]
+    if: always()
+    
+    steps:
+    - name: Generate security summary
+      run: |
+        echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Dependency Scan | ${{ needs.dependency-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| CodeQL Analysis | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Container Scan | ${{ needs.container-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Secret Detection | ${{ needs.secret-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Supply Chain | ${{ needs.supply-chain-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Policy Check | ${{ needs.security-policy-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Review individual job outputs for detailed findings." >> $GITHUB_STEP_SUMMARY

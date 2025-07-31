@@ -1,0 +1,289 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v2.1.0)'
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/}
+        fi
+        
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        
+        # Check if this is a pre-release (contains alpha, beta, rc)
+        if [[ $VERSION =~ (alpha|beta|rc) ]]; then
+          echo "is_prerelease=true" >> $GITHUB_OUTPUT
+        else
+          echo "is_prerelease=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Validate version format
+      run: |
+        if [[ ! "${{ steps.version.outputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+          echo "❌ Invalid version format: ${{ steps.version.outputs.version }}"
+          exit 1
+        fi
+        echo "✅ Version format is valid: ${{ steps.version.outputs.version }}"
+
+    - name: Check if tag exists (for workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+          echo "❌ Tag ${{ steps.version.outputs.version }} already exists"
+          exit 1
+        fi
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: validate-release
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .[dev]
+
+    - name: Run full test suite
+      run: |
+        pytest tests/ -v --cov=ai_scientist --cov-report=xml
+
+    - name: Run security checks
+      run: |
+        bandit -r ai_scientist/ -f json -o bandit-report.json
+        safety check --json --output safety-report.json
+        semgrep --config=auto ai_scientist/ --json --output=semgrep-report.json
+
+    - name: Build package
+      run: |
+        python -m pip install build
+        python -m build
+
+    - name: Verify package
+      run: |
+        python -m pip install twine
+        python -m twine check dist/*
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts
+        path: |
+          dist/
+          bandit-report.json
+          safety-report.json
+          semgrep-report.json
+        retention-days: 7
+
+  build-docker:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [validate-release, build-and-test]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=ref,event=tag
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [validate-release, build-and-test, build-docker]
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts
+        path: ./artifacts
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        # Extract version for changelog lookup
+        VERSION="${{ needs.validate-release.outputs.version }}"
+        VERSION_NUM=${VERSION#v}
+        
+        # Extract release notes from CHANGELOG.md if it exists
+        if [ -f CHANGELOG.md ]; then
+          # Try to extract the section for this version
+          NOTES=$(awk "/^## \[?${VERSION_NUM}\]?/ { flag=1; next } /^## / { flag=0 } flag" CHANGELOG.md)
+          if [ -n "$NOTES" ]; then
+            echo "Found release notes in CHANGELOG.md"
+            echo "$NOTES" > release_notes.md
+          else
+            echo "No specific release notes found for version $VERSION_NUM"
+            echo "## Release $VERSION" > release_notes.md
+            echo "" >> release_notes.md
+            echo "See commit history for detailed changes." >> release_notes.md
+          fi
+        else
+          echo "## Release $VERSION" > release_notes.md
+          echo "" >> release_notes.md
+          echo "See commit history for detailed changes." >> release_notes.md
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.validate-release.outputs.version }}
+        name: Release ${{ needs.validate-release.outputs.version }}
+        body_path: release_notes.md
+        prerelease: ${{ needs.validate-release.outputs.is_prerelease == 'true' }}
+        files: |
+          artifacts/dist/*
+          artifacts/*-report.json
+        generate_release_notes: true
+        make_latest: ${{ needs.validate-release.outputs.is_prerelease == 'false' }}
+
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [validate-release, create-release]
+    if: needs.validate-release.outputs.is_prerelease == 'false'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ai-scientist-v2
+    permissions:
+      id-token: write
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts
+        path: ./artifacts
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: artifacts/dist/
+        verbose: true
+
+  publish-test-pypi:
+    name: Publish to Test PyPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [validate-release, create-release]
+    if: needs.validate-release.outputs.is_prerelease == 'true'
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/ai-scientist-v2
+    permissions:
+      id-token: write
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts
+        path: ./artifacts
+
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        packages-dir: artifacts/dist/
+        verbose: true
+
+  notify-release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [validate-release, create-release, publish-pypi]
+    if: always() && needs.create-release.result == 'success'
+    
+    steps:
+    - name: Notify success
+      run: |
+        echo "🎉 Release ${{ needs.validate-release.outputs.version }} completed successfully!"
+        echo "- GitHub Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.validate-release.outputs.version }}"
+        if [ "${{ needs.validate-release.outputs.is_prerelease }}" = "false" ]; then
+          echo "- PyPI: https://pypi.org/project/ai-scientist-v2/"
+        else
+          echo "- Test PyPI: https://test.pypi.org/project/ai-scientist-v2/"
+        fi
