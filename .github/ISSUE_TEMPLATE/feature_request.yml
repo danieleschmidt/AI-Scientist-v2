@@ -1,0 +1,215 @@
+name: ✨ Feature Request
+description: Suggest an idea or enhancement for AI Scientist v2
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees:
+  - terragon-labs/product-team
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand and evaluate your request.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have reviewed the roadmap and planned features
+          required: true
+        - label: This feature aligns with the project's goals and scope
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature are you requesting?
+      options:
+        - New AI/ML capability
+        - Performance improvement
+        - Developer experience enhancement
+        - Integration with external service
+        - User interface improvement
+        - Documentation enhancement
+        - Security enhancement
+        - Testing/Quality improvement
+        - Infrastructure/DevOps improvement
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What need does it address?
+      placeholder: |
+        Is your feature request related to a problem? Please describe.
+        A clear and concise description of what the problem is.
+        Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: |
+        A clear and concise description of what you want to happen.
+        Include specific details about how this feature should work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        A clear and concise description of any alternative solutions or features you've considered.
+        Include workarounds you're currently using, if any.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Critical (Blocking current work)
+        - High (Significant improvement to workflow)
+        - Medium (Nice to have, moderate impact)
+        - Low (Minor improvement)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: affected-components
+    attributes:
+      label: Affected Components
+      description: Which parts of AI Scientist would this feature affect?
+      options:
+        - label: Core AI Scientist engine
+        - label: Tree search algorithms (BFTS)
+        - label: LLM integration (OpenAI, Anthropic, etc.)
+        - label: Research idea generation
+        - label: Experiment execution
+        - label: Paper writing and formatting
+        - label: Citation and literature search
+        - label: Configuration management
+        - label: Performance monitoring
+        - label: Security and validation
+        - label: Docker/deployment
+        - label: Documentation
+        - label: Testing framework
+        - label: CLI interface
+        - label: API/integrations
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Provide specific examples of how this feature would be used
+      placeholder: |
+        1. As a researcher, I want to... so that I can...
+        2. When working on [specific scenario], this feature would help by...
+        3. This would be particularly useful for...
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-requirements
+    attributes:
+      label: Technical Requirements
+      description: Any specific technical requirements or constraints?
+      placeholder: |
+        - Must support specific LLM providers
+        - Should integrate with existing APIs
+        - Performance requirements
+        - Compatibility requirements
+        - Resource constraints
+
+  - type: textarea
+    id: user-interface
+    attributes:
+      label: User Interface
+      description: How should users interact with this feature?
+      placeholder: |
+        - Command line interface changes
+        - Configuration file modifications
+        - API endpoints
+        - Web interface (if applicable)
+        - Integration with existing workflows
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How would you measure the success of this feature?
+      placeholder: |
+        - Specific metrics or benchmarks
+        - User experience improvements
+        - Performance improvements
+        - Adoption indicators
+
+  - type: checkboxes
+    id: research-impact
+    attributes:
+      label: Research Impact (if applicable)
+      description: How would this feature impact research capabilities?
+      options:
+        - label: Enables new types of research
+        - label: Improves research quality
+        - label: Increases research speed/efficiency
+        - label: Enhances reproducibility
+        - label: Supports new research domains
+        - label: Improves collaboration
+
+  - type: dropdown
+    id: implementation-complexity
+    attributes:
+      label: Implementation Complexity (estimate)
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple (1-2 days)
+        - Moderate (1-2 weeks)
+        - Complex (1-2 months)
+        - Very Complex (3+ months)
+        - Unsure
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, examples, or references
+      placeholder: |
+        - Links to relevant papers or resources
+        - Similar features in other tools
+        - Mockups or wireframes
+        - Example configurations
+        - Performance requirements
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to contribute to the implementation of this feature
+        - label: I would be willing to help test this feature
+        - label: I would be willing to help document this feature
+        - label: I have domain expertise relevant to this feature
+
+  - type: textarea
+    id: contribution-details
+    attributes:
+      label: Contribution Details
+      description: If you're willing to contribute, please provide more details
+      placeholder: |
+        - Your relevant experience/expertise
+        - How you could contribute (code, testing, documentation, etc.)
+        - Available timeline for contribution
