@@ -1,288 +1,46 @@
 {
-  "project": "AI Scientist v2",
-  "version": "2.0.0",
-  "last_updated": "2025-07-27",
-  "sdlc_implementation": {
-    "version": "1.0.0",
-    "completion_date": "2025-07-27",
-    "implementation_phases": {
-      "phase_1_planning": {
-        "name": "Project Foundation & Requirements",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "ARCHITECTURE.md",
-          "docs/ROADMAP.md",
-          "docs/adr/ADR-001-multi-model-llm-strategy.md"
-        ]
-      },
-      "phase_2_dev_environment": {
-        "name": "Development Environment Setup",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "Dockerfile",
-          "docker-compose.yml",
-          ".devcontainer/devcontainer.json",
-          ".env.example",
-          "Makefile"
-        ]
-      },
-      "phase_3_code_quality": {
-        "name": "Code Quality Standards",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          ".editorconfig",
-          ".flake8",
-          "pyproject.toml",
-          ".pre-commit-config.yaml"
-        ]
-      },
-      "phase_4_testing": {
-        "name": "Comprehensive Testing Strategy",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "tests/conftest.py",
-          "tests/unit/test_config_management.py",
-          "tests/integration/test_e2e_research_pipeline.py",
-          "tests/performance/test_benchmarks.py"
-        ]
-      },
-      "phase_5_build": {
-        "name": "Build Pipeline & Packaging",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "scripts/build.py",
-          "scripts/release.py"
-        ]
-      },
-      "phase_6_cicd": {
-        "name": "CI/CD Automation",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "templates/github-workflows/ci.yml",
-          "templates/github-workflows/cd.yml"
-        ]
-      },
-      "phase_7_monitoring": {
-        "name": "Monitoring & Observability",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "monitoring/prometheus.yml",
-          "monitoring/grafana/dashboards/ai-scientist-overview.json"
-        ]
-      },
-      "phase_8_security": {
-        "name": "Security Hardening",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "SECURITY.md"
-        ]
-      },
-      "phase_9_documentation": {
-        "name": "Documentation Framework",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "CONTRIBUTING.md",
-          "docs/DEPLOYMENT.md"
-        ]
-      },
-      "phase_10_release": {
-        "name": "Release Management",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "scripts/release.py",
-          "pyproject.toml"
-        ]
-      },
-      "phase_11_maintenance": {
-        "name": "Maintenance & Lifecycle",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "scripts/build.py",
-          ".pre-commit-config.yaml"
-        ]
-      },
-      "phase_12_hygiene": {
-        "name": "Repository Hygiene",
-        "status": "completed",
-        "completion_date": "2025-07-27",
-        "artifacts": [
-          "CONTRIBUTING.md",
-          "SECURITY.md",
-          ".github/project-metrics.json"
-        ]
-      }
-    }
+  "project": {
+    "name": "AI Scientist v2",
+    "version": "2.0.0",
+    "description": "Workshop-Level Automated Scientific Discovery via Agentic Tree Search",
+    "repository": "danieleschmidt/AI-Scientist-v2",
+    "license": "MIT",
+    "language": "Python",
+    "framework": "PyTorch"
   },
   "metrics": {
-    "sdlc_completeness": 100,
-    "automation_coverage": 95,
-    "security_score": 90,
-    "documentation_health": 95,
-    "test_coverage_target": 80,
-    "deployment_reliability": 90,
-    "maintenance_automation": 85
-  },
-  "quality_gates": {
     "code_quality": {
-      "enabled": true,
-      "tools": ["black", "flake8", "mypy", "isort"],
-      "thresholds": {
-        "complexity": 12,
-        "line_length": 88,
-        "test_coverage": 80
-      }
+      "coverage_target": 80,
+      "coverage_critical": 95,
+      "test_count_target": 500,
+      "complexity_max": 10,
+      "duplication_max": 5,
+      "maintainability_min": 7.0
     },
     "security": {
-      "enabled": true,
-      "tools": ["bandit", "safety", "semgrep", "trivy"],
-      "scan_frequency": "on_commit"
+      "vulnerability_tolerance": "low",
+      "security_score_min": 90,
+      "dependency_audit_frequency": "weekly",
+      "secret_scanning": true,
+      "code_scanning": true,
+      "sast_tools": ["bandit", "semgrep", "codeql"]
     },
-    "testing": {
-      "enabled": true,
-      "types": ["unit", "integration", "performance", "security"],
-      "coverage_requirement": 80,
-      "parallel_execution": true
+    "performance": {
+      "response_time_max": 2000,
+      "memory_usage_max": 4096,
+      "cpu_usage_max": 80,
+      "gpu_utilization_target": 75,
+      "experiment_completion_rate": 85,
+      "paper_generation_time_max": 1440
     },
-    "documentation": {
-      "enabled": true,
-      "requirements": ["api_docs", "user_guides", "architecture", "deployment"],
-      "auto_generation": true
+    "research": {
+      "paper_acceptance_rate_target": 70,
+      "experiment_success_rate_target": 75,
+      "research_domains_supported": 10,
+      "cost_per_paper_max": 50,
+      "time_to_publication_reduction": 90
     }
   },
-  "automation": {
-    "ci_cd": {
-      "provider": "github_actions",
-      "workflows": ["ci", "cd", "security", "release"],
-      "environments": ["development", "staging", "production"]
-    },
-    "testing": {
-      "automated": true,
-      "coverage_reporting": true,
-      "performance_benchmarking": true,
-      "security_scanning": true
-    },
-    "deployment": {
-      "containerized": true,
-      "orchestration": "kubernetes",
-      "monitoring": "prometheus_grafana",
-      "logging": "structured"
-    },
-    "maintenance": {
-      "dependency_updates": "automated",
-      "security_patches": "automated",
-      "backup_strategy": "daily",
-      "disaster_recovery": "tested"
-    }
-  },
-  "compliance": {
-    "standards": ["SOC2", "ISO27001"],
-    "frameworks": ["NIST", "CIS"],
-    "privacy": ["GDPR", "CCPA"],
-    "audit_frequency": "quarterly"
-  },
-  "performance_targets": {
-    "build_time": "< 10 minutes",
-    "test_execution": "< 15 minutes",
-    "deployment_time": "< 5 minutes",
-    "mttr": "< 30 minutes",
-    "availability": "99.9%"
-  },
-  "technology_stack": {
-    "languages": ["Python 3.11+"],
-    "frameworks": ["PyTorch", "Transformers"],
-    "databases": ["PostgreSQL", "Redis"],
-    "messaging": ["Redis"],
-    "monitoring": ["Prometheus", "Grafana"],
-    "containerization": ["Docker", "Kubernetes"],
-    "cloud_providers": ["AWS", "GCP", "Azure"],
-    "security_tools": ["Bandit", "Safety", "Trivy", "Semgrep"],
-    "testing_tools": ["Pytest", "Coverage.py", "Memory Profiler"]
-  },
-  "team_structure": {
-    "development": {
-      "size": "3-5 developers",
-      "roles": ["backend", "ml_engineering", "devops"],
-      "practices": ["code_review", "pair_programming", "tdd"]
-    },
-    "operations": {
-      "size": "2-3 engineers",
-      "responsibilities": ["deployment", "monitoring", "incident_response"],
-      "on_call": "24/7"
-    },
-    "quality_assurance": {
-      "size": "2 engineers",
-      "focus": ["automated_testing", "security_testing", "performance_testing"],
-      "integration": "shift_left"
-    }
-  },
-  "risk_management": {
-    "identified_risks": [
-      {
-        "type": "technical",
-        "description": "LLM API rate limits",
-        "probability": "medium",
-        "impact": "medium",
-        "mitigation": "Multi-provider strategy with fallbacks"
-      },
-      {
-        "type": "security",
-        "description": "Code execution vulnerabilities",
-        "probability": "low",
-        "impact": "high",
-        "mitigation": "Sandboxed execution environment"
-      },
-      {
-        "type": "operational",
-        "description": "GPU resource exhaustion",
-        "probability": "medium",
-        "impact": "medium",
-        "mitigation": "Resource monitoring and auto-scaling"
-      }
-    ],
-    "review_frequency": "monthly",
-    "escalation_procedures": "defined"
-  },
-  "success_criteria": {
-    "technical": {
-      "code_coverage": "> 80%",
-      "security_score": "> 85%",
-      "performance": "< 2s API response time",
-      "reliability": "> 99% uptime"
-    },
-    "operational": {
-      "deployment_frequency": "Daily",
-      "lead_time": "< 1 day",
-      "mttr": "< 30 minutes",
-      "change_failure_rate": "< 5%"
-    },
-    "business": {
-      "user_satisfaction": "> 4.5/5",
-      "research_output": "100+ papers/year",
-      "cost_efficiency": "50% reduction vs manual",
-      "innovation_index": "Top quartile"
-    }
-  },
-  "continuous_improvement": {
-    "retrospectives": "bi-weekly",
-    "metrics_review": "monthly",
-    "process_optimization": "quarterly",
-    "technology_evaluation": "semi-annually"
-  },
-  "knowledge_management": {
-    "documentation_strategy": "docs_as_code",
-    "knowledge_sharing": ["tech_talks", "brown_bags", "wikis"],
-    "onboarding": "automated_with_mentoring",
-    "training": "continuous_learning_budget"
-  }
+  "last_updated": "2025-08-02T00:00:00Z",
+  "schema_version": "1.0.0"
 }
