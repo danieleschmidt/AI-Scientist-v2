@@ -15,7 +15,10 @@
       "test_count_target": 500,
       "complexity_max": 10,
       "duplication_max": 5,
-      "maintainability_min": 7.0
+      "maintainability_min": 7.0,
+      "technical_debt_max": 20,
+      "code_smells_max": 50,
+      "documentation_coverage_min": 90
     },
     "security": {
       "vulnerability_tolerance": "low",
@@ -23,7 +26,10 @@
       "dependency_audit_frequency": "weekly",
       "secret_scanning": true,
       "code_scanning": true,
-      "sast_tools": ["bandit", "semgrep", "codeql"]
+      "sast_tools": ["bandit", "semgrep", "codeql"],
+      "dependency_check_frequency": "daily",
+      "security_review_required": true,
+      "penetration_test_frequency": "quarterly"
     },
     "performance": {
       "response_time_max": 2000,
@@ -31,14 +37,37 @@
       "cpu_usage_max": 80,
       "gpu_utilization_target": 75,
       "experiment_completion_rate": 85,
-      "paper_generation_time_max": 1440
+      "paper_generation_time_max": 1440,
+      "build_time_max": 300,
+      "test_execution_time_max": 120,
+      "startup_time_max": 30
     },
     "research": {
       "paper_acceptance_rate_target": 70,
       "experiment_success_rate_target": 75,
       "research_domains_supported": 10,
       "cost_per_paper_max": 50,
-      "time_to_publication_reduction": 90
+      "time_to_publication_reduction": 90,
+      "reproducibility_rate_target": 95,
+      "innovation_score_min": 7.0,
+      "citation_impact_target": 100
+    },
+    "operational": {
+      "deployment_frequency": "weekly",
+      "lead_time_max": 24,
+      "mttr_max": 4,
+      "change_failure_rate_max": 15,
+      "availability_target": 99.9,
+      "backup_frequency": "daily",
+      "monitoring_coverage": 100
+    },
+    "community": {
+      "issue_response_time_max": 48,
+      "pr_review_time_max": 72,
+      "contributor_growth_rate": 10,
+      "documentation_quality_min": 8.0,
+      "user_satisfaction_min": 4.5,
+      "community_activity_score_min": 7.0
     }
   },
   "last_updated": "2025-08-02T00:00:00Z",

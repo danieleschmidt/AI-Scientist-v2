@@ -62,12 +62,21 @@ RUN mkdir -p /app/experiments /app/data /app/logs && \
 # Switch to non-root user
 USER aiscientist
 
+# Create health check script
+COPY --chown=aiscientist:aiscientist scripts/health_check.py /app/scripts/
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)"
+    CMD python scripts/health_check.py
+
+# Set default working directory
+WORKDIR /app
+
+# Expose ports (if needed)
+EXPOSE 8000
 
 # Default command
-CMD ["python", "--version"]
+CMD ["python", "-m", "ai_scientist", "--help"]
 
 # Security scanning stage
 FROM production as security
