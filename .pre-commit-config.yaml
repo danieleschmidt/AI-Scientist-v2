@@ -1,215 +1,165 @@
-# Pre-commit hooks configuration for AI Scientist v2
+# See https://pre-commit.com for more information
 repos:
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^(experiments/|aisci_outputs/|results/|cache/)
+        exclude: \.md$
       - id: end-of-file-fixer
-        exclude: ^(experiments/|aisci_outputs/|results/|cache/)
       - id: check-yaml
-        exclude: ^templates/
-      - id: check-added-large-files
-        args: [--maxkb=1000]
+        args: [--allow-multiple-documents]
       - id: check-json
-        exclude: ^(experiments/|aisci_outputs/|results/)
-      - id: check-merge-conflict
-      - id: debug-statements
-      - id: detect-private-key
       - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: [--maxkb=10000]
       - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: debug-statements
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
+      - id: detect-private-key
+      - id: fix-byte-order-marker
       - id: mixed-line-ending
         args: [--fix=lf]
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
 
-  # Python formatting
+  # Python formatting and linting
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.4.2
     hooks:
       - id: black
-        language_version: python3.11
         args: [--line-length=88]
+        language_version: python3
 
-  # Import sorting
-  - repo: https://github.com/pycqa/isort
+  - repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
       - id: isort
         args: [--profile=black]
 
-  # Python linting
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.0
     hooks:
       - id: flake8
         args: [--max-line-length=88, --extend-ignore=E203,W503]
         additional_dependencies:
           - flake8-docstrings
+          - flake8-import-order
           - flake8-bugbear
           - flake8-comprehensions
+          - flake8-simplify
 
-  # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.10.1
     hooks:
       - id: mypy
-        additional_dependencies: [types-PyYAML, types-requests]
-        args: [--ignore-missing-imports]
+        args: [--no-error-summary, --install-types, --non-interactive]
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - types-toml
 
   # Security scanning
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.6
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
     hooks:
       - id: bandit
-        args: [-c, pyproject.toml]
-        additional_dependencies: ["bandit[toml]"]
+        args: [--recursive, --skip=B101,B601]
+        exclude: ^tests/
 
-  # Python syntax upgrade
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+  # Safety checks for dependencies
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
     hooks:
-      - id: pyupgrade
-        args: [--py311-plus]
+      - id: python-safety-dependencies-check
 
-  # Remove unused imports
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.2.1
-    hooks:
-      - id: autoflake
-        args:
-          - --in-place
-          - --remove-all-unused-imports
-          - --remove-unused-variables
-
-  # Documentation formatting
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.17
-    hooks:
-      - id: mdformat
-        args: [--wrap, "88"]
-        additional_dependencies:
-          - mdformat-gfm
-          - mdformat-black
-        exclude: ^(CHANGELOG\.md|experiments/|aisci_outputs/|results/)
-
-  # Docker linting
+  # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.0
     hooks:
-      - id: hadolint-docker
+      - id: hadolint
+        args: [--ignore=DL3008,DL3009]
+
+  # YAML formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [yaml, json, markdown]
+        exclude: \.md$
 
   # Shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
 
-  # Secrets detection
+  # Git commit message linting
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.27.0
+    hooks:
+      - id: commitizen
+
+  # Check for secrets
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         args: [--baseline, .secrets.baseline]
-        exclude: ^(tests/|\.env\.example)
+        exclude: \.env\.example$
 
-  # Local custom hooks
+  # License header check
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        files: \.py$
+        args:
+          - --license-filepath
+          - LICENSE_HEADER.txt
+          - --comment-style
+          - "#"
+
+  # Documentation checks
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: [--convention=google]
+
+  # Configuration file validation
   - repo: local
     hooks:
-      - id: enhanced-security-check
-        name: Enhanced Security Check
-        entry: python
+      - id: validate-config
+        name: Validate Configuration Files
+        entry: python scripts/validate_config.py
         language: system
-        args:
-          - -c
-          - |
-            import subprocess
-            import sys
-            import os
-            
-            security_issues = []
-            
-            # Check for dangerous functions
-            dangerous_patterns = [
-                ('os.popen', 'Dangerous: os.popen usage found'),
-                ('shell=True', 'Warning: shell=True in subprocess calls'),
-                ('eval\s*\(', 'Dangerous: eval() usage found'),
-                ('exec\s*\(', 'Warning: exec() usage found'),
-                ('__import__', 'Warning: dynamic imports found'),
-            ]
-            
-            for pattern, message in dangerous_patterns:
-                result = subprocess.run(['grep', '-rE', pattern, 'ai_scientist/', '--exclude-dir=__pycache__'], 
-                                      capture_output=True, text=True)
-                if result.returncode == 0:
-                    security_issues.append(f"{message}:\n{result.stdout}")
-            
-            # Check for hardcoded secrets (basic patterns)
-            secret_patterns = [
-                ('sk-[a-zA-Z0-9]{32,}', 'Potential API key found'),
-                ('AKIA[0-9A-Z]{16}', 'Potential AWS access key found'),
-                ('password\s*=\s*["\'][^"\']{8,}', 'Hardcoded password found'),
-            ]
-            
-            for pattern, message in secret_patterns:
-                result = subprocess.run(['grep', '-rE', pattern, 'ai_scientist/', '--exclude-dir=__pycache__'], 
-                                      capture_output=True, text=True)
-                if result.returncode == 0:
-                    security_issues.append(f"{message}:\n{result.stdout}")
-            
-            if security_issues:
-                print("🚨 SECURITY ISSUES FOUND:")
-                for issue in security_issues:
-                    print(f"  {issue}")
-                sys.exit(1)
-            else:
-                print('✅ Enhanced security checks passed')
-        files: '\.py$'
-        pass_filenames: false
+        files: \.(yaml|yml|json|toml)$
+        pass_filenames: true
 
-      - id: test-runner
-        name: Run Core Tests
-        entry: python
+  # Test coverage check
+  - repo: local
+    hooks:
+      - id: test-coverage
+        name: Test Coverage Check
+        entry: pytest --cov=ai_scientist --cov-fail-under=80 --cov-report=term-missing
         language: system
-        args:
-          - -c
-          - |
-            import subprocess
-            import sys
-            
-            # Run basic tests
-            result = subprocess.run(['python', '-m', 'pytest', 'tests/', '-x', '--tb=short'], 
-                                  capture_output=True, text=True)
-            
-            if result.returncode != 0:
-                print("❌ Tests failed:")
-                print(result.stdout)
-                print(result.stderr)
-                sys.exit(1)
-            else:
-                print("✅ Core tests passed")
-        files: '\.py$'
-        pass_filenames: false
+        files: \.py$
+        stages: [push]
 
-# Global exclusions for all hooks
-exclude: |
-  (?x)^(
-    experiments/.*|
-    aisci_outputs/.*|
-    results/.*|
-    cache/.*|
-    huggingface/.*|
-    final_papers/.*|
-    \.git/.*|
-    .*\.egg-info/.*|
-    build/.*|
-    dist/.*|
-    __pycache__/.*
-  )$
-
-# Pre-commit CI configuration  
+# Configuration
 ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
   autofix_prs: true
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: [test-runner, enhanced-security-check]
+  skip: []
+  submodules: false
