@@ -1,0 +1,70 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: ai-scientist-v2
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# Resources to include in the deployment
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - rbac.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - monitoring.yaml
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/name: ai-scientist
+  app.kubernetes.io/version: v2.0.0
+  app.kubernetes.io/part-of: ai-scientist-platform
+  app.kubernetes.io/managed-by: kustomize
+
+# Common annotations applied to all resources
+commonAnnotations:
+  ai-scientist.terragonlabs.ai/deployment-timestamp: "2025-08-04T00:00:00Z"
+  ai-scientist.terragonlabs.ai/deployed-by: "terragon-labs"
+
+# Image replacements for different environments
+images:
+  - name: ai-scientist
+    newTag: v2.0.0
+  - name: redis
+    newTag: 7.0-alpine
+
+# Namespace for all resources
+namespace: ai-scientist
+
+# ConfigMap generator for environment-specific configs
+configMapGenerator:
+  - name: ai-scientist-env-config
+    literals:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - METRICS_ENABLED=true
+      - CACHE_ENABLED=true
+      - COST_TRACKING_ENABLED=true
+
+# Secret generator (placeholder - use external secret management in production)
+secretGenerator:
+  - name: ai-scientist-generated-secrets
+    literals:
+      - REDIS_PASSWORD=placeholder-generate-in-production
+      - JWT_SECRET=placeholder-generate-in-production
+
+# Patches for different environments
+patchesStrategicMerge:
+  - patches/production-resources.yaml
+
+# Replicas for different environments
+replicas:
+  - name: ai-scientist
+    count: 3
+  - name: ai-scientist-redis
+    count: 1

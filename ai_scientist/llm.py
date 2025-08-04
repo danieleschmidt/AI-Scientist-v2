@@ -4,6 +4,8 @@ import re
 from typing import Any
 from ai_scientist.utils.token_tracker import track_token_usage
 from ai_scientist.utils.config import get_config
+from ai_scientist.utils.circuit_breaker import circuit_breaker, LLM_API_CONFIG
+from ai_scientist.utils.distributed_cache import llm_cache
 
 import anthropic
 import backoff
@@ -18,6 +20,8 @@ AVAILABLE_LLMS = config.get("AVAILABLE_LLM_MODELS")
 
 
 # Get N responses from a single message, used for ensembling.
+@circuit_breaker("llm_batch_responses", LLM_API_CONFIG)
+@llm_cache(ttl=3600)
 @backoff.on_exception(
     backoff.expo,
     (
@@ -170,6 +174,8 @@ def make_llm_call(client, model, temperature, system_message, prompt):
         raise ValueError(f"Model {model} not supported.")
 
 
+@circuit_breaker("llm_single_response", LLM_API_CONFIG)
+@llm_cache(ttl=3600)
 @backoff.on_exception(
     backoff.expo,
     (

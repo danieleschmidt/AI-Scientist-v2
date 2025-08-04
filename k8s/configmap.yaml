@@ -1,0 +1,188 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-scientist-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: v2.0.0
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  ai_scientist_config.yaml: |
+    # AI Scientist Configuration for Kubernetes Deployment
+    # API Configuration
+    API_DEEPSEEK_BASE_URL: "https://api.deepseek.com"
+    API_HUGGINGFACE_BASE_URL: "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview"
+    API_OPENROUTER_BASE_URL: "https://openrouter.ai/api/v1"
+    API_GEMINI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+    API_SEMANTIC_SCHOLAR_BASE_URL: "https://api.semanticscholar.org/graph/v1/paper/search"
+
+    # Model Configuration
+    AVAILABLE_LLM_MODELS:
+      - "claude-3-5-sonnet-20240620"
+      - "gpt-4o-mini"
+      - "o1-2024-12-17"
+      - "gpt-4o-2024-11-20"
+      - "o1-preview-2024-09-12"
+      - "o3-mini-2025-01-31"
+
+    AVAILABLE_VLM_MODELS:
+      - "gpt-4o"
+      - "gpt-4o-mini"
+      - "claude-3-5-sonnet-20240620"
+
+    # Default Models for Different Tasks
+    DEFAULT_MODEL_PLOT_AGG: "o3-mini-2025-01-31"
+    DEFAULT_MODEL_WRITEUP: "o1-preview-2024-09-12"
+    DEFAULT_MODEL_CITATION: "gpt-4o-2024-11-20"
+    DEFAULT_MODEL_REVIEW: "gpt-4o-2024-11-20"
+
+    # Token Limits (Kubernetes optimized)
+    MAX_LLM_TOKENS: 8192
+    MAX_VLM_TOKENS: 8192
+    DEFAULT_CLAUDE_MAX_TOKENS: 16384
+
+    # Timeout Configuration (Kubernetes optimized)
+    LATEX_COMPILE_TIMEOUT: 60
+    PDF_DETECTION_TIMEOUT: 30
+    CHKTEX_TIMEOUT: 120
+    INTERPRETER_TIMEOUT: 7200
+    EXEC_TIMEOUT: 7200
+
+    # File Paths (Kubernetes paths)
+    LATEX_TEMPLATE_DIR_ICML: "/app/ai_scientist/blank_icml_latex"
+    LATEX_TEMPLATE_DIR_ICBINB: "/app/ai_scientist/blank_icbinb_latex"
+    FEWSHOT_EXAMPLES_DIR: "/app/ai_scientist/fewshot_examples"
+
+    # Kubernetes-optimized Settings
+    MAX_FIGURES_ALLOWED: 20
+    DEFAULT_WRITEUP_RETRIES: 5
+    DEFAULT_CITATION_ROUNDS: 30
+    DEFAULT_VLM_MAX_IMAGES: 50
+    BATCH_VLM_MAX_IMAGES: 500
+    VLM_REVIEW_MAX_TOKENS: 2000
+
+    # Temperature Values
+    TEMP_REPORT: 1.0
+    TEMP_CODE: 1.0
+    TEMP_FEEDBACK: 0.5
+    TEMP_VLM_FEEDBACK: 0.5
+    TEMP_REVIEW_DEFAULT: 0.75
+
+    # Other Settings
+    DEFAULT_MODEL_SEED: 0
+    PAGE_LIMIT_NORMAL: 12
+    PAGE_LIMIT_ICBINB: 6
+    SEMANTIC_SCHOLAR_RATE_LIMIT_DELAY: 0.5
+
+    # Kubernetes Execution Configuration
+    NUM_WORKERS: 8
+    EVAL_NUM_SEEDS: 3
+
+  bfts_config.yaml: |
+    # BFTS Configuration for Kubernetes
+    data_dir: "/data"
+    preprocess_data: false
+    goal: null
+    eval: null
+    log_dir: "/logs"
+    workspace_dir: "/workspaces"
+    copy_data: true
+    exp_name: "run"
+
+    # Kubernetes execution settings
+    exec:
+      timeout: 7200
+      agent_file_name: "runfile.py"
+      format_tb_ipython: false
+
+    generate_report: true
+    report:
+      model: "gpt-4o-2024-11-20"
+      temp: 1.0
+
+    experiment:
+      num_syn_datasets: 1
+
+    debug:
+      stage4: false
+
+    # Kubernetes-optimized agent hyperparams
+    agent:
+      type: "parallel"
+      num_workers: 8
+      stages:
+        stage1_max_iters: 30
+        stage2_max_iters: 20
+        stage3_max_iters: 20
+        stage4_max_iters: 25
+      steps: 10
+      k_fold_validation: 1
+      multi_seed_eval:
+        num_seeds: 3
+      expose_prediction: false
+      data_preview: true
+
+      # Kubernetes LLM settings
+      code:
+        model: "anthropic.claude-3-5-sonnet-20241022-v2:0"
+        temp: 1.0
+        max_tokens: 16000
+
+      feedback:
+        model: "gpt-4o-2024-11-20"
+        temp: 0.5
+        max_tokens: 12288
+
+      vlm_feedback:
+        model: "gpt-4o-2024-11-20"
+        temp: 0.5
+        max_tokens: null
+
+      search:
+        max_debug_depth: 5
+        debug_prob: 0.7
+        num_drafts: 5
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-scientist-redis-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: v2.0.0
+    app.kubernetes.io/component: redis-config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  redis.conf: |
+    # Redis configuration for AI Scientist caching
+    maxmemory 2gb
+    maxmemory-policy allkeys-lru
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # Network
+    tcp-keepalive 300
+    timeout 0
+    tcp-backlog 511
+    
+    # Performance
+    databases 16
+    rdbcompression yes
+    rdbchecksum yes
+    
+    # Logging
+    loglevel notice
+    syslog-enabled yes
+    syslog-ident redis
+    
+    # Security
+    protected-mode yes
+    bind 0.0.0.0
+    port 6379
