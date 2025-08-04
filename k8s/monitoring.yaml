@@ -1,0 +1,345 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: ai-scientist-metrics
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: v2.0.0
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: ai-scientist-platform
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-scientist
+      app.kubernetes.io/component: application
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    honorTimestamps: true
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ai-scientist-alerts
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: v2.0.0
+    app.kubernetes.io/component: alerts
+    app.kubernetes.io/part-of: ai-scientist-platform
+spec:
+  groups:
+  - name: ai-scientist.rules
+    rules:
+    # High cost alerts
+    - alert: HighDailyCost
+      expr: ai_scientist_daily_cost > 100
+      for: 5m
+      labels:
+        severity: warning
+        category: cost
+      annotations:
+        summary: "AI Scientist daily cost is high"
+        description: "Daily cost has exceeded $100: {{ $value }}"
+        
+    - alert: CriticalDailyCost
+      expr: ai_scientist_daily_cost > 200
+      for: 1m
+      labels:
+        severity: critical
+        category: cost
+      annotations:
+        summary: "AI Scientist daily cost is critical"
+        description: "Daily cost has exceeded $200: {{ $value }}"
+        
+    # High error rate
+    - alert: HighLLMErrorRate
+      expr: rate(ai_scientist_llm_errors_total[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+        category: reliability
+      annotations:
+        summary: "High LLM error rate detected"
+        description: "LLM error rate is {{ $value }} errors per second"
+        
+    # GPU utilization
+    - alert: LowGPUUtilization
+      expr: ai_scientist_gpu_utilization < 30
+      for: 10m
+      labels:
+        severity: info
+        category: efficiency
+      annotations:
+        summary: "Low GPU utilization detected"
+        description: "GPU utilization is only {{ $value }}%"
+        
+    - alert: HighGPUMemoryUsage
+      expr: ai_scientist_gpu_memory_usage > 90
+      for: 5m
+      labels:
+        severity: warning
+        category: resource
+      annotations:
+        summary: "High GPU memory usage"
+        description: "GPU memory usage is {{ $value }}%"
+        
+    # Application health
+    - alert: ApplicationDown
+      expr: up{job="ai-scientist"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        category: availability
+      annotations:
+        summary: "AI Scientist application is down"
+        description: "AI Scientist has been down for more than 1 minute"
+        
+    - alert: HighResponseTime
+      expr: ai_scientist_request_duration_seconds{quantile="0.95"} > 30
+      for: 5m
+      labels:
+        severity: warning
+        category: performance
+      annotations:
+        summary: "High response time detected"
+        description: "95th percentile response time is {{ $value }}s"
+        
+    # Circuit breaker alerts
+    - alert: CircuitBreakerOpen
+      expr: ai_scientist_circuit_breaker_open_total > 0
+      for: 1m
+      labels:
+        severity: warning
+        category: reliability
+      annotations:
+        summary: "Circuit breaker is open"
+        description: "Circuit breaker {{ $labels.name }} has been opened"
+        
+    # Cache performance
+    - alert: LowCacheHitRate
+      expr: ai_scientist_cache_hit_rate < 0.5
+      for: 10m
+      labels:
+        severity: info
+        category: performance
+      annotations:
+        summary: "Low cache hit rate"
+        description: "Cache hit rate is {{ $value }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: v2.0.0
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: ai-scientist-platform
+    grafana_dashboard: "1"
+data:
+  ai-scientist-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "AI Scientist v2 - Overview",
+        "tags": ["ai-scientist", "overview"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Daily Cost",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "ai_scientist_daily_cost",
+                "legendFormat": "Daily Cost ($)"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 50},
+                    {"color": "red", "value": 100}
+                  ]
+                },
+                "unit": "currencyUSD"
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(ai_scientist_requests_total[5m])",
+                "legendFormat": "Requests/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "LLM Usage by Model",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "sum by (model) (ai_scientist_llm_requests_total)",
+                "legendFormat": "{{ model }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "GPU Utilization",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "ai_scientist_gpu_utilization",
+                "legendFormat": "GPU {{ gpu_id }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Cache Hit Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "ai_scientist_cache_hit_rate",
+                "legendFormat": "Hit Rate"
+              }
+            ],
+            "yAxes": [
+              {
+                "min": 0,
+                "max": 1,
+                "unit": "percentunit"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(ai_scientist_errors_total[5m])",
+                "legendFormat": "Errors/sec"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "10s"
+      }
+    }
+    
+  ai-scientist-cost-analysis.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "AI Scientist v2 - Cost Analysis",
+        "tags": ["ai-scientist", "cost"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Cost by Category",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "sum by (category) (ai_scientist_cost_by_category)",
+                "legendFormat": "{{ category }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Cost Trend",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "ai_scientist_daily_cost",
+                "legendFormat": "Daily Cost"
+              },
+              {
+                "expr": "ai_scientist_weekly_cost / 7",
+                "legendFormat": "Weekly Average"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "LLM Cost by Model",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "sum by (model) (ai_scientist_llm_cost_total)",
+                "legendFormat": "{{ model }}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Budget Utilization",
+            "type": "bargauge",
+            "targets": [
+              {
+                "expr": "ai_scientist_daily_cost / ai_scientist_daily_budget",
+                "legendFormat": "Daily"
+              },
+              {
+                "expr": "ai_scientist_weekly_cost / ai_scientist_weekly_budget",
+                "legendFormat": "Weekly"
+              },
+              {
+                "expr": "ai_scientist_monthly_cost / ai_scientist_monthly_budget",
+                "legendFormat": "Monthly"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "max": 1,
+                "unit": "percentunit",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 0.7},
+                    {"color": "red", "value": 0.9}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          }
+        ],
+        "time": {
+          "from": "now-7d",
+          "to": "now"
+        },
+        "refresh": "1m"
+      }
+    }

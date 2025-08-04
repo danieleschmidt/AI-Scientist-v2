@@ -20,6 +20,8 @@ from typing import Any, Dict, Optional, Union, List
 from dataclasses import dataclass
 import logging
 
+from .config_validation import validate_config as validate_config_schema
+
 # Optional YAML support
 try:
     import yaml
@@ -351,6 +353,11 @@ class ConfigurationManager:
     
     def _validate_config(self):
         """Validate configuration values against schema."""
+        # Use advanced validation from config_validation module
+        if not validate_config_schema(self._config):
+            logger.error("Advanced configuration validation failed")
+        
+        # Original validation for backwards compatibility
         for key, schema in self._schema.items():
             value = self._config.get(key)
             
@@ -433,6 +440,12 @@ class ConfigurationManager:
 # Global configuration instance
 _config_manager = None
 
+# Make validation functions available at module level
+__all__ = [
+    'ConfigurationManager', 'get_config', 'init_config', 'load_config', 'validate_config',
+    'get_api_config', 'get_model_config', 'get_timeout_config', 'get_temp_config'
+]
+
 def get_config() -> ConfigurationManager:
     """Get the global configuration manager instance."""
     global _config_manager
@@ -482,3 +495,13 @@ def get_temp_config(operation: str) -> float:
     config = get_config()
     key = f"TEMP_{operation.upper()}"
     return config.get(key, 1.0)
+
+# Additional convenience functions for enhanced configuration management
+def load_config(config_file: Optional[str] = None) -> Dict[str, Any]:
+    """Load configuration with validation."""
+    config_manager = ConfigurationManager(config_file)
+    return config_manager.get_all()
+
+def validate_config(config: Dict[str, Any]) -> bool:
+    """Validate configuration dictionary."""
+    return validate_config_schema(config)
