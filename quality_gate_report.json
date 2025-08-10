@@ -1,0 +1,1158 @@
+{
+  "timestamp": 1754856052.0510519,
+  "overall_status": "NEEDS_IMPROVEMENT",
+  "summary": {
+    "total_gates": 8,
+    "passed_gates": 5,
+    "failed_gates": 3,
+    "pass_rate": 0.625,
+    "overall_score": 0.7625824791740238,
+    "execution_time": 5.157803297042847
+  },
+  "gate_results": [
+    {
+      "name": "Code Quality Analysis",
+      "passed": true,
+      "score": 0.9012195121951219,
+      "execution_time": 1.6676740646362305,
+      "error_message": "",
+      "details": {
+        "total_files": 164,
+        "total_lines": 71974,
+        "docstring_coverage": 0.8081350729086723,
+        "complex_functions": 88,
+        "long_functions": 215,
+        "quality_issues": [
+          "Error analyzing /root/repo/tests/test_enterprise_integration.py: unterminated string literal (detected at line 51) (<unknown>, line 51)",
+          "Error analyzing /root/repo/ai_scientist/research/research_validation_suite.py: invalid syntax (<unknown>, line 899)"
+        ],
+        "total_functions": 2606,
+        "functions_with_docstrings": 2106
+      }
+    },
+    {
+      "name": "Import and Syntax Validation",
+      "passed": false,
+      "score": 0.9502439024390245,
+      "execution_time": 0.645315408706665,
+      "error_message": "",
+      "details": {
+        "total_files": 164,
+        "syntax_valid": 162,
+        "import_successful": 102,
+        "syntax_errors": [
+          {
+            "file": "tests/test_enterprise_integration.py",
+            "error": "unterminated string literal (detected at line 51) (<unknown>, line 51)",
+            "line": 51
+          },
+          {
+            "file": "ai_scientist/research/research_validation_suite.py",
+            "error": "invalid syntax (<unknown>, line 899)",
+            "line": 899
+          }
+        ],
+        "import_errors": []
+      }
+    },
+    {
+      "name": "Security Analysis",
+      "passed": false,
+      "score": 0,
+      "execution_time": 0.27190160751342773,
+      "error_message": "",
+      "details": {
+        "potential_issues": [
+          {
+            "file": "tdd_security_framework.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "tdd_security_framework.py",
+            "issue": "exec() usage",
+            "matches": 1
+          },
+          {
+            "file": "run_quality_gates.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "run_quality_gates.py",
+            "issue": "exec() usage",
+            "matches": 1
+          },
+          {
+            "file": "run_quality_gates.py",
+            "issue": "os.system() usage",
+            "matches": 1
+          },
+          {
+            "file": "ai_scientist/security_framework.py",
+            "issue": "eval() usage",
+            "matches": 2
+          },
+          {
+            "file": "ai_scientist/security_framework.py",
+            "issue": "os.system() usage",
+            "matches": 1
+          },
+          {
+            "file": "security/secrets_scanner.py",
+            "issue": "Hardcoded password",
+            "matches": 1
+          },
+          {
+            "file": "security/secrets_scanner.py",
+            "issue": "Hardcoded API key",
+            "matches": 1
+          },
+          {
+            "file": "security/secrets_scanner.py",
+            "issue": "Hardcoded secret",
+            "matches": 1
+          },
+          {
+            "file": "tests/test_api_key_security.py",
+            "issue": "Hardcoded API key",
+            "matches": 1
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "issue": "eval() usage",
+            "matches": 2
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "issue": "exec() usage",
+            "matches": 3
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "issue": "os.system() usage",
+            "matches": 2
+          },
+          {
+            "file": "tests/test_security_integration.py",
+            "issue": "exec() usage",
+            "matches": 1
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_better.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "ai_scientist/treesearch/interpreter.py",
+            "issue": "exec() usage",
+            "matches": 1
+          },
+          {
+            "file": "ai_scientist/utils/input_validation.py",
+            "issue": "eval() usage",
+            "matches": 2
+          },
+          {
+            "file": "ai_scientist/utils/torch_compile_safety.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "tests/fixtures/sample_data.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "tests/fixtures/sample_data.py",
+            "issue": "exec() usage",
+            "matches": 1
+          },
+          {
+            "file": "tests/quantum_task_planner/test_monitoring.py",
+            "issue": "eval() usage",
+            "matches": 1
+          },
+          {
+            "file": "tests/security/test_comprehensive_security.py",
+            "issue": "eval() usage",
+            "matches": 2
+          },
+          {
+            "file": "tests/security/test_comprehensive_security.py",
+            "issue": "exec() usage",
+            "matches": 2
+          },
+          {
+            "file": "tests/security/test_comprehensive_security.py",
+            "issue": "os.system() usage",
+            "matches": 1
+          }
+        ],
+        "hardcoded_secrets": 2,
+        "unsafe_functions": 30,
+        "sql_injection_risks": 0,
+        "files_analyzed": 164
+      }
+    },
+    {
+      "name": "Performance Analysis",
+      "passed": true,
+      "score": 0.8859756097560976,
+      "execution_time": 1.3834967613220215,
+      "error_message": "",
+      "details": {
+        "large_functions": 43,
+        "nested_loops": 144,
+        "string_concatenation": 0,
+        "performance_opportunities": [
+          {
+            "file": "run_quality_gates.py",
+            "issue": "Large function 'check_documentation' (103 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/cli_robust.py",
+            "issue": "Large function 'main' (114 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/distributed_computing_engine.py",
+            "issue": "Large function 'demo_distributed_computing' (143 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/intelligent_hypothesis_generator.py",
+            "issue": "Large function 'generate_hypotheses' (109 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/llm.py",
+            "issue": "Large function 'get_batch_responses_from_llm' (108 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/llm.py",
+            "issue": "Large function 'get_response_from_llm' (170 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_icbinb_writeup.py",
+            "issue": "Large function 'get_citation_addition' (193 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_icbinb_writeup.py",
+            "issue": "Large function 'gather_citations' (109 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_icbinb_writeup.py",
+            "issue": "Large function 'perform_writeup' (392 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_ideation_temp_free.py",
+            "issue": "Large function 'generate_temp_free_idea' (138 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_llm_review.py",
+            "issue": "Large function 'perform_review' (108 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_plotting.py",
+            "issue": "Large function 'aggregate_plots' (118 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_vlm_review.py",
+            "issue": "Large function 'extract_figure_screenshots' (154 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_writeup.py",
+            "issue": "Large function 'get_citation_addition' (192 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/perform_writeup.py",
+            "issue": "Large function 'perform_writeup' (312 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/unified_research_orchestrator.py",
+            "issue": "Large function 'create_standard_workflow' (102 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/unified_research_orchestrator.py",
+            "issue": "Large function 'execute_workflow' (131 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/scalable_autonomous_orchestrator.py",
+            "issue": "Large function 'create_scalable_research_pipeline' (206 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/scalable_autonomous_orchestrator.py",
+            "issue": "Large function 'run_scalable_research_cycle' (115 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/autonomous_sdlc_orchestrator.py",
+            "issue": "Large function 'create_research_pipeline' (132 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/autonomous_sdlc_orchestrator.py",
+            "issue": "Large function 'run_autonomous_research_cycle' (131 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/robust_autonomous_orchestrator.py",
+            "issue": "Large function 'create_robust_research_pipeline' (122 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/robust_autonomous_orchestrator.py",
+            "issue": "Large function 'run_robust_research_cycle' (147 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "scripts/dependency_update.py",
+            "issue": "Large function 'main' (111 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "scripts/release.py",
+            "issue": "Large function 'main' (104 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/agent_manager.py",
+            "issue": "Large function '_check_stage_completion' (126 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/agent_manager.py",
+            "issue": "Large function 'run' (137 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/interpreter.py",
+            "issue": "Large function 'run' (123 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function '_generate_plotting_code' (113 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function '_analyze_plots_with_vlm' (139 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function '_process_node_wrapper' (386 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function '_select_parallel_nodes' (164 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function 'step' (132 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "issue": "Large function '_aggregate_seed_eval_results' (103 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/perform_experiments_bfts_with_agentmanager.py",
+            "issue": "Large function 'perform_experiments_bfts' (184 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/utils/config.py",
+            "issue": "Large function '_define_schema' (184 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/__init__.py",
+            "issue": "Large function 'extract_archives' (102 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/tree_export.py",
+            "issue": "Large function 'cfg_to_tree_struct' (283 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "tests/integration/test_e2e_research_pipeline.py",
+            "issue": "Large function 'test_full_research_pipeline' (113 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_integration.py",
+            "issue": "Large function 'test_full_quantum_planning_workflow' (116 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_integration.py",
+            "issue": "Large function 'test_distributed_quantum_computing_workflow' (128 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_integration.py",
+            "issue": "Large function 'test_adaptive_optimization_workflow' (101 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_integration.py",
+            "issue": "Large function 'test_production_deployment_scenario' (105 lines)",
+            "suggestion": "Consider breaking into smaller functions"
+          }
+        ],
+        "files_analyzed": 164
+      }
+    },
+    {
+      "name": "Documentation Coverage",
+      "passed": true,
+      "score": 0.8732208090019465,
+      "execution_time": 1.1559410095214844,
+      "error_message": "",
+      "details": {
+        "readme_exists": true,
+        "changelog_exists": true,
+        "license_exists": true,
+        "docs_directory": true,
+        "module_docstrings": 125,
+        "total_modules": 162,
+        "class_docstrings": 381,
+        "total_classes": 463,
+        "missing_docs": [
+          {
+            "file": "autonomous_backlog_manager.py",
+            "type": "class",
+            "item": "class TaskStatus"
+          },
+          {
+            "file": "autonomous_backlog_manager.py",
+            "type": "class",
+            "item": "class TaskType"
+          },
+          {
+            "file": "launch_scientist_bfts.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "launch_scientist_bfts.py",
+            "type": "class",
+            "item": "class ProcessWrapper"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockConsole"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockProgress"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockSpinnerColumn"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockTextColumn"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockBarColumn"
+          },
+          {
+            "file": "test_ai_scientist_minimal.py",
+            "type": "class",
+            "item": "class MockTimeRemainingColumn"
+          },
+          {
+            "file": "DOCS/autonomous_execution_loop.py",
+            "type": "class",
+            "item": "class TaskStatus"
+          },
+          {
+            "file": "DOCS/autonomous_execution_loop.py",
+            "type": "class",
+            "item": "class TaskType"
+          },
+          {
+            "file": "ai_scientist/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockHealthChecker"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockQuantumPlanner"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockQuantumMonitor"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockCostOptimizer"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockCache"
+          },
+          {
+            "file": "ai_scientist/cli.py",
+            "type": "class",
+            "item": "class MockTokenTracker"
+          },
+          {
+            "file": "ai_scientist/cli_enterprise.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_robust.py",
+            "type": "class",
+            "item": "class MockFailureType"
+          },
+          {
+            "file": "ai_scientist/cli_robust.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_robust.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_robust.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockQuantumMonitor"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockQuantumPlanner"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockCostOptimizer"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockCache"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockTokenTracker"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class MockHealthChecker"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/cli_simple.py",
+            "type": "class",
+            "item": "class Args"
+          },
+          {
+            "file": "ai_scientist/llm.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_icbinb_writeup.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_ideation_temp_free.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_llm_review.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_plotting.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_vlm_review.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/perform_writeup.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/vlm.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/scalable_autonomous_orchestrator.py",
+            "type": "class",
+            "item": "class MemoryOptimizer"
+          },
+          {
+            "file": "ai_scientist/robust_autonomous_orchestrator.py",
+            "type": "class",
+            "item": "class TimeoutContext"
+          },
+          {
+            "file": "repo_hygiene/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "repo_hygiene/github_client.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "repo_hygiene/github_client.py",
+            "type": "class",
+            "item": "class Repository"
+          },
+          {
+            "file": "repo_hygiene/github_client.py",
+            "type": "class",
+            "item": "class GitHubClient"
+          },
+          {
+            "file": "tests/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "tests/test_basic_functionality.py",
+            "type": "class",
+            "item": "class TestBasicFunctionality"
+          },
+          {
+            "file": "tests/test_basic_functionality.py",
+            "type": "class",
+            "item": "class TestConfigurationParsing"
+          },
+          {
+            "file": "tests/test_gpu_manager_isolated.py",
+            "type": "class",
+            "item": "class TestGPUManagerIsolated"
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "type": "class",
+            "item": "class ValidationError"
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_input_validation_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_nested_zip.py",
+            "type": "class",
+            "item": "class TestNestedZipHandling"
+          },
+          {
+            "file": "tests/test_path_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_path_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_path_security.py",
+            "type": "class",
+            "item": "class SecurityError"
+          },
+          {
+            "file": "tests/test_security_fixes.py",
+            "type": "class",
+            "item": "class TestSecurityFixes"
+          },
+          {
+            "file": "tests/test_utils.py",
+            "type": "class",
+            "item": "class TestUtilsFunctions"
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_better.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_better.py",
+            "type": "class",
+            "item": "class HuggingFaceImageNet"
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+            "type": "class",
+            "item": "class HuggingFaceImageNet"
+          },
+          {
+            "file": "ai_scientist/optimization/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/scaling/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/tools/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/tools/base_tool.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/tools/semantic_scholar.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/tools/semantic_scholar.py",
+            "type": "class",
+            "item": "class SemanticScholarSearchTool"
+          },
+          {
+            "file": "ai_scientist/treesearch/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/agent_manager.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/agent_manager.py",
+            "type": "class",
+            "item": "class Stage"
+          },
+          {
+            "file": "ai_scientist/treesearch/agent_manager.py",
+            "type": "class",
+            "item": "class AgentManager"
+          },
+          {
+            "file": "ai_scientist/treesearch/bfts_utils.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/interpreter.py",
+            "type": "class",
+            "item": "class RedirectQueue"
+          },
+          {
+            "file": "ai_scientist/treesearch/interpreter.py",
+            "type": "class",
+            "item": "class Interpreter"
+          },
+          {
+            "file": "ai_scientist/treesearch/journal.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/journal2report.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/log_summarization.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/parallel_agent.py",
+            "type": "class",
+            "item": "class ParallelAgent"
+          },
+          {
+            "file": "ai_scientist/treesearch/perform_experiments_bfts_with_agentmanager.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/utils/token_tracker.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/utils/token_tracker.py",
+            "type": "class",
+            "item": "class TokenTracker"
+          },
+          {
+            "file": "ai_scientist/research/adaptive_tree_search.py",
+            "type": "class",
+            "item": "class MockResult"
+          },
+          {
+            "file": "ai_scientist/treesearch/backend/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/backend/backend_anthropic.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/backend/backend_openai.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/backend/utils.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/backend/utils.py",
+            "type": "class",
+            "item": "class FunctionSpec"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/__init__.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class ThinkingConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class StageConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class SearchConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class DebugConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class AgentConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class ExecConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class ExperimentConfig"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/config.py",
+            "type": "class",
+            "item": "class Config"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/metric.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/response.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "ai_scientist/treesearch/utils/serialize.py",
+            "type": "module",
+            "item": "module docstring"
+          },
+          {
+            "file": "tests/performance/test_load_benchmarks.py",
+            "type": "class",
+            "item": "class TestResource"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class MockTask"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class MockTask"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class MockResource"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class MockResource"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class UnnormalizedQubitState"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class InvalidQubitState"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class IncompleteResult"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class InvalidSolutionResult"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class CustomValidator"
+          },
+          {
+            "file": "tests/quantum_task_planner/test_validation.py",
+            "type": "class",
+            "item": "class ValidObject"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Architecture Validation",
+      "passed": true,
+      "score": 1.0,
+      "execution_time": 0.021006107330322266,
+      "error_message": "",
+      "details": {
+        "package_structure": {
+          "ai_scientist": {
+            "exists": true,
+            "files": 76,
+            "subdirectories": 11
+          },
+          "tests": {
+            "exists": true,
+            "files": 40,
+            "subdirectories": 6
+          },
+          "docs": {
+            "exists": true,
+            "files": 0,
+            "subdirectories": 5
+          },
+          "scripts": {
+            "exists": true,
+            "files": 9,
+            "subdirectories": 1
+          }
+        },
+        "circular_imports": [],
+        "interface_compliance": true,
+        "design_patterns": [
+          "Factory Pattern",
+          "Singleton Pattern",
+          "Observer Pattern",
+          "Strategy Pattern"
+        ],
+        "architectural_violations": [],
+        "research_modules": {
+          "count": 5,
+          "modules": [
+            "multi_objective_orchestration",
+            "adaptive_tree_search",
+            "predictive_resource_manager",
+            "research_validation_suite"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Research Code Validation",
+      "passed": false,
+      "score": 0.64,
+      "execution_time": 0.00742030143737793,
+      "error_message": "",
+      "details": {
+        "research_modules": [
+          "multi_objective_orchestration",
+          "adaptive_tree_search",
+          "predictive_resource_manager",
+          "research_validation_suite"
+        ],
+        "algorithms_implemented": 0,
+        "validation_code": true,
+        "baseline_comparisons": true,
+        "statistical_testing": true,
+        "reproducibility_features": 0,
+        "research_documentation": true
+      }
+    },
+    {
+      "name": "Configuration Validation",
+      "passed": true,
+      "score": 0.85,
+      "execution_time": 0.0012195110321044922,
+      "error_message": "",
+      "details": {
+        "pyproject_toml": true,
+        "requirements_txt": true,
+        "config_files": [
+          ".pre-commit-config.yaml",
+          "ai_scientist_config.yaml",
+          "bfts_config.yaml",
+          "docker-compose.yml",
+          "performance_optimization.yml",
+          "bandit_report.json",
+          "safety_report.json",
+          "pytest.ini",
+          "pyproject.toml"
+        ],
+        "docker_support": true,
+        "ci_cd_setup": false,
+        "git_setup": true
+      }
+    }
+  ],
+  "recommendations": [
+    "Fix syntax errors and resolve import issues",
+    "Address security issues: avoid hardcoded secrets and unsafe functions",
+    "\u2705 Good code quality - consider addressing minor issues before deployment",
+    "Implement automated quality gates in CI/CD pipeline",
+    "Set up pre-commit hooks for code quality checks",
+    "Consider implementing test coverage reporting",
+    "Add performance benchmarking for critical algorithms"
+  ],
+  "quality_metrics": {
+    "code_quality_threshold": 0.85,
+    "security_threshold": 0.9,
+    "performance_threshold": 0.75,
+    "documentation_threshold": 0.7
+  }
+}

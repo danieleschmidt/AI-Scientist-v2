@@ -48,7 +48,7 @@ def test_import_availability():
         )
         assert True, "Distributed executor imports successful"
     except ImportError:
-        print("SKIPPED:("Distributed executor not available")
+        print("SKIPPED: Distributed executor not available")
     
     try:
         # Test performance optimizer import  
@@ -154,7 +154,7 @@ def test_distributed_task_manager():
             DistributedTaskManager, create_ideation_task, TaskStatus
         )
     except ImportError:
-        print("SKIPPED:("Distributed executor not available")
+        print("SKIPPED: Distributed executor not available")
     
     manager = DistributedTaskManager(max_workers=2)
     manager.start()
@@ -303,7 +303,7 @@ def test_task_creation_and_validation():
             create_ideation_task, create_experiment_task, ResourceRequirement
         )
     except ImportError:
-        print("SKIPPED:("Distributed executor not available")
+        print("SKIPPED: Distributed executor not available")
     
     # Test ideation task creation
     ideation_task = create_ideation_task(
@@ -339,7 +339,7 @@ def test_error_handling_in_distributed_tasks():
             DistributedTaskManager, TaskDefinition, ResourceRequirement, TaskStatus
         )
     except ImportError:
-        print("SKIPPED:("Distributed executor not available")
+        print("SKIPPED: Distributed executor not available")
     
     manager = DistributedTaskManager(max_workers=1)
     manager.start()
