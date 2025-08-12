@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  terragon-autonomous:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: terragon-sdlc:v4.0
+    container_name: terragon-autonomous-research
+    restart: unless-stopped
+    
+    ports:
+      - "8080:8080"    # Main application port
+      - "8000:8000"    # Prometheus metrics port
+    
+    environment:
+      # Core Configuration
+      - RESEARCH_MODE=unified
+      - WORKSPACE_DIR=/workspace
+      - MAX_CONCURRENT_EXPERIMENTS=16
+      
+      # Discovery Configuration
+      - DISCOVERY_BUDGET=20
+      - VALIDATION_BUDGET=10
+      - EXPERIMENT_BUDGET=50
+      
+      # Optimization Configuration
+      - ENABLE_QUANTUM_OPTIMIZATION=true
+      - ENABLE_DISTRIBUTED_COMPUTING=true
+      - OPTIMIZATION_ROUNDS=5
+      
+      # Performance Configuration
+      - CACHE_MEMORY_MB=8192
+      - INITIAL_WORKERS=16
+      - MAX_WORKERS=64
+      
+      # Output Configuration
+      - GENERATE_VISUALIZATIONS=true
+      - GENERATE_PUBLICATIONS=true
+      - AUTO_COMMIT_RESULTS=false
+      
+      # Monitoring Configuration
+      - PROMETHEUS_PORT=8000
+      - HEALTH_CHECK_INTERVAL=30
+      - LOG_LEVEL=INFO
+    
+    volumes:
+      - terragon_workspace:/workspace
+      - terragon_logs:/var/log/terragon
+      - ./terragon_production.yaml:/app/terragon_production.yaml:ro
+    
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 16G
+        reservations:
+          cpus: '4'  
+          memory: 8G
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: terragon-prometheus
+    restart: unless-stopped
+    
+    ports:
+      - "9090:9090"
+    
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - terragon_prometheus_data:/prometheus
+    
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: terragon-grafana
+    restart: unless-stopped
+    
+    ports:
+      - "3000:3000"
+    
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=terragon_admin_2025
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    
+    volumes:
+      - terragon_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    
+    depends_on:
+      - prometheus
+
+  redis:
+    image: redis:7-alpine
+    container_name: terragon-redis
+    restart: unless-stopped
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - terragon_redis_data:/data
+    
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+
+  nginx:
+    image: nginx:alpine
+    container_name: terragon-nginx
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    
+    depends_on:
+      - terragon-autonomous
+
+volumes:
+  terragon_workspace:
+    driver: local
+  terragon_logs:
+    driver: local
+  terragon_prometheus_data:
+    driver: local
+  terragon_grafana_data:
+    driver: local
+  terragon_redis_data:
+    driver: local
+
+networks:
+  default:
+    name: terragon-network
+    driver: bridge

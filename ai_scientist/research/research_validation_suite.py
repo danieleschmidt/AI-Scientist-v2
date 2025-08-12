@@ -896,7 +896,7 @@ class ComprehensiveValidator:
         for h in hypothesis_validations:
             if h['achieved'] and h['statistically_significant']:
                 conclusions.append(f"✅ {h['hypothesis']}: VALIDATED ({h['measured_improvement']} improvement, p={h['p_value']:.4f})")
-            elif h['statistically_significant'] but not h['achieved']:
+            elif h['statistically_significant'] and not h['achieved']:
                 conclusions.append(f"⚠️  {h['hypothesis']}: PARTIALLY VALIDATED ({h['measured_improvement']} improvement, significant but below target)")
             else:
                 conclusions.append(f"❌ {h['hypothesis']}: NOT VALIDATED (improvement={h['measured_improvement']}, p={h['p_value']:.4f})")
