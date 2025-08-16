@@ -1,0 +1,12 @@
+{
+  "experiments": [
+    {
+      "id": "exp_001",
+      "type": "baseline_analysis",
+      "description": "Baseline analysis for Robust AI Testing v2",
+      "estimated_duration": 1800
+    }
+  ],
+  "total_experiments": 1,
+  "estimated_total_time": 1800
+}
