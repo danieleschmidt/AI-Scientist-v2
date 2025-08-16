@@ -1,0 +1,468 @@
+{
+  "summary": {
+    "overall_status": "FAILED",
+    "overall_score": 43.03904027564853,
+    "gates_passed": 2,
+    "gates_failed": 1,
+    "gates_warning": 1,
+    "gates_error": 0,
+    "total_gates": 4,
+    "gate_results": [
+      {
+        "gate_type": "unit_tests",
+        "status": "passed",
+        "score": 0.0,
+        "execution_time": 0.5674996376037598,
+        "violations_count": 0,
+        "recommendations_count": 0
+      },
+      {
+        "gate_type": "security_scan",
+        "status": "failed",
+        "score": 0.0,
+        "execution_time": 0.5019736289978027,
+        "violations_count": 30,
+        "recommendations_count": 0
+      },
+      {
+        "gate_type": "performance_benchmark",
+        "status": "passed",
+        "score": 99.60714149475098,
+        "execution_time": 0.0012776851654052734,
+        "violations_count": 0,
+        "recommendations_count": 0
+      },
+      {
+        "gate_type": "code_quality",
+        "status": "warning",
+        "score": 72.54901960784314,
+        "execution_time": 0.049675703048706055,
+        "violations_count": 0,
+        "recommendations_count": 0
+      }
+    ],
+    "recommendations": [],
+    "critical_issues": [
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "pickle can execute arbitrary code",
+      "pickle can execute arbitrary code",
+      "Use of eval() can be dangerous",
+      "pickle can execute arbitrary code",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "pickle can execute arbitrary code",
+      "Use of eval() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of eval() can be dangerous",
+      "Use of exec() can be dangerous",
+      "Potential hardcoded secret: API_KEY = \"api_key\"",
+      "Potential hardcoded secret: PASSWORD = \"password\"",
+      "Potential hardcoded secret: SECRET = \"generic_secret\"",
+      "Potential hardcoded secret: TOKEN = \"token\"",
+      "Potential hardcoded secret: api_key = \"test-api-key-12345\""
+    ]
+  },
+  "detailed_results": [
+    {
+      "gate_type": "unit_tests",
+      "status": "passed",
+      "score": 0.0,
+      "max_score": 100.0,
+      "details": {
+        "test_files_found": 86,
+        "test_files": [
+          "/root/repo/test_ai_scientist_integration.py",
+          "/root/repo/test_ai_scientist_minimal.py",
+          "/root/repo/test_gpu_fixes.py",
+          "/root/repo/test_imports.py",
+          "/root/repo/test_runner.py",
+          "/root/repo/test_system.py",
+          "/root/repo/tests/test_api_key_security.py",
+          "/root/repo/tests/test_api_key_security_enhancement.py",
+          "/root/repo/tests/test_autonomous_sdlc_generations.py",
+          "/root/repo/tests/test_basic_autonomous_sdlc.py",
+          "/root/repo/tests/test_basic_functionality.py",
+          "/root/repo/tests/test_configuration_management.py",
+          "/root/repo/tests/test_debug_error_handling.py",
+          "/root/repo/tests/test_dependency_management.py",
+          "/root/repo/tests/test_enterprise_integration.py",
+          "/root/repo/tests/test_enterprise_simple.py",
+          "/root/repo/tests/test_file_handle_leak_fix.py",
+          "/root/repo/tests/test_gpu_manager_enhanced.py",
+          "/root/repo/tests/test_gpu_manager_isolated.py",
+          "/root/repo/tests/test_gpu_resource_management.py",
+          "/root/repo/tests/test_input_validation_security.py",
+          "/root/repo/tests/test_interpreter_timeout.py",
+          "/root/repo/tests/test_llm_configuration_integration.py",
+          "/root/repo/tests/test_llm_simple.py",
+          "/root/repo/tests/test_nested_zip.py",
+          "/root/repo/tests/test_path_security.py",
+          "/root/repo/tests/test_process_cleanup_enhanced.py",
+          "/root/repo/tests/test_security_fixes.py",
+          "/root/repo/tests/test_security_integration.py",
+          "/root/repo/tests/test_timeout_fix.py",
+          "/root/repo/tests/test_torch_compile_safety.py",
+          "/root/repo/tests/test_torch_compile_safety_enhanced.py",
+          "/root/repo/tests/test_utils.py",
+          "/root/repo/tests/test_vlm_prepare_prompt.py",
+          "/root/repo/tests/integration/test_e2e_research_pipeline.py",
+          "/root/repo/tests/performance/test_benchmarks.py",
+          "/root/repo/tests/performance/test_load_benchmarks.py",
+          "/root/repo/tests/quantum_task_planner/test_core.py",
+          "/root/repo/tests/quantum_task_planner/test_integration.py",
+          "/root/repo/tests/quantum_task_planner/test_monitoring.py",
+          "/root/repo/tests/quantum_task_planner/test_optimization.py",
+          "/root/repo/tests/quantum_task_planner/test_validation.py",
+          "/root/repo/tests/security/test_comprehensive_security.py",
+          "/root/repo/tests/unit/test_config_management.py",
+          "/root/repo/tests/__init__.py",
+          "/root/repo/tests/conftest.py",
+          "/root/repo/tests/test_api_key_security.py",
+          "/root/repo/tests/test_api_key_security_enhancement.py",
+          "/root/repo/tests/test_autonomous_sdlc_generations.py",
+          "/root/repo/tests/test_basic_autonomous_sdlc.py",
+          "/root/repo/tests/test_basic_functionality.py",
+          "/root/repo/tests/test_configuration_management.py",
+          "/root/repo/tests/test_debug_error_handling.py",
+          "/root/repo/tests/test_dependency_management.py",
+          "/root/repo/tests/test_enterprise_integration.py",
+          "/root/repo/tests/test_enterprise_simple.py",
+          "/root/repo/tests/test_file_handle_leak_fix.py",
+          "/root/repo/tests/test_gpu_manager_enhanced.py",
+          "/root/repo/tests/test_gpu_manager_isolated.py",
+          "/root/repo/tests/test_gpu_resource_management.py",
+          "/root/repo/tests/test_input_validation_security.py",
+          "/root/repo/tests/test_interpreter_timeout.py",
+          "/root/repo/tests/test_llm_configuration_integration.py",
+          "/root/repo/tests/test_llm_simple.py",
+          "/root/repo/tests/test_nested_zip.py",
+          "/root/repo/tests/test_path_security.py",
+          "/root/repo/tests/test_process_cleanup_enhanced.py",
+          "/root/repo/tests/test_security_fixes.py",
+          "/root/repo/tests/test_security_integration.py",
+          "/root/repo/tests/test_timeout_fix.py",
+          "/root/repo/tests/test_torch_compile_safety.py",
+          "/root/repo/tests/test_torch_compile_safety_enhanced.py",
+          "/root/repo/tests/test_utils.py",
+          "/root/repo/tests/test_vlm_prepare_prompt.py",
+          "/root/repo/tests/fixtures/sample_data.py",
+          "/root/repo/tests/integration/test_e2e_research_pipeline.py",
+          "/root/repo/tests/performance/test_benchmarks.py",
+          "/root/repo/tests/performance/test_load_benchmarks.py",
+          "/root/repo/tests/quantum_task_planner/__init__.py",
+          "/root/repo/tests/quantum_task_planner/test_core.py",
+          "/root/repo/tests/quantum_task_planner/test_integration.py",
+          "/root/repo/tests/quantum_task_planner/test_monitoring.py",
+          "/root/repo/tests/quantum_task_planner/test_optimization.py",
+          "/root/repo/tests/quantum_task_planner/test_validation.py",
+          "/root/repo/tests/security/test_comprehensive_security.py",
+          "/root/repo/tests/unit/test_config_management.py"
+        ],
+        "exit_code": 1,
+        "output": "/usr/bin/python3: No module named pytest\n",
+        "execution_method": "pytest"
+      },
+      "metrics": {},
+      "violations": [],
+      "recommendations": [],
+      "execution_time": 0.5674996376037598,
+      "timestamp": "2025-08-16T19:29:25.211152"
+    },
+    {
+      "gate_type": "security_scan",
+      "status": "failed",
+      "score": 0.0,
+      "max_score": 100.0,
+      "details": {
+        "security_issues": [
+          {
+            "file": "/root/repo/run_quality_gates.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/run_quality_gates.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tdd_security_framework.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tdd_security_framework.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/autonomous_quality_validator.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/autonomous_quality_validator.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
+            "description": "pickle can execute arbitrary code",
+            "severity": "medium",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/scalable_research_orchestrator.py",
+            "description": "pickle can execute arbitrary code",
+            "severity": "medium",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/security_framework.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/scalable_execution_engine.py",
+            "description": "pickle can execute arbitrary code",
+            "severity": "medium",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/test_input_validation_security.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/test_input_validation_security.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/test_security_integration.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/treesearch/interpreter.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/utils/distributed_cache.py",
+            "description": "pickle can execute arbitrary code",
+            "severity": "medium",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/utils/input_validation.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/utils/torch_compile_safety.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/fixtures/sample_data.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/fixtures/sample_data.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/quantum_task_planner/test_monitoring.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/security/test_comprehensive_security.py",
+            "description": "Use of eval() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/tests/security/test_comprehensive_security.py",
+            "description": "Use of exec() can be dangerous",
+            "severity": "critical",
+            "type": "dangerous_function"
+          },
+          {
+            "file": "/root/repo/security/secrets_scanner.py",
+            "description": "Potential hardcoded secret: API_KEY = \"api_key\"",
+            "severity": "high",
+            "type": "hardcoded_secret",
+            "line": 22
+          },
+          {
+            "file": "/root/repo/security/secrets_scanner.py",
+            "description": "Potential hardcoded secret: PASSWORD = \"password\"",
+            "severity": "high",
+            "type": "hardcoded_secret",
+            "line": 23
+          },
+          {
+            "file": "/root/repo/security/secrets_scanner.py",
+            "description": "Potential hardcoded secret: SECRET = \"generic_secret\"",
+            "severity": "high",
+            "type": "hardcoded_secret",
+            "line": 27
+          },
+          {
+            "file": "/root/repo/security/secrets_scanner.py",
+            "description": "Potential hardcoded secret: TOKEN = \"token\"",
+            "severity": "high",
+            "type": "hardcoded_secret",
+            "line": 24
+          },
+          {
+            "file": "/root/repo/tests/test_api_key_security.py",
+            "description": "Potential hardcoded secret: api_key = \"test-api-key-12345\"",
+            "severity": "high",
+            "type": "hardcoded_secret",
+            "line": 77
+          }
+        ],
+        "files_scanned": 190
+      },
+      "metrics": {},
+      "violations": [
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "pickle can execute arbitrary code",
+        "pickle can execute arbitrary code",
+        "Use of eval() can be dangerous",
+        "pickle can execute arbitrary code",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "pickle can execute arbitrary code",
+        "Use of eval() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of eval() can be dangerous",
+        "Use of exec() can be dangerous",
+        "Potential hardcoded secret: API_KEY = \"api_key\"",
+        "Potential hardcoded secret: PASSWORD = \"password\"",
+        "Potential hardcoded secret: SECRET = \"generic_secret\"",
+        "Potential hardcoded secret: TOKEN = \"token\"",
+        "Potential hardcoded secret: api_key = \"test-api-key-12345\""
+      ],
+      "recommendations": [],
+      "execution_time": 0.5019736289978027,
+      "timestamp": "2025-08-16T19:29:25.224711"
+    },
+    {
+      "gate_type": "performance_benchmark",
+      "status": "passed",
+      "score": 99.60714149475098,
+      "max_score": 100.0,
+      "details": {
+        "benchmark_results": {
+          "memory_usage_mb": 0.0062713623046875,
+          "cpu_performance_score": 99.09257888793945,
+          "io_performance_score": 99.73511695861816
+        }
+      },
+      "metrics": {
+        "memory_usage_mb": 0.0062713623046875,
+        "cpu_performance_score": 99.09257888793945,
+        "io_performance_score": 99.73511695861816
+      },
+      "violations": [],
+      "recommendations": [],
+      "execution_time": 0.0012776851654052734,
+      "timestamp": "2025-08-16T19:29:25.726817"
+    },
+    {
+      "gate_type": "code_quality",
+      "status": "warning",
+      "score": 72.54901960784314,
+      "max_score": 100.0,
+      "details": {
+        "files_analyzed": 190,
+        "quality_metrics": {
+          "total_lines": 94562,
+          "total_functions": 340,
+          "total_classes": 344,
+          "avg_function_length": 10.0,
+          "avg_complexity": 2.0,
+          "docstring_coverage": 37.64705882352941
+        }
+      },
+      "metrics": {
+        "total_lines": 94562,
+        "total_functions": 340,
+        "total_classes": 344,
+        "avg_function_length": 10.0,
+        "avg_complexity": 2.0,
+        "docstring_coverage": 37.64705882352941
+      },
+      "violations": [],
+      "recommendations": [],
+      "execution_time": 0.049675703048706055,
+      "timestamp": "2025-08-16T19:29:25.728107"
+    }
+  ]
+}

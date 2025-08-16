@@ -1,0 +1,33 @@
+{
+  "research_topic": "Test Research Topic",
+  "start_time": "2025-08-16T19:20:11.779106",
+  "status": "completed",
+  "stages": {
+    "ideation": {
+      "status": "completed",
+      "ideas_generated": 1,
+      "output_file": "test_output/research_ideas.json"
+    },
+    "planning": {
+      "status": "completed",
+      "experiments_planned": 1,
+      "plan_file": "test_output/experiment_plan.json"
+    },
+    "experimentation": {
+      "status": "completed",
+      "experiments_completed": 1,
+      "results_file": "test_output/experiment_results.json"
+    },
+    "validation": {
+      "status": "completed",
+      "validation_passed": true,
+      "validation_file": "test_output/validation_results.json"
+    },
+    "reporting": {
+      "status": "completed",
+      "report_file": "test_output/research_report.md"
+    }
+  },
+  "execution_time_hours": 4.3094158172607424e-07,
+  "end_time": "2025-08-16T19:20:11.780730"
+}
