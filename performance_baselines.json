@@ -1,0 +1,30 @@
+{
+  "cpu_intensive": {
+    "matrix_multiplication": 1000.0,
+    "prime_calculation": 500.0
+  },
+  "quantum_algorithms": {
+    "quantum_optimization": 50.0
+  },
+  "matrix_intensive": {
+    "matrix_multiplication": 1150.0
+  },
+  "prime_intensive": {
+    "prime_calculation": 485.0
+  },
+  "memory_intensive": {
+    "memory_intensive_test": 105.0
+  },
+  "io_intensive": {
+    "io_intensive_test": 105.0
+  },
+  "network_intensive": {
+    "network_intensive_test": 105.0
+  },
+  "quantum_intensive": {
+    "quantum_optimization": 62.5
+  },
+  "ml_intensive": {
+    "ml_processing_test": 105.0
+  }
+}
