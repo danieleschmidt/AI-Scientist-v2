@@ -1,0 +1,10 @@
+{
+  "execution_id": "quality_gates_1755466864",
+  "version": "QG-1.0.0",
+  "total_execution_time": 6.630896806716919,
+  "phases": {
+    "testing": {
+      "status": "completed",
+      "results": {
+        "test_suites": {
+          "unit": 
