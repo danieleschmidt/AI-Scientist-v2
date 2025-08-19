@@ -1,0 +1,56 @@
+{
+  "deployment_id": "deploy_1755607464",
+  "timestamp": "2025-08-19T12:44:24.831356",
+  "duration": "0:00:00.001460",
+  "status": "completed",
+  "regions_configured": [
+    "us-west-2",
+    "eu-central-1",
+    "ap-southeast-1"
+  ],
+  "languages_supported": [
+    "en",
+    "es",
+    "fr",
+    "de",
+    "ja",
+    "zh"
+  ],
+  "compliance_frameworks": [
+    "GDPR",
+    "CCPA",
+    "PDPA"
+  ],
+  "platforms_supported": [
+    "linux",
+    "macos",
+    "windows"
+  ],
+  "artifacts": {
+    "docker_images": [
+      "production_deployment/deploy_1755607464/docker/Dockerfile"
+    ],
+    "kubernetes_manifests": [],
+    "terraform_configs": [],
+    "monitoring_configs": [],
+    "compliance_docs": [
+      "production_deployment/deploy_1755607464/compliance/GDPR_Compliance.md",
+      "production_deployment/deploy_1755607464/compliance/CCPA_Compliance.md"
+    ],
+    "i18n_resources": [
+      "production_deployment/deploy_1755607464/i18n/en.json",
+      "production_deployment/deploy_1755607464/i18n/es.json",
+      "production_deployment/deploy_1755607464/i18n/fr.json",
+      "production_deployment/deploy_1755607464/i18n/de.json",
+      "production_deployment/deploy_1755607464/i18n/ja.json",
+      "production_deployment/deploy_1755607464/i18n/zh.json"
+    ]
+  },
+  "features": [
+    "Multi-region deployment readiness",
+    "Internationalization support",
+    "Compliance documentation",
+    "Production Docker configuration",
+    "Global-first architecture"
+  ]
+}

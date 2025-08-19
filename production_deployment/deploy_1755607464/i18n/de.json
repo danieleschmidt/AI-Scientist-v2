@@ -1,0 +1,9 @@
+{
+  "app_name": "KI Wissenschaftler v2",
+  "research_started": "Forschung gestartet",
+  "experiment_completed": "Experiment abgeschlossen",
+  "paper_generated": "Artikel generiert",
+  "error_occurred": "Ein Fehler ist aufgetreten",
+  "success": "Erfolg",
+  "failed": "Fehlgeschlagen"
+}

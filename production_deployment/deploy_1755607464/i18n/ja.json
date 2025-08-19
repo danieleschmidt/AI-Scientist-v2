@@ -1,0 +1,9 @@
+{
+  "app_name": "AI科学者 v2",
+  "research_started": "研究開始",
+  "experiment_completed": "実験完了",
+  "paper_generated": "論文生成",
+  "error_occurred": "エラーが発生しました",
+  "success": "成功",
+  "failed": "失敗"
+}
