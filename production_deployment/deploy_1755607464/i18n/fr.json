@@ -1,0 +1,9 @@
+{
+  "app_name": "IA Scientifique v2",
+  "research_started": "Recherche commencée",
+  "experiment_completed": "Expérience terminée",
+  "paper_generated": "Article généré",
+  "error_occurred": "Une erreur s'est produite",
+  "success": "Succès",
+  "failed": "Échoué"
+}

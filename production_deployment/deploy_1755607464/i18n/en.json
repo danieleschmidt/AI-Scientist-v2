@@ -1,0 +1,9 @@
+{
+  "app_name": "AI Scientist v2",
+  "research_started": "Research started",
+  "experiment_completed": "Experiment completed",
+  "paper_generated": "Paper generated",
+  "error_occurred": "An error occurred",
+  "success": "Success",
+  "failed": "Failed"
+}

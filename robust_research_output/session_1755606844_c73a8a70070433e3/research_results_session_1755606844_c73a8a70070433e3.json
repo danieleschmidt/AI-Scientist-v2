@@ -1,0 +1,57 @@
+{
+  "session_id": "session_1755606844_c73a8a70070433e3",
+  "domain": "computer vision",
+  "config": {
+    "max_experiments": 3,
+    "max_papers": 2,
+    "experiment_timeout": 120,
+    "quality_threshold": 0.7,
+    "validation_level": "ValidationLevel.STRICT",
+    "enable_monitoring": true,
+    "enable_checkpointing": true,
+    "max_retries": 3,
+    "backup_results": true,
+    "security_scan": true
+  },
+  "start_time": "2025-08-19T12:34:04.047434",
+  "research_topic": null,
+  "ideas": [],
+  "experiments": [],
+  "papers": [],
+  "checkpoints": [
+    "robust_research_output/session_1755606844_c73a8a70070433e3/checkpoints/checkpoint_start_1755606844.json",
+    "robust_research_output/session_1755606844_c73a8a70070433e3/checkpoints/checkpoint_error_1755606844.json"
+  ],
+  "metrics": {
+    "start_time": "2025-08-19T12:34:04.047434",
+    "experiments_attempted": 0,
+    "experiments_completed": 0,
+    "experiments_failed": 0,
+    "papers_generated": 0,
+    "errors": [
+      {
+        "type": "fatal_error",
+        "message": "module 'asyncio' has no attribute 'coroutine'",
+        "timestamp": "2025-08-19T12:34:04.050588",
+        "traceback": "Traceback (most recent call last):\n  File \"/root/repo/robust_research_executor.py\", line 641, in run_autonomous_research\n    asyncio.coroutine(lambda: self.generate_research_topic(domain))(),\n    ^^^^^^^^^^^^^^^^^\nAttributeError: module 'asyncio' has no attribute 'coroutine'. Did you mean: 'coroutines'?\n"
+      }
+    ],
+    "warnings": [],
+    "validations_passed": 0,
+    "validations_failed": 0,
+    "resource_alerts": [],
+    "end_time": "2025-08-19T12:34:04.052993",
+    "total_duration": "0:00:00"
+  },
+  "resource_usage": {
+    "memory_gb": 0.0,
+    "cpu_percent": 0.0,
+    "peak_memory_gb": 0.0,
+    "alerts": []
+  },
+  "errors": [],
+  "warnings": [],
+  "error": "Fatal error in robust research session: module 'asyncio' has no attribute 'coroutine'",
+  "fatal": true,
+  "completed_at": "2025-08-19T12:34:04.052993"
+}
