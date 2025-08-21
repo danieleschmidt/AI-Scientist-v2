@@ -1,0 +1,3259 @@
+{
+  "overall_score": 77.27733477264646,
+  "quality_level": "excellent",
+  "metrics": [
+    {
+      "name": "Code Complexity",
+      "category": "Code Quality",
+      "score": 0,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Average complexity: 52.75",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:31.747690"
+    },
+    {
+      "name": "Documentation Coverage",
+      "category": "Documentation",
+      "score": 0.7905579399141631,
+      "max_score": 1.0,
+      "status": "good",
+      "details": "Documentation coverage: 79.1%",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:31.747748"
+    },
+    {
+      "name": "Maintainability Index",
+      "category": "Code Quality",
+      "score": 0.29999999999999993,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Maintainability index: 0.30",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:31.747755"
+    },
+    {
+      "name": "Security Analysis",
+      "category": "Security",
+      "score": 0,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Found 344 security issues",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:32.994979"
+    },
+    {
+      "name": "File Io Speed",
+      "category": "Performance",
+      "score": 1000.0,
+      "max_score": 1.0,
+      "status": "good",
+      "details": "Performance score: 1000.00",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:38.687992"
+    },
+    {
+      "name": "Code Execution Speed",
+      "category": "Performance",
+      "score": 0.09477809167957714,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Performance score: 0.09",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:38.688018"
+    },
+    {
+      "name": "Memory Efficiency",
+      "category": "Performance",
+      "score": 0.4,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Performance score: 0.40",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:38.688027"
+    },
+    {
+      "name": "Startup Time",
+      "category": "Performance",
+      "score": 0.020016012810248198,
+      "max_score": 1.0,
+      "status": "needs_improvement",
+      "details": "Performance score: 0.02",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:38.688033"
+    },
+    {
+      "name": "Pep8 Compliant",
+      "category": "Compliance",
+      "score": 0.0,
+      "max_score": 1.0,
+      "status": "failed",
+      "details": "Non-compliant",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:45.633570"
+    },
+    {
+      "name": "Documentation Adequate",
+      "category": "Compliance",
+      "score": 1.0,
+      "max_score": 1.0,
+      "status": "passed",
+      "details": "Compliant",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:45.633589"
+    },
+    {
+      "name": "Testing Adequate",
+      "category": "Compliance",
+      "score": 1.0,
+      "max_score": 1.0,
+      "status": "passed",
+      "details": "Compliant",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:45.633593"
+    },
+    {
+      "name": "Security Compliant",
+      "category": "Compliance",
+      "score": 0.0,
+      "max_score": 1.0,
+      "status": "failed",
+      "details": "Non-compliant",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:45.633598"
+    },
+    {
+      "name": "License Compliant",
+      "category": "Compliance",
+      "score": 1.0,
+      "max_score": 1.0,
+      "status": "passed",
+      "details": "Compliant",
+      "recommendations": [],
+      "timestamp": "2025-08-20T17:22:45.633602"
+    }
+  ],
+  "security_findings": [
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_backlog_manager.py",
+      "line_number": 88,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_backlog_manager.py",
+      "line_number": 196,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_backlog_manager.py",
+      "line_number": 577,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_execution_simplified.py",
+      "line_number": 387,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_execution_simplified.py",
+      "line_number": 394,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 156,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 157,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 161,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 208,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 209,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 210,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 211,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 256,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 256,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 257,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 258,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/autonomous_quality_validator.py",
+      "line_number": 483,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/comprehensive_quality_validator.py",
+      "line_number": 776,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/comprehensive_quality_validator.py",
+      "line_number": 779,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/launch_scientist_bfts.py",
+      "line_number": 147,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/launch_scientist_bfts.py",
+      "line_number": 226,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/launch_scientist_bfts.py",
+      "line_number": 297,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/production_deployment_orchestrator.py",
+      "line_number": 1220,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/production_deployment_orchestrator.py",
+      "line_number": 1227,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/robust_research_executor.py",
+      "line_number": 739,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 321,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 322,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 323,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 325,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 326,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 327,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 366,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/run_quality_gates.py",
+      "line_number": 442,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/scalable_research_executor.py",
+      "line_number": 136,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scalable_research_executor.py",
+      "line_number": 211,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scalable_research_executor.py",
+      "line_number": 792,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/simple_research_executor.py",
+      "line_number": 131,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/simple_research_executor.py",
+      "line_number": 132,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/simple_research_executor.py",
+      "line_number": 133,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/simple_research_executor.py",
+      "line_number": 134,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/simple_research_executor.py",
+      "line_number": 265,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 90,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 90,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 107,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 108,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 109,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 110,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tdd_security_framework.py",
+      "line_number": 302,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_gpu_fixes.py",
+      "line_number": 130,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_runner.py",
+      "line_number": 146,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_runner.py",
+      "line_number": 188,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_system.py",
+      "line_number": 140,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_system.py",
+      "line_number": 158,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/test_system.py",
+      "line_number": 194,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_autonomous_master.py",
+      "line_number": 181,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_autonomous_master.py",
+      "line_number": 455,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_robust_orchestrator_lite.py",
+      "line_number": 495,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_robust_orchestrator_lite.py",
+      "line_number": 797,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_robust_orchestrator_lite.py",
+      "line_number": 846,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_robust_orchestrator.py",
+      "line_number": 881,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_robust_orchestrator.py",
+      "line_number": 932,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_scalable_optimizer.py",
+      "line_number": 485,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_scalable_optimizer.py",
+      "line_number": 855,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 122,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 123,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 124,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 125,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 261,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 266,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 279,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 337,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 338,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 438,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/terragon_quality_gates.py",
+      "line_number": 525,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/DOCS/autonomous_execution_loop.py",
+      "line_number": 66,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/advanced_monitoring.py",
+      "line_number": 1089,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/autonomous_sdlc_orchestrator.py",
+      "line_number": 342,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/autonomous_sdlc_orchestrator.py",
+      "line_number": 343,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/autonomous_sdlc_orchestrator.py",
+      "line_number": 960,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/cli_enterprise.py",
+      "line_number": 317,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/cli_enterprise.py",
+      "line_number": 356,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/cli_enterprise.py",
+      "line_number": 666,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/distributed_computing_engine.py",
+      "line_number": 112,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/distributed_computing_engine.py",
+      "line_number": 934,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/distributed_computing_engine.py",
+      "line_number": 1183,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/distributed_computing_engine.py",
+      "line_number": 1196,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/distributed_computing_engine.py",
+      "line_number": 1209,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/dynamic_checkpoint_orchestrator.py",
+      "line_number": 1494,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/global_autonomous_system.py",
+      "line_number": 590,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/global_compliance_orchestrator.py",
+      "line_number": 1019,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/intelligent_hypothesis_generator.py",
+      "line_number": 654,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/intelligent_hypothesis_generator.py",
+      "line_number": 681,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/llm.py",
+      "line_number": 136,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/llm.py",
+      "line_number": 140,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/llm.py",
+      "line_number": 351,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/llm.py",
+      "line_number": 355,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 39,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 102,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 811,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1019,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1028,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1031,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1116,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1123,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1126,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1183,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1190,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1193,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1219,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_icbinb_writeup.py",
+      "line_number": 1235,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_ideation_temp_free.py",
+      "line_number": 150,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_plotting.py",
+      "line_number": 125,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_plotting.py",
+      "line_number": 202,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_plotting.py",
+      "line_number": 253,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 192,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 193,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 194,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 195,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 268,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 272,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_vlm_review.py",
+      "line_number": 317,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_writeup.py",
+      "line_number": 32,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_writeup.py",
+      "line_number": 660,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_writeup.py",
+      "line_number": 745,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_writeup.py",
+      "line_number": 756,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/perform_writeup.py",
+      "line_number": 759,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/quantum_quality_gates.py",
+      "line_number": 656,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research_orchestrator.py",
+      "line_number": 1218,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research_orchestrator.py",
+      "line_number": 1219,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research_orchestrator.py",
+      "line_number": 1220,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research_orchestrator.py",
+      "line_number": 1938,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 382,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 1077,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 1078,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 1093,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 1094,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_autonomous_orchestrator.py",
+      "line_number": 1691,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_execution_engine.py",
+      "line_number": 262,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_execution_engine.py",
+      "line_number": 263,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_execution_engine.py",
+      "line_number": 487,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/robust_quantum_orchestrator.py",
+      "line_number": 181,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/robust_quantum_orchestrator.py",
+      "line_number": 181,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/robust_research_orchestrator.py",
+      "line_number": 230,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
+      "line_number": 215,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
+      "line_number": 245,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
+      "line_number": 1323,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
+      "line_number": 1829,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 269,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 291,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 299,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 302,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 320,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 631,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/scalable_execution_engine.py",
+      "line_number": 713,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/scalable_research_orchestrator.py",
+      "line_number": 180,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/scalable_research_orchestrator.py",
+      "line_number": 984,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 207,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 210,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 225,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 232,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 233,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 236,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 261,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 267,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 506,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 1021,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 1050,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 1051,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security_framework.py",
+      "line_number": 1068,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 74,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 75,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 76,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 106,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 107,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/simplified_autonomous_cli.py",
+      "line_number": 165,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/unified_research_framework.py",
+      "line_number": 727,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/vlm.py",
+      "line_number": 182,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/vlm.py",
+      "line_number": 186,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/vlm.py",
+      "line_number": 308,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/vlm.py",
+      "line_number": 312,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/repo_hygiene/github_client.py",
+      "line_number": 32,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/repo_hygiene/github_client.py",
+      "line_number": 159,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/changelog_automation.py",
+      "line_number": 73,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/changelog_automation.py",
+      "line_number": 91,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/changelog_automation.py",
+      "line_number": 270,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/dependency_update.py",
+      "line_number": 367,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/dependency_update.py",
+      "line_number": 368,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/release.py",
+      "line_number": 32,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/release.py",
+      "line_number": 153,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/release.py",
+      "line_number": 251,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/release.py",
+      "line_number": 303,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/scripts/security_scan.py",
+      "line_number": 72,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Hardcoded password detected",
+      "file_path": "/root/repo/security/secrets_scanner.py",
+      "line_number": 23,
+      "recommendation": "Use environment variables or secure key management",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/security/secrets_scanner.py",
+      "line_number": 94,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/security/secrets_scanner.py",
+      "line_number": 95,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/security/secrets_scanner.py",
+      "line_number": 110,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/security/secrets_scanner.py",
+      "line_number": 326,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_autonomous_sdlc_generations.py",
+      "line_number": 577,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_autonomous_sdlc_generations.py",
+      "line_number": 589,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_autonomous_sdlc_generations.py",
+      "line_number": 792,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_autonomous_sdlc_generations.py",
+      "line_number": 812,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_basic_autonomous_sdlc.py",
+      "line_number": 292,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_enterprise_simple.py",
+      "line_number": 401,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_file_handle_leak_fix.py",
+      "line_number": 51,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_file_handle_leak_fix.py",
+      "line_number": 87,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_file_handle_leak_fix.py",
+      "line_number": 155,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_file_handle_leak_fix.py",
+      "line_number": 157,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_gpu_manager_enhanced.py",
+      "line_number": 191,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 45,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 47,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 58,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 62,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 63,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 63,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 82,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 144,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_input_validation_security.py",
+      "line_number": 146,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_llm_simple.py",
+      "line_number": 63,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_security_integration.py",
+      "line_number": 35,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/test_security_integration.py",
+      "line_number": 51,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_torch_compile_safety.py",
+      "line_number": 75,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_torch_compile_safety.py",
+      "line_number": 133,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/test_torch_compile_safety.py",
+      "line_number": 134,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/compliance/global_compliance_framework.py",
+      "line_number": 240,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/compliance/global_compliance_framework.py",
+      "line_number": 241,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+      "line_number": 271,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+      "line_number": 344,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+      "line_number": 345,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+      "line_number": 372,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
+      "line_number": 393,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+      "line_number": 239,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+      "line_number": 312,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+      "line_number": 313,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+      "line_number": 340,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
+      "line_number": 361,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/optimization/quantum_performance_optimizer.py",
+      "line_number": 683,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/adaptive_tree_search.py",
+      "line_number": 464,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/research/autonomous_experimentation_engine.py",
+      "line_number": 245,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/autonomous_experimentation_engine.py",
+      "line_number": 812,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/multi_objective_orchestration.py",
+      "line_number": 571,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/research_validation_suite.py",
+      "line_number": 1146,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/research_validation_suite.py",
+      "line_number": 1157,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/research/research_validation_suite.py",
+      "line_number": 1176,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 101,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 108,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 109,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 279,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 326,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/security/comprehensive_security.py",
+      "line_number": 329,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/tools/semantic_scholar.py",
+      "line_number": 94,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 197,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 237,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 245,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 653,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 684,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 845,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 931,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 936,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/agent_manager.py",
+      "line_number": 939,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/treesearch/interpreter.py",
+      "line_number": 154,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/journal.py",
+      "line_number": 350,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/journal.py",
+      "line_number": 352,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/journal.py",
+      "line_number": 356,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 493,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 606,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 659,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 666,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 683,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 687,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 846,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 1308,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 1324,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 1328,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 2452,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 2453,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/parallel_agent.py",
+      "line_number": 2454,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/perform_experiments_bfts_with_agentmanager.py",
+      "line_number": 188,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/circuit_breaker.py",
+      "line_number": 420,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/circuit_breaker.py",
+      "line_number": 422,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/config_validation.py",
+      "line_number": 109,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/config_validation.py",
+      "line_number": 112,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/config_validation.py",
+      "line_number": 113,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/config_validation.py",
+      "line_number": 291,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/cost_optimization.py",
+      "line_number": 155,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/utils/distributed_cache.py",
+      "line_number": 148,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/utils/distributed_cache.py",
+      "line_number": 151,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/utils/distributed_cache.py",
+      "line_number": 368,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Unsafe deserialization can lead to code execution",
+      "file_path": "/root/repo/ai_scientist/utils/distributed_cache.py",
+      "line_number": 371,
+      "recommendation": "Use safe loading methods with explicit Loader parameter",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/ai_scientist/utils/distributed_cache.py",
+      "line_number": 571,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 72,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 73,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 84,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 89,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 90,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 91,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 92,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 95,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 96,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 422,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 523,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/enhanced_validation.py",
+      "line_number": 527,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/error_recovery.py",
+      "line_number": 277,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/input_validation.py",
+      "line_number": 52,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/input_validation.py",
+      "line_number": 60,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/input_validation.py",
+      "line_number": 61,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/utils/input_validation.py",
+      "line_number": 156,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/utils/input_validation.py",
+      "line_number": 409,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/robust_autonomous_orchestrator.py",
+      "line_number": 635,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/utils/robust_error_handling.py",
+      "line_number": 181,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/utils/torch_compile_safety.py",
+      "line_number": 258,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 161,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 162,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 163,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 164,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 698,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 699,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
+      "line_number": 704,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/backend/utils.py",
+      "line_number": 67,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/utils/metric.py",
+      "line_number": 226,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/utils/serialize.py",
+      "line_number": 71,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/ai_scientist/treesearch/utils/tree_export.py",
+      "line_number": 1,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/monitoring/health_monitor.py",
+      "line_number": 234,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/quantum_task_planner/optimization/cache_manager.py",
+      "line_number": 676,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/optimization/parallel_executor.py",
+      "line_number": 92,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/utils/quantum_math.py",
+      "line_number": 16,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/utils/quantum_math.py",
+      "line_number": 87,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/validation/error_handling.py",
+      "line_number": 488,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/validation/validators.py",
+      "line_number": 176,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/validation/validators.py",
+      "line_number": 364,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/quantum_task_planner/validation/validators.py",
+      "line_number": 461,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/fixtures/sample_data.py",
+      "line_number": 181,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/fixtures/sample_data.py",
+      "line_number": 182,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/tests/fixtures/sample_data.py",
+      "line_number": 182,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/quantum_task_planner/test_integration.py",
+      "line_number": 308,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Weak cryptographic hash function",
+      "file_path": "/root/repo/tests/quantum_task_planner/test_optimization.py",
+      "line_number": 261,
+      "recommendation": "Use SHA-256 or stronger cryptographic hash functions",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 81,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 180,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 224,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential SQL injection vulnerability",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 276,
+      "recommendation": "Use parameterized queries or ORM",
+      "cve_reference": ""
+    },
+    {
+      "severity": "medium",
+      "category": "code_analysis",
+      "description": "Potential shell injection vulnerability",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 382,
+      "recommendation": "Use subprocess with shell=False and input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 407,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 408,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of eval() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 422,
+      "recommendation": "Replace eval() with safe alternatives like ast.literal_eval()",
+      "cve_reference": ""
+    },
+    {
+      "severity": "high",
+      "category": "code_analysis",
+      "description": "Use of exec() can lead to code injection vulnerabilities",
+      "file_path": "/root/repo/tests/security/test_comprehensive_security.py",
+      "line_number": 422,
+      "recommendation": "Avoid exec() or use with strict input validation",
+      "cve_reference": ""
+    }
+  ],
+  "compliance_status": {
+    "pep8_compliant": false,
+    "documentation_adequate": true,
+    "testing_adequate": true,
+    "security_compliant": false,
+    "license_compliant": true
+  },
+  "performance_benchmarks": {
+    "file_io_speed": 1000.0,
+    "code_execution_speed": 0.09477809167957714,
+    "memory_efficiency": 0.4,
+    "startup_time": 0.020016012810248198
+  },
+  "recommendations": [
+    "Reduce code complexity by breaking down large functions",
+    "Improve code maintainability with better structure and documentation",
+    "Optimize code execution speed for better performance",
+    "Optimize memory efficiency for better performance",
+    "Optimize startup time for better performance",
+    "Fix high-severity security issues",
+    "Improve PEP 8 compliance with code formatting",
+    "Implement security best practices"
+  ],
+  "gate_passed": true,
+  "timestamp": "2025-08-20T17:22:45.633802"
+}
