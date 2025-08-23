@@ -1,0 +1,198 @@
+# AI Scientist v2 Production Dockerfile
+# Multi-stage build optimized for production deployment
+# Author: AI Scientist v2 Team
+# License: MIT
+
+# ========================
+# Base Stage
+# ========================
+FROM python:3.11-slim as base
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH="/app" \
+    PATH="/app/.local/bin:$PATH"
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies (minimal for security)
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    git \
+    curl \
+    wget \
+    build-essential \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
+    ghostscript \
+    poppler-utils \
+    chktex \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user with specific UID/GID for consistency
+RUN groupadd -r -g 1001 aiscientist && \
+    useradd -r -g aiscientist -u 1001 -d /app -s /bin/bash aiscientist
+
+# ========================
+# Dependencies Stage
+# ========================
+FROM base as dependencies
+
+# Copy requirements first for better layer caching
+COPY requirements.txt /tmp/requirements.txt
+COPY deployment/docker/requirements-prod.txt /tmp/requirements-prod.txt
+
+# Install Python dependencies
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install -r /tmp/requirements.txt && \
+    pip install -r /tmp/requirements-prod.txt && \
+    rm -f /tmp/requirements*.txt
+
+# ========================
+# Security Scanner Stage
+# ========================
+FROM dependencies as security
+
+# Switch to root for security tools installation
+USER root
+
+# Install security scanning tools
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    curl \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Trivy for container scanning
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+# Copy application code for scanning
+COPY --chown=aiscientist:aiscientist . /app/
+
+# Run security scans (non-blocking in production build)
+RUN trivy fs --exit-code 0 /app || echo "Security scan completed with warnings"
+
+# ========================
+# Production Stage
+# ========================
+FROM dependencies as production
+
+# Create application directories
+RUN mkdir -p /app/experiments /app/data /app/logs /app/cache /app/config /app/checkpoints && \
+    chown -R aiscientist:aiscientist /app
+
+# Copy application code
+COPY --chown=aiscientist:aiscientist . /app/
+
+# Copy production configuration
+COPY --chown=aiscientist:aiscientist deployment/configs/production.yaml /app/config/
+COPY --chown=aiscientist:aiscientist deployment/scripts/entrypoint.sh /app/
+COPY --chown=aiscientist:aiscientist deployment/scripts/health_check.py /app/scripts/
+
+# Make scripts executable
+RUN chmod +x /app/entrypoint.sh /app/scripts/health_check.py
+
+# Set up monitoring endpoints
+COPY --chown=aiscientist:aiscientist ai_scientist/monitoring/ /app/ai_scientist/monitoring/
+
+# Switch to non-root user
+USER aiscientist
+
+# Create cache directories with proper permissions
+RUN mkdir -p /app/.cache /app/.local && \
+    chmod 755 /app/.cache /app/.local
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD python /app/scripts/health_check.py || exit 1
+
+# Expose ports
+EXPOSE 8000 8080 8443
+
+# Set entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Default command
+CMD ["python", "-m", "ai_scientist.cli_enterprise", "--production"]
+
+# ========================
+# Development Stage
+# ========================
+FROM production as development
+
+# Switch to root to install dev tools
+USER root
+
+# Install development dependencies
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    vim \
+    htop \
+    tree \
+    strace \
+    tcpdump \
+    net-tools \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install development Python packages
+RUN pip install \
+    ipython \
+    jupyter \
+    pytest-cov \
+    black \
+    flake8 \
+    mypy \
+    bandit
+
+# Add user to useful groups for development
+RUN usermod -aG root aiscientist
+
+# Switch back to application user
+USER aiscientist
+
+# Override entrypoint for development
+CMD ["python", "-m", "ai_scientist.cli_enterprise", "--development"]
+
+# ========================
+# Testing Stage
+# ========================
+FROM development as testing
+
+# Switch to root for test dependencies
+USER root
+
+# Install testing tools
+RUN pip install \
+    pytest \
+    pytest-asyncio \
+    pytest-mock \
+    pytest-xdist \
+    coverage \
+    tox
+
+# Switch back to application user
+USER aiscientist
+
+# Run tests during build (optional, can be disabled)
+RUN python -m pytest tests/ --maxfail=1 --tb=short || echo "Tests completed"
+
+# ========================
+# Labels and Metadata
+# ========================
+LABEL maintainer="AI Scientist v2 Team" \
+      version="2.0.0" \
+      description="AI Scientist v2 Autonomous SDLC System" \
+      org.opencontainers.image.title="AI Scientist v2" \
+      org.opencontainers.image.description="Production-ready autonomous SDLC system" \
+      org.opencontainers.image.version="2.0.0" \
+      org.opencontainers.image.source="https://github.com/ai-scientist/v2" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.documentation="https://docs.ai-scientist.dev"

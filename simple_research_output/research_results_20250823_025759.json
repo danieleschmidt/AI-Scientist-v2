@@ -1,0 +1,148 @@
+{
+  "session_id": "20250823_025759",
+  "domain": "machine learning",
+  "config": {
+    "max_experiments": 1,
+    "max_papers": 1,
+    "experiment_timeout": 300,
+    "quality_threshold": 0.7,
+    "output_format": "json",
+    "enable_plots": true,
+    "enable_validation": true
+  },
+  "start_time": "2025-08-23T02:57:59.316677",
+  "research_topic": {
+    "domain": "machine learning",
+    "title": "Meta-Learning Algorithms",
+    "description": "Investigating novel approaches to meta-learning algorithms with focus on practical applications.",
+    "keywords": [
+      "machine learning",
+      "meta-learning_algorithms",
+      "optimization",
+      "evaluation"
+    ],
+    "complexity": "medium",
+    "estimated_duration": "2-4 hours",
+    "generated_at": "2025-08-23T02:57:59.318167"
+  },
+  "ideas": [
+    {
+      "id": "idea_1",
+      "title": "Meta-Learning Algorithms - Approach 1",
+      "hypothesis": "We propose that meta-learning algorithms can be improved through novel approach 1.",
+      "methodology": "Implement and evaluate approach 1 using standard benchmarks.",
+      "expected_outcome": "Improved performance in machine learning tasks.",
+      "novelty_score": 0.6,
+      "feasibility_score": 0.8,
+      "priority": "high",
+      "created_at": "2025-08-23T02:57:59.318201"
+    }
+  ],
+  "experiments": [
+    {
+      "idea_id": "idea_1",
+      "experiment_id": "exp_20250823_025759_idea_1",
+      "status": "completed",
+      "metrics": {
+        "accuracy": 0.9116957845113663,
+        "precision": 0.9316957845113664,
+        "recall": 0.9016957845113663,
+        "f1_score": 0.9166957845113664,
+        "training_time": 1757,
+        "inference_time": 0.051975794021898086
+      },
+      "artifacts": {
+        "model_saved": true,
+        "plots_generated": true,
+        "data_processed": true,
+        "logs_available": true
+      },
+      "validation": {
+        "cross_validation_score": 0.8816957845113663,
+        "statistical_significance": true,
+        "reproducible": true
+      },
+      "resources_used": {
+        "cpu_hours": 0.5908991737021707,
+        "memory_peak_gb": 2.965261731382779,
+        "disk_usage_gb": 0.5067191945860402
+      },
+      "completed_at": "2025-08-23T02:58:01.320717"
+    }
+  ],
+  "papers": [
+    {
+      "title": "Autonomous Research on Meta-Learning Algorithms - Approach 1",
+      "authors": [
+        "AI Scientist v2"
+      ],
+      "abstract": {
+        "text": "This paper presents a novel approach to meta-learning algorithms - approach 1. \n                Our experimental evaluation demonstrates improved performance with accuracy of \n                0.912 and F1-score of 0.917. \n                The proposed method shows significant improvements over baseline approaches.",
+        "word_count": 150
+      },
+      "sections": {
+        "introduction": {
+          "content": "Generated introduction with problem statement and contributions",
+          "word_count": 800
+        },
+        "related_work": {
+          "content": "Comprehensive review of related work and positioning",
+          "word_count": 600
+        },
+        "methodology": {
+          "content": "Detailed description of the proposed approach",
+          "word_count": 1000
+        },
+        "experiments": {
+          "content": "Experimental setup, datasets, and evaluation metrics",
+          "word_count": 800
+        },
+        "results": {
+          "content": "Presentation and analysis of experimental results",
+          "word_count": 600,
+          "key_results": {
+            "accuracy": 0.9116957845113663,
+            "precision": 0.9316957845113664,
+            "recall": 0.9016957845113663,
+            "f1_score": 0.9166957845113664,
+            "training_time": 1757,
+            "inference_time": 0.051975794021898086
+          }
+        },
+        "discussion": {
+          "content": "Interpretation of results and implications",
+          "word_count": 400
+        },
+        "conclusion": {
+          "content": "Summary of contributions and future work",
+          "word_count": 300
+        }
+      },
+      "statistics": {
+        "total_word_count": 4650,
+        "figures": 5,
+        "tables": 3,
+        "references": 25,
+        "pages_estimated": 8
+      },
+      "quality_metrics": {
+        "novelty_score": 0.6,
+        "technical_quality": 0.9116957845113663,
+        "clarity_score": 0.8,
+        "significance_score": 0.75,
+        "overall_score": 0.7654239461278416
+      },
+      "generated_at": "2025-08-23T02:58:01.320794"
+    }
+  ],
+  "summary": {
+    "total_duration": "0:00:02",
+    "ideas_generated": 1,
+    "experiments_completed": 1,
+    "papers_written": 1,
+    "success_rate": 1.0,
+    "avg_accuracy": 0.9116957845113663,
+    "errors_encountered": 0,
+    "completed_at": "2025-08-23T02:58:01.320809"
+  }
+}

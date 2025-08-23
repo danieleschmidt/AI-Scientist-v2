@@ -1,0 +1,509 @@
+# AI Scientist v2 Helm Chart Values Template
+# Customize these values for your deployment
+
+# Global settings
+global:
+  imageRegistry: "your-registry.com"
+  imagePullSecrets: 
+    - name: registry-credentials
+  storageClass: "fast-ssd"
+
+# Application configuration
+image:
+  registry: "your-registry.com"
+  repository: "ai-scientist"
+  tag: "v2.0.0"
+  pullPolicy: IfNotPresent
+
+# Deployment configuration
+replicaCount: 3
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# Service configuration
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    external-dns.alpha.kubernetes.io/hostname: "ai-scientist.yourdomain.com"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: ai-scientist.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ai-scientist-tls
+      hosts:
+        - ai-scientist.yourdomain.com
+
+# Resource configuration
+resources:
+  limits:
+    cpu: 8000m
+    memory: 16Gi
+    nvidia.com/gpu: 1
+  requests:
+    cpu: 2000m
+    memory: 4Gi
+    nvidia.com/gpu: 1
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - NET_BIND_SERVICE
+
+# Node selection
+nodeSelector:
+  nvidia.com/gpu.present: "true"
+  kubernetes.io/arch: amd64
+
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - ai-scientist
+          topologyKey: kubernetes.io/hostname
+
+# Environment variables
+env:
+  - name: ENVIRONMENT
+    value: "production"
+  - name: LOG_LEVEL
+    value: "INFO"
+  - name: WORKERS
+    value: "4"
+  - name: MAX_MEMORY_USAGE
+    value: "85"
+  - name: MAX_CPU_USAGE
+    value: "90"
+
+# Secrets (reference existing secrets)
+secrets:
+  - name: ANTHROPIC_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ai-scientist-secrets
+        key: ANTHROPIC_API_KEY
+  - name: OPENAI_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ai-scientist-secrets
+        key: OPENAI_API_KEY
+  - name: SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: ai-scientist-secrets
+        key: SECRET_KEY
+
+# ConfigMaps
+configMaps:
+  - name: ai-scientist-config
+    data:
+      production.yaml: |
+        application:
+          environment: production
+          debug: false
+          log_level: INFO
+        server:
+          host: "0.0.0.0"
+          port: 8000
+          workers: 4
+
+# Persistent volumes
+persistence:
+  data:
+    enabled: true
+    storageClass: "fast-ssd"
+    accessMode: ReadWriteOnce
+    size: 100Gi
+    annotations:
+      volume.beta.kubernetes.io/storage-provisioner: "ebs.csi.aws.com"
+  
+  logs:
+    enabled: true
+    storageClass: "standard"
+    accessMode: ReadWriteOnce
+    size: 50Gi
+  
+  experiments:
+    enabled: true
+    storageClass: "fast-ssd"
+    accessMode: ReadWriteOnce
+    size: 200Gi
+
+# Health checks
+healthCheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 180
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  startupProbe:
+    httpGet:
+      path: /startup
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+
+# Worker configuration
+worker:
+  enabled: true
+  replicaCount: 5
+  image:
+    repository: "ai-scientist"
+    tag: "v2.0.0"
+  
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+      nvidia.com/gpu: 1
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+      nvidia.com/gpu: 1
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+# Redis configuration
+redis:
+  enabled: true
+  architecture: standalone
+  
+  auth:
+    enabled: true
+    existingSecret: "ai-scientist-secrets"
+    existingSecretPasswordKey: "redis-password"
+  
+  master:
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    
+    persistence:
+      enabled: true
+      storageClass: "fast-ssd"
+      size: 20Gi
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: "ai-scientist"
+
+# PostgreSQL configuration (optional)
+postgresql:
+  enabled: false
+  auth:
+    username: "ai_scientist"
+    database: "ai_scientist"
+    existingSecret: "ai-scientist-secrets"
+    secretKeys:
+      adminPasswordKey: "postgres-password"
+      userPasswordKey: "postgres-password"
+  
+  primary:
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+    
+    persistence:
+      enabled: true
+      storageClass: "fast-ssd"
+      size: 50Gi
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Monitoring configuration
+monitoring:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: "ai-scientist"
+      labels:
+        app.kubernetes.io/name: ai-scientist
+      interval: 30s
+      scrapeTimeout: 10s
+      path: /metrics
+      port: metrics
+    
+    prometheusRule:
+      enabled: true
+      namespace: "ai-scientist"
+      rules:
+        - alert: AIScientistDown
+          expr: up{job="ai-scientist"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "AI Scientist application is down"
+  
+  grafana:
+    enabled: true
+    dashboards:
+      enabled: true
+      configMapName: "ai-scientist-dashboards"
+    
+    datasources:
+      enabled: true
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus:9090
+          access: proxy
+          isDefault: true
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+  
+  egress:
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+
+# Pod security policy
+podSecurityPolicy:
+  enabled: true
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "ai-scientist"
+
+# RBAC
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "services", "configmaps"]
+      verbs: ["get", "list", "watch"]
+
+# External services
+externalServices:
+  # External APIs
+  anthropic:
+    enabled: true
+    url: "https://api.anthropic.com"
+  
+  openai:
+    enabled: true
+    url: "https://api.openai.com"
+
+# Backup configuration
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: "30d"
+  
+  destinations:
+    s3:
+      enabled: false
+      bucket: "ai-scientist-backups"
+      region: "us-west-2"
+    
+    gcs:
+      enabled: false
+      bucket: "ai-scientist-backups"
+      project: "your-project-id"
+
+# Testing configuration
+testing:
+  enabled: false
+  image:
+    repository: "ai-scientist"
+    tag: "v2.0.0-test"
+  
+  tests:
+    - name: "health-check"
+      command: ["python", "/app/scripts/health_check.py"]
+    - name: "integration-test"
+      command: ["python", "-m", "pytest", "tests/integration/"]
+
+# Development overrides (for non-production environments)
+development:
+  enabled: false
+  debug: true
+  logLevel: "DEBUG"
+  replicaCount: 1
+  
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+# Environment-specific overrides
+environments:
+  staging:
+    replicaCount: 2
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+    
+    ingress:
+      hosts:
+        - host: staging.ai-scientist.yourdomain.com
+          paths:
+            - path: /
+              pathType: Prefix
+  
+  production:
+    replicaCount: 5
+    resources:
+      limits:
+        cpu: 8000m
+        memory: 16Gi
+      requests:
+        cpu: 2000m
+        memory: 4Gi
+    
+    ingress:
+      hosts:
+        - host: ai-scientist.yourdomain.com
+          paths:
+            - path: /
+              pathType: Prefix
+
+# Advanced configuration
+advancedConfig:
+  # Pod topology spread constraints
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: ai-scientist
+  
+  # Pod priority
+  priorityClassName: "high-priority"
+  
+  # Init containers
+  initContainers:
+    - name: wait-for-dependencies
+      image: busybox:latest
+      command: ['sh', '-c', 'until nc -z redis 6379; do sleep 1; done']
+  
+  # Sidecar containers
+  sidecars:
+    - name: log-forwarder
+      image: fluent/fluent-bit:latest
+      volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+          readOnly: true

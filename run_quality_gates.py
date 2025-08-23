@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
 """
-Quality Gates and Testing Suite
-===============================
+Enterprise Quality Gates CLI - AI Scientist v2 Quality Validation
+================================================================
 
-Comprehensive quality gates implementation for the AI Scientist v2 system.
-Validates code quality, security, performance, and functionality.
+Comprehensive quality gates CLI for validating all three generations:
+- Simple Generation: Basic functionality and research capabilities
+- Robust Generation: Error handling, monitoring, and recovery
+- Scalable Generation: Distributed computing and performance optimization
 
-Author: AI Scientist v2 Autonomous System
+Validates:
+- Code execution across all three generations
+- Security posture and API key safety
+- Performance benchmarks and resource efficiency  
+- Integration between generations
+- Documentation completeness
+- Deployment readiness
+
+Author: AI Scientist v2 Enterprise Quality System
+Version: 3.0.0
 License: MIT
 """
 
@@ -25,6 +36,9 @@ import ast
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Global variables for tracking
+enterprise_success = None
 
 
 @dataclass
@@ -945,14 +959,114 @@ class QualityGateRunner:
             logger.error(f"Failed to save report: {e}")
 
 
+async def run_enterprise_quality_gates():
+    """Run comprehensive enterprise quality gates."""
+    from comprehensive_quality_validator import ComprehensiveQualityValidator
+    
+    try:
+        # Initialize enterprise quality validator
+        validator = ComprehensiveQualityValidator(Path("/root/repo"))
+        
+        # Run all enterprise quality gates
+        results = await validator.run_all_quality_gates()
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"Enterprise quality validation failed: {e}")
+        return {
+            'overall_passed': False,
+            'error': str(e),
+            'gate_results': []
+        }
+
 def main():
     """Run quality gates and display results."""
-    print("🛡️ AI Scientist v2 - Quality Gates Validation")
-    print("=" * 60)
+    print("🏢 AI Scientist v2 - Enterprise Quality Gates Validation")
+    print("=" * 80)
+    print("Validating Simple, Robust, and Scalable generations...")
+    print()
     
     # Initialize and run quality gates
     runner = QualityGateRunner()
     report = runner.run_all_gates()
+    
+    # Also run enterprise quality gates if comprehensive validator is available
+    try:
+        import asyncio
+        enterprise_results = asyncio.run(run_enterprise_quality_gates())
+        
+        # Merge results
+        if enterprise_results and enterprise_results.get('overall_passed') is not None:
+            print("\n" + "=" * 80)
+            print("🚀 ENTERPRISE QUALITY VALIDATION RESULTS")
+            print("=" * 80)
+            
+            if enterprise_results['overall_passed']:
+                print("✅ ALL ENTERPRISE QUALITY GATES PASSED")
+                print(f"📊 Overall Score: {enterprise_results.get('overall_score', 0):.1f}%")
+                print(f"🎯 Gates Passed: {enterprise_results.get('gates_passed', 0)}/{enterprise_results.get('gates_total', 0)}")
+            else:
+                print("❌ ENTERPRISE QUALITY GATES FAILED")
+                print(f"📊 Overall Score: {enterprise_results.get('overall_score', 0):.1f}%")
+                print(f"🎯 Gates Passed: {enterprise_results.get('gates_passed', 0)}/{enterprise_results.get('gates_total', 0)}")
+            
+            # Show enterprise metrics
+            if 'enterprise_metrics' in enterprise_results:
+                metrics = enterprise_results['enterprise_metrics']
+                print("\n📈 Enterprise Metrics:")
+                print(f"  Security Posture: {metrics.get('security_posture', 0):.1f}%")
+                print(f"  Integration Health: {metrics.get('integration_health', 0):.1f}%")
+                print(f"  API Maturity: {metrics.get('api_maturity', 0):.1f}%")
+                print(f"  Scalability Readiness: {metrics.get('scalability_readiness', 0):.1f}%")
+            
+            # Show generation analysis
+            if 'generation_analysis' in enterprise_results:
+                print("\n🚀 Generation Analysis:")
+                for gen_name, gen_data in enterprise_results['generation_analysis'].items():
+                    status_icon = {
+                        'excellent': '✅',
+                        'good': '✅',
+                        'needs_improvement': '⚠️',
+                        'critical': '❌',
+                        'unknown': '❓'
+                    }.get(gen_data['status'], '❓')
+                    print(f"  {status_icon} {gen_name.title()}: {gen_data['status']} ({gen_data['score']:.1f}%)")
+                    
+                    if gen_data['issues']:
+                        for issue in gen_data['issues'][:3]:  # Show first 3 issues
+                            print(f"    • {issue}")
+            
+            # Show deployment readiness
+            if 'deployment_readiness' in enterprise_results:
+                deployment = enterprise_results['deployment_readiness']
+                print("\n🚀 Deployment Readiness:")
+                print(f"  Production Ready: {'✅' if deployment['production_ready'] else '❌'}")
+                print(f"  Staging Ready: {'✅' if deployment['staging_ready'] else '❌'}")
+                print(f"  Development Ready: {'✅' if deployment['development_ready'] else '❌'}")
+                print(f"  Deployment Score: {deployment['deployment_score']:.1f}%")
+                
+                if deployment['blocking_issues']:
+                    print("  Blocking Issues:")
+                    for issue in deployment['blocking_issues']:
+                        print(f"    • {issue}")
+            
+            # Show enterprise recommendations
+            if 'recommendations' in enterprise_results:
+                print("\n💡 Enterprise Recommendations:")
+                for rec in enterprise_results['recommendations'][:8]:  # Show first 8
+                    print(f"  {rec}")
+            
+            # Update overall success based on enterprise results
+            enterprise_success = enterprise_results.get('overall_passed', False)
+            
+    except ImportError:
+        enterprise_success = None
+        print("\n⚠️ Enterprise quality validation not available (missing comprehensive_quality_validator)")
+    except Exception as e:
+        enterprise_success = False
+        logger.error(f"Enterprise quality validation error: {e}")
+        print(f"\n❌ Enterprise quality validation failed: {e}")
     
     # Display summary
     summary = report["summary"]
@@ -978,14 +1092,98 @@ def main():
     
     print(f"\n{'=' * 60}")
     
-    if report["overall_status"] in ["EXCELLENT", "GOOD"]:
-        print("🎉 Quality Gates PASSED - System ready for deployment!")
-    else:
-        print("⚠️ Quality Gates require attention before deployment")
+    # Determine final success status
+    basic_success = report["overall_status"] in ["EXCELLENT", "GOOD", "ACCEPTABLE"]
     
-    return report["overall_status"] in ["EXCELLENT", "GOOD", "ACCEPTABLE"]
+    print("\n" + "=" * 80)
+    print("🏁 FINAL QUALITY VALIDATION RESULTS")
+    print("=" * 80)
+    
+    if basic_success:
+        if enterprise_success is True:
+            print("🎉 ALL QUALITY GATES PASSED - System ready for production deployment!")
+            print("✅ Basic Quality Gates: PASSED")
+            print("✅ Enterprise Quality Gates: PASSED")
+            final_success = True
+        elif enterprise_success is False:
+            print("⚠️ Mixed Results - Basic quality passed, but enterprise validation failed")
+            print("✅ Basic Quality Gates: PASSED")
+            print("❌ Enterprise Quality Gates: FAILED")
+            print("📋 Recommendation: Address enterprise issues before production deployment")
+            final_success = False
+        else:
+            print("✅ Basic Quality Gates PASSED - Ready for staging deployment")
+            print("⚠️ Enterprise Quality Gates: Not Available")
+            final_success = True
+    else:
+        print("❌ Quality Gates FAILED - System requires attention before deployment")
+        print("❌ Basic Quality Gates: FAILED")
+        if enterprise_success is False:
+            print("❌ Enterprise Quality Gates: FAILED")
+        final_success = False
+    
+    print("\n📊 Summary:")
+    print(f"  Basic Quality Status: {report['overall_status']}")
+    print(f"  Basic Overall Score: {report['summary']['overall_score']:.2f}")
+    if enterprise_success is not None:
+        enterprise_status = "PASSED" if enterprise_success else "FAILED"
+        print(f"  Enterprise Quality Status: {enterprise_status}")
+    
+    print("\n📄 Detailed reports saved to:")
+    print("  • quality_gate_report.json (Basic Quality Gates)")
+    if enterprise_success is not None:
+        print("  • quality_validation_output/ (Enterprise Quality Gates)")
+    
+    return final_success
 
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description="AI Scientist v2 Enterprise Quality Gates Validation",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Run all quality gates
+  python run_quality_gates.py
+  
+  # Run with verbose output
+  python run_quality_gates.py --verbose
+  
+  # Run only basic quality gates
+  python run_quality_gates.py --basic-only
+  
+  # Run with custom thresholds
+  python run_quality_gates.py --coverage-threshold 90 --security-threshold 9.0
+        """
+    )
+    
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output')
+    parser.add_argument('--basic-only', action='store_true', help='Run only basic quality gates')
+    parser.add_argument('--coverage-threshold', type=float, default=85.0, help='Test coverage threshold (default: 85.0)')
+    parser.add_argument('--security-threshold', type=float, default=8.0, help='Security score threshold (default: 8.0)')
+    parser.add_argument('--performance-threshold', type=float, default=7.0, help='Performance score threshold (default: 7.0)')
+    parser.add_argument('--output-format', choices=['text', 'json', 'both'], default='both', help='Output format')
+    
+    args = parser.parse_args()
+    
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+        print("🔧 Verbose mode enabled")
+    
+    try:
+        success = main()
+        
+        if args.output_format in ['json', 'both']:
+            print("\n📄 JSON report generated: quality_gate_report.json")
+        
+        sys.exit(0 if success else 1)
+        
+    except KeyboardInterrupt:
+        print("\n⚠️ Quality validation interrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        logger.error(f"Quality validation failed with error: {e}")
+        print(f"\n❌ Fatal error: {e}")
+        sys.exit(1)

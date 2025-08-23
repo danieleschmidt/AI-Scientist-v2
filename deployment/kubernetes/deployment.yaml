@@ -1,0 +1,456 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-scientist
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/component: application
+    app.kubernetes.io/part-of: ai-scientist-platform
+    app.kubernetes.io/managed-by: kubectl
+    environment: production
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "AI Scientist v2 main application deployment"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-scientist
+      app.kubernetes.io/component: application
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-scientist
+        app.kubernetes.io/version: "2.0.0"
+        app.kubernetes.io/component: application
+        app.kubernetes.io/part-of: ai-scientist-platform
+        environment: production
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        config.checksum: "{{ checksum }}"
+    spec:
+      serviceAccountName: ai-scientist
+      automountServiceAccountToken: true
+      terminationGracePeriodSeconds: 60
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      
+      initContainers:
+      - name: init-dependencies
+        image: ai-scientist:2.0.0
+        imagePullPolicy: IfNotPresent
+        command: ["/app/deployment/scripts/init-container.sh"]
+        env:
+        - name: INIT_MODE
+          value: "dependencies"
+        envFrom:
+        - secretRef:
+            name: ai-scientist-secrets
+        - configMapRef:
+            name: ai-scientist-config
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /app/deployment/scripts
+          readOnly: true
+        - name: shared-data
+          mountPath: /shared
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      
+      containers:
+      - name: ai-scientist
+        image: ai-scientist:2.0.0
+        imagePullPolicy: IfNotPresent
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # Some temp files needed
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+        
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        - name: health
+          containerPort: 8443
+          protocol: TCP
+        
+        env:
+        - name: DEPLOYMENT_MODE
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: PORT
+          value: "8000"
+        - name: WORKERS
+          value: "4"
+        - name: KUBERNETES_DEPLOYMENT
+          value: "true"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        
+        envFrom:
+        - secretRef:
+            name: ai-scientist-secrets
+        - configMapRef:
+            name: ai-scientist-config
+        
+        volumeMounts:
+        - name: app-config
+          mountPath: /app/config
+          readOnly: true
+        - name: data-volume
+          mountPath: /app/data
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: experiments-volume
+          mountPath: /app/experiments
+        - name: cache-volume
+          mountPath: /app/cache
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: shared-data
+          mountPath: /shared
+          readOnly: true
+        
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: "1"
+            ephemeral-storage: "10Gi"
+          limits:
+            memory: "16Gi"
+            cpu: "8000m"
+            nvidia.com/gpu: "1"
+            ephemeral-storage: "50Gi"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+          successThreshold: 1
+        
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      
+      # Monitoring sidecar
+      - name: monitoring-agent
+        image: prom/node-exporter:latest
+        imagePullPolicy: IfNotPresent
+        
+        args:
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.filesystem.ignored-mount-points
+        - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+        
+        ports:
+        - name: node-metrics
+          containerPort: 9100
+          protocol: TCP
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
+        
+        volumeMounts:
+        - name: proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: sys
+          mountPath: /host/sys
+          readOnly: true
+        
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      
+      volumes:
+      - name: app-config
+        configMap:
+          name: ai-scientist-config
+          defaultMode: 0644
+      - name: init-scripts
+        configMap:
+          name: ai-scientist-init-scripts
+          defaultMode: 0755
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: ai-scientist-data
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: ai-scientist-logs
+      - name: experiments-volume
+        persistentVolumeClaim:
+          claimName: ai-scientist-experiments
+      - name: cache-volume
+        emptyDir:
+          sizeLimit: 10Gi
+          medium: Memory
+      - name: tmp-volume
+        emptyDir:
+          sizeLimit: 2Gi
+      - name: shared-data
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: proc
+        hostPath:
+          path: /proc
+          type: Directory
+      - name: sys
+        hostPath:
+          path: /sys
+          type: Directory
+      
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+        kubernetes.io/arch: amd64
+        node-type: compute
+      
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      - key: high-compute
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.memory
+                operator: Gt
+                values:
+                - "8000"
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - ai-scientist
+              topologyKey: kubernetes.io/hostname
+          - weight: 50
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - application
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-scientist-worker
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist-worker
+    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: ai-scientist-platform
+    app.kubernetes.io/managed-by: kubectl
+    environment: production
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-scientist-worker
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-scientist-worker
+        app.kubernetes.io/version: "2.0.0"
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: ai-scientist-platform
+        environment: production
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: ai-scientist-worker
+      terminationGracePeriodSeconds: 120
+      
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      
+      containers:
+      - name: worker
+        image: ai-scientist:2.0.0
+        imagePullPolicy: IfNotPresent
+        
+        command: ["python", "-m", "ai_scientist.distributed_computing_engine"]
+        args: ["--worker", "--concurrency=4"]
+        
+        env:
+        - name: WORKER_MODE
+          value: "true"
+        - name: WORKER_CONCURRENCY
+          value: "4"
+        - name: QUEUE_BACKEND
+          value: "redis"
+        
+        envFrom:
+        - secretRef:
+            name: ai-scientist-secrets
+        - configMapRef:
+            name: ai-scientist-config
+        
+        volumeMounts:
+        - name: worker-data
+          mountPath: /app/data
+        - name: worker-logs
+          mountPath: /app/logs
+        - name: worker-cache
+          mountPath: /app/cache
+        
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+            nvidia.com/gpu: "1"
+        
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import redis; r=redis.from_url('redis://ai-scientist-redis:6379'); r.ping()"
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import ai_scientist; print('Worker ready')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      
+      volumes:
+      - name: worker-data
+        emptyDir:
+          sizeLimit: 20Gi
+      - name: worker-logs
+        emptyDir:
+          sizeLimit: 5Gi
+      - name: worker-cache
+        emptyDir:
+          sizeLimit: 10Gi
+      
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+        worker-type: compute-intensive
+      
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule

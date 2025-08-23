@@ -1,0 +1,310 @@
+# AI Scientist v2 Staging Configuration
+# This file contains staging-specific settings for testing and validation
+
+# Application settings
+application:
+  name: "ai-scientist-v2-staging"
+  version: "2.0.0"
+  environment: "staging"
+  debug: true
+  log_level: "DEBUG"
+  log_format: "json"
+  
+# Server configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 2
+  worker_class: "uvicorn.workers.UvicornWorker"
+  timeout: 300
+  keepalive: 5
+  max_requests: 500
+  max_requests_jitter: 50
+  preload: false
+  reload: true  # Enable for development
+  
+# Security settings (relaxed for staging)
+security:
+  secret_key: "${SECRET_KEY}"
+  jwt_secret: "${JWT_SECRET_KEY}"
+  allowed_hosts:
+    - "staging.ai-scientist.yourdomain.com"
+    - "localhost"
+    - "127.0.0.1"
+    - "*"  # Allow all for staging
+  cors_origins:
+    - "https://staging.ai-scientist.yourdomain.com"
+    - "http://localhost:3000"  # For local development
+    - "http://localhost:8080"
+  cors_credentials: true
+  cors_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+    - "PATCH"
+  cors_headers:
+    - "*"
+  ssl_redirect: false  # Disabled for staging
+  secure_cookies: false
+  
+# Database configuration
+database:
+  url: "${DATABASE_URL:-postgresql://ai_scientist:staging_pass@postgres:5432/ai_scientist_staging}"
+  pool_size: 10
+  max_overflow: 5
+  pool_timeout: 20
+  pool_recycle: 1800
+  echo: true  # Enable SQL logging in staging
+  
+# Redis configuration
+redis:
+  url: "${REDIS_URL:-redis://:staging_redis@redis:6379/1}"
+  decode_responses: true
+  socket_timeout: 10
+  socket_connect_timeout: 10
+  socket_keepalive: true
+  connection_pool_max_connections: 20
+  retry_on_timeout: true
+  
+# GPU configuration (may be limited in staging)
+gpu:
+  enabled: true
+  devices: "0"
+  memory_fraction: 0.7  # Reduced for staging
+  allow_growth: true
+  per_process_gpu_memory_fraction: 0.6
+  
+# Research configuration (reduced for staging)
+research:
+  max_concurrent_experiments: 5
+  experiment_timeout: 3600  # 1 hour (reduced)
+  checkpoint_interval: 180  # 3 minutes (more frequent)
+  auto_checkpoint: true
+  backup_interval: 1800  # 30 minutes
+  max_backup_files: 48  # 1 day at 30min intervals
+  
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_port: 8080
+  health_check_port: 8443
+  health_check_interval: 15  # More frequent for staging
+  performance_monitoring: true
+  resource_monitoring: true
+  gpu_monitoring: true
+  
+# Logging configuration (more verbose)
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: "[{asctime}] [{levelname}] [{name}] [{funcName}:{lineno}] {message}"
+      style: "{"
+    json:
+      format: "{\"timestamp\": \"{asctime}\", \"level\": \"{levelname}\", \"logger\": \"{name}\", \"function\": \"{funcName}\", \"line\": {lineno}, \"message\": \"{message}\"}"
+      style: "{"
+  handlers:
+    console:
+      class: "logging.StreamHandler"
+      level: "DEBUG"
+      formatter: "standard"
+      stream: "ext://sys.stdout"
+    file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "DEBUG"
+      formatter: "json"
+      filename: "/app/logs/staging.log"
+      maxBytes: 52428800  # 50MB (smaller for staging)
+      backupCount: 5
+    error_file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "ERROR"
+      formatter: "json"
+      filename: "/app/logs/staging-errors.log"
+      maxBytes: 52428800  # 50MB
+      backupCount: 5
+  loggers:
+    ai_scientist:
+      level: "DEBUG"
+      handlers: ["console", "file"]
+      propagate: false
+    uvicorn:
+      level: "DEBUG"
+      handlers: ["console"]
+      propagate: false
+    sqlalchemy.engine:
+      level: "INFO"  # SQL queries
+      handlers: ["console", "file"]
+      propagate: false
+  root:
+    level: "DEBUG"
+    handlers: ["console", "file", "error_file"]
+
+# Cache configuration (smaller for staging)
+cache:
+  default_timeout: 1800  # 30 minutes
+  max_entries: 5000
+  eviction_policy: "lru"
+  
+# API configuration (more permissive)
+api:
+  rate_limiting:
+    enabled: true
+    per_minute: 2000  # Higher for testing
+    per_hour: 20000
+    per_day: 200000
+  pagination:
+    default_page_size: 10
+    max_page_size: 100
+  versioning:
+    default_version: "v2"
+    allowed_versions: ["v2", "v1"]  # Allow both for testing
+    
+# LLM configuration (may use different models for cost)
+llm:
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    model: "claude-3-haiku-20240307"  # Cheaper model for staging
+    max_tokens: 2048
+    temperature: 0.2
+    timeout: 180
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-3.5-turbo"  # Cheaper model for staging
+    max_tokens: 2048
+    temperature: 0.2
+    timeout: 180
+  
+# Performance configuration (relaxed)
+performance:
+  async_workers: 4
+  thread_pool_workers: 8
+  max_memory_usage: 80  # percentage
+  max_cpu_usage: 85  # percentage
+  max_gpu_memory_usage: 80  # percentage
+  
+# Feature flags (all enabled for testing)
+features:
+  quantum_optimization: true
+  distributed_computing: true
+  advanced_monitoring: true
+  auto_scaling: true
+  experiment_caching: true
+  result_persistence: true
+  debug_mode: true
+  test_mode: true
+  
+# Distributed computing configuration
+distributed:
+  enabled: true
+  backend: "redis"
+  broker_url: "${REDIS_URL:-redis://:staging_redis@redis:6379/2}"
+  result_backend: "${REDIS_URL:-redis://:staging_redis@redis:6379/3}"
+  worker_concurrency: 2
+  task_serializer: "json"
+  result_serializer: "json"
+  accept_content: ["json"]
+  timezone: "UTC"
+  enable_utc: true
+  task_always_eager: false  # Set to true for synchronous testing
+  
+# File storage configuration
+storage:
+  backend: "local"
+  local:
+    data_path: "/app/staging-data"
+    experiments_path: "/app/staging-experiments"
+    logs_path: "/app/logs"
+    cache_path: "/app/staging-cache"
+    backup_path: "/app/staging-backups"
+  
+# Backup configuration (reduced retention)
+backup:
+  enabled: true
+  interval: 1800  # 30 minutes
+  retention_days: 7  # 1 week only
+  compression: true
+  encryption: false  # Disabled for easier debugging
+  
+# Alert configuration (different channels for staging)
+alerts:
+  enabled: true
+  channels:
+    - type: "email"
+      recipients: ["staging-alerts@yourdomain.com"]
+    - type: "slack"
+      webhook_url: "${STAGING_SLACK_WEBHOOK_URL}"
+  
+# Health check configuration (more lenient)
+health_checks:
+  - name: "database"
+    type: "database"
+    critical: false  # Non-critical for staging
+    timeout: 15
+  - name: "redis"
+    type: "redis"
+    critical: false
+    timeout: 10
+  - name: "gpu"
+    type: "gpu"
+    critical: false
+    timeout: 15
+  - name: "disk_space"
+    type: "disk"
+    critical: false
+    threshold: 85  # Higher threshold
+  - name: "memory"
+    type: "memory"
+    critical: false
+    threshold: 85
+    
+# Prometheus metrics configuration
+metrics:
+  enabled: true
+  endpoint: "/metrics"
+  include_default: true
+  custom_metrics:
+    - name: "staging_experiments_total"
+      type: "counter"
+      description: "Total number of staging experiments run"
+    - name: "staging_experiment_duration"
+      type: "histogram"
+      description: "Staging experiment execution duration"
+    - name: "staging_test_results"
+      type: "counter"
+      description: "Staging test results"
+      
+# Tracing configuration (more detailed for debugging)
+tracing:
+  enabled: true
+  service_name: "ai-scientist-v2-staging"
+  jaeger:
+    agent_host: "jaeger-agent"
+    agent_port: 6831
+    collector_endpoint: "http://jaeger-collector:14268/api/traces"
+  sampling_rate: 0.5  # 50% of traces for better debugging
+  
+# Profiling configuration (enabled for performance analysis)
+profiling:
+  enabled: true
+  output_dir: "/app/profiles"
+  interval: 30  # seconds
+  
+# Testing configuration
+testing:
+  enabled: true
+  test_data_path: "/app/test-data"
+  mock_external_apis: false
+  skip_slow_tests: false
+  parallel_test_workers: 2
+  
+# Development tools (staging only)
+development:
+  auto_reload: true
+  debug_toolbar: true
+  sql_debug: true
+  template_debug: true
+  static_debug: true

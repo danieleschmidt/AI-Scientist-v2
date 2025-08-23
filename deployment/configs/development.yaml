@@ -1,0 +1,300 @@
+# AI Scientist v2 Development Configuration
+# This file contains development-specific settings for local development
+
+# Application settings
+application:
+  name: "ai-scientist-v2-dev"
+  version: "2.0.0-dev"
+  environment: "development"
+  debug: true
+  log_level: "DEBUG"
+  log_format: "standard"  # More readable for development
+  
+# Server configuration
+server:
+  host: "127.0.0.1"
+  port: 8000
+  workers: 1  # Single worker for development
+  worker_class: "uvicorn.workers.UvicornWorker"
+  timeout: 600  # Longer timeout for debugging
+  keepalive: 2
+  max_requests: 0  # Unlimited
+  max_requests_jitter: 0
+  preload: false
+  reload: true  # Auto-reload on code changes
+  reload_dirs: ["/app/ai_scientist"]
+  
+# Security settings (minimal for development)
+security:
+  secret_key: "dev-secret-key-not-for-production"
+  jwt_secret: "dev-jwt-secret-key"
+  allowed_hosts:
+    - "*"  # Allow all hosts in development
+  cors_origins:
+    - "*"  # Allow all origins in development
+  cors_credentials: true
+  cors_methods: ["*"]
+  cors_headers: ["*"]
+  ssl_redirect: false
+  secure_cookies: false
+  
+# Database configuration (local SQLite for simplicity)
+database:
+  url: "sqlite:///./dev_database.db"
+  pool_size: 5
+  max_overflow: 0
+  pool_timeout: 10
+  pool_recycle: -1
+  echo: true  # Show all SQL queries
+  
+# Redis configuration (local or mock)
+redis:
+  url: "redis://localhost:6379/0"
+  decode_responses: true
+  socket_timeout: 5
+  socket_connect_timeout: 5
+  socket_keepalive: false
+  connection_pool_max_connections: 10
+  retry_on_timeout: false
+  
+# GPU configuration (may not be available in dev)
+gpu:
+  enabled: false  # Disabled by default for CPU-only dev machines
+  devices: "0"
+  memory_fraction: 0.5
+  allow_growth: true
+  per_process_gpu_memory_fraction: 0.4
+  
+# Research configuration (small scale for development)
+research:
+  max_concurrent_experiments: 2
+  experiment_timeout: 600  # 10 minutes
+  checkpoint_interval: 60  # 1 minute
+  auto_checkpoint: true
+  backup_interval: 300  # 5 minutes
+  max_backup_files: 12
+  
+# Monitoring configuration (simplified)
+monitoring:
+  enabled: true
+  metrics_port: 8080
+  health_check_port: 8443
+  health_check_interval: 60
+  performance_monitoring: true
+  resource_monitoring: false  # Disabled to reduce overhead
+  gpu_monitoring: false
+  
+# Logging configuration (console focused)
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: "[{asctime}] [{levelname}] [{name}] [{funcName}:{lineno}] {message}"
+      style: "{"
+    simple:
+      format: "{levelname} - {name} - {message}"
+      style: "{"
+  handlers:
+    console:
+      class: "logging.StreamHandler"
+      level: "DEBUG"
+      formatter: "standard"
+      stream: "ext://sys.stdout"
+    file:
+      class: "logging.FileHandler"
+      level: "DEBUG"
+      formatter: "standard"
+      filename: "development.log"
+      mode: "w"  # Overwrite on each run
+  loggers:
+    ai_scientist:
+      level: "DEBUG"
+      handlers: ["console", "file"]
+      propagate: false
+    uvicorn:
+      level: "INFO"
+      handlers: ["console"]
+      propagate: false
+    sqlalchemy.engine:
+      level: "INFO"
+      handlers: ["console"]
+      propagate: false
+  root:
+    level: "DEBUG"
+    handlers: ["console", "file"]
+
+# Cache configuration (minimal)
+cache:
+  default_timeout: 300  # 5 minutes
+  max_entries: 1000
+  eviction_policy: "lru"
+  
+# API configuration (permissive)
+api:
+  rate_limiting:
+    enabled: false  # Disabled for development
+    per_minute: 10000
+    per_hour: 100000
+    per_day: 1000000
+  pagination:
+    default_page_size: 10
+    max_page_size: 100
+  versioning:
+    default_version: "v2"
+    allowed_versions: ["v2", "v1", "dev"]
+    
+# LLM configuration (use environment variables or mock)
+llm:
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY:-mock-key}"
+    model: "claude-3-haiku-20240307"
+    max_tokens: 1024
+    temperature: 0.3
+    timeout: 60
+    mock_responses: true  # Use mock responses when no API key
+  openai:
+    api_key: "${OPENAI_API_KEY:-mock-key}"
+    model: "gpt-3.5-turbo"
+    max_tokens: 1024
+    temperature: 0.3
+    timeout: 60
+    mock_responses: true
+  
+# Performance configuration (relaxed)
+performance:
+  async_workers: 2
+  thread_pool_workers: 4
+  max_memory_usage: 95  # Allow higher usage in dev
+  max_cpu_usage: 95
+  max_gpu_memory_usage: 95
+  
+# Feature flags (all enabled for testing)
+features:
+  quantum_optimization: true
+  distributed_computing: false  # Disabled for single-machine dev
+  advanced_monitoring: false
+  auto_scaling: false
+  experiment_caching: true
+  result_persistence: true
+  debug_mode: true
+  test_mode: true
+  mock_mode: true
+  
+# Distributed computing configuration (disabled)
+distributed:
+  enabled: false
+  backend: "memory"  # In-memory for development
+  broker_url: "memory://"
+  result_backend: "cache+memory://"
+  worker_concurrency: 1
+  task_serializer: "json"
+  result_serializer: "json"
+  accept_content: ["json"]
+  timezone: "UTC"
+  enable_utc: true
+  task_always_eager: true  # Execute tasks synchronously
+  
+# File storage configuration (local only)
+storage:
+  backend: "local"
+  local:
+    data_path: "./dev-data"
+    experiments_path: "./dev-experiments"
+    logs_path: "./dev-logs"
+    cache_path: "./dev-cache"
+    backup_path: "./dev-backups"
+  
+# Backup configuration (minimal)
+backup:
+  enabled: false  # Disabled in development
+  interval: 3600
+  retention_days: 1
+  compression: false
+  encryption: false
+  
+# Alert configuration (console only)
+alerts:
+  enabled: true
+  channels:
+    - type: "console"
+      level: "WARNING"
+  
+# Health check configuration (lenient)
+health_checks:
+  - name: "database"
+    type: "database"
+    critical: false
+    timeout: 30
+  - name: "redis"
+    type: "redis"
+    critical: false
+    timeout: 10
+  - name: "disk_space"
+    type: "disk"
+    critical: false
+    threshold: 95
+  - name: "memory"
+    type: "memory"
+    critical: false
+    threshold: 95
+    
+# Prometheus metrics configuration (optional)
+metrics:
+  enabled: false  # Disabled by default in development
+  endpoint: "/metrics"
+  include_default: false
+  
+# Tracing configuration (disabled for performance)
+tracing:
+  enabled: false
+  service_name: "ai-scientist-v2-dev"
+  sampling_rate: 0.0
+  
+# Profiling configuration (optional)
+profiling:
+  enabled: false  # Can be enabled when needed
+  output_dir: "./profiles"
+  interval: 60
+  
+# Testing configuration
+testing:
+  enabled: true
+  test_data_path: "./test-data"
+  mock_external_apis: true  # Mock by default
+  skip_slow_tests: true
+  parallel_test_workers: 1
+  auto_test: false  # Set to true for continuous testing
+  
+# Development tools
+development:
+  auto_reload: true
+  debug_toolbar: true
+  sql_debug: true
+  template_debug: true
+  static_debug: true
+  hot_reload: true
+  livereload: true
+  
+# Mock services configuration
+mocks:
+  enabled: true
+  llm_responses: true
+  external_apis: true
+  gpu_operations: true
+  slow_operations: true
+  
+# IDE integration
+ide:
+  enable_debugger: true
+  debugger_port: 5678
+  enable_profiler: false
+  code_completion: true
+  
+# Local development overrides
+local:
+  bind_all_interfaces: false
+  enable_cors: true
+  serve_static_files: true
+  auto_create_directories: true
+  seed_test_data: true

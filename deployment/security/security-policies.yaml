@@ -1,0 +1,506 @@
+# AI Scientist v2 Security Policies
+# Comprehensive security configuration for production deployment
+
+# Network Policy - Restrict network traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-scientist-network-policy
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/component: security
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: ai-scientist-platform
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  # Ingress rules - what can connect to our pods
+  ingress:
+  # Allow traffic from ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8000
+    - protocol: TCP
+      port: 8080
+  
+  # Allow traffic from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8080  # metrics
+  
+  # Allow inter-pod communication within namespace
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: ai-scientist-platform
+    ports:
+    - protocol: TCP
+      port: 8000
+    - protocol: TCP
+      port: 6379  # Redis
+  
+  # Egress rules - what our pods can connect to
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  
+  # Allow HTTPS to external APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  
+  # Allow HTTP for health checks and internal services
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 8080
+  
+  # Allow Redis communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+
+---
+# Pod Security Policy - Define security constraints for pods
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: ai-scientist-psp
+  namespace: ai-scientist
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  
+  # Required security contexts
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  runAsGroup:
+    rule: 'MustRunAs'
+    ranges:
+    - min: 1
+      max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+    - min: 1
+      max: 65535
+  
+  # Volume restrictions
+  volumes:
+  - 'configMap'
+  - 'emptyDir'
+  - 'projected'
+  - 'secret'
+  - 'downwardAPI'
+  - 'persistentVolumeClaim'
+  
+  # Capability restrictions
+  requiredDropCapabilities:
+  - ALL
+  allowedCapabilities:
+  - NET_BIND_SERVICE  # Allow binding to privileged ports
+  
+  # Host restrictions
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  hostPorts: []
+  
+  # SELinux
+  seLinux:
+    rule: 'RunAsAny'
+  
+  # Read-only root filesystem
+  readOnlyRootFilesystem: false  # Our app needs some writable areas
+  
+  # Allowed proc mount types
+  allowedProcMountTypes:
+  - Default
+
+---
+# Pod Disruption Budget - Ensure availability during updates
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-scientist-pdb
+  namespace: ai-scientist
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-scientist
+      app.kubernetes.io/component: application
+
+---
+# Pod Disruption Budget for workers
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-scientist-worker-pdb
+  namespace: ai-scientist
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-scientist-worker
+      app.kubernetes.io/component: worker
+
+---
+# Security Context Constraints (OpenShift)
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: ai-scientist-scc
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: false
+allowedCapabilities:
+- NET_BIND_SERVICE
+defaultAddCapabilities: []
+fsGroup:
+  type: MustRunAs
+  ranges:
+  - min: 1000
+    max: 1000
+groups: []
+priority: 10
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- ALL
+runAsUser:
+  type: MustRunAs
+  uid: 1001
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: MustRunAs
+  ranges:
+  - min: 1000
+    max: 1000
+users: []
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
+
+---
+# OPA Gatekeeper Constraint Template - Resource limits
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredresources
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredResources
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            cpu:
+              type: string
+            memory:
+              type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredresources
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.cpu
+          msg := "Container must specify CPU requests"
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.requests.memory
+          msg := "Container must specify memory requests"
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := "Container must specify CPU limits"
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := "Container must specify memory limits"
+        }
+
+---
+# Gatekeeper Constraint - Enforce resource requirements
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredResources
+metadata:
+  name: must-have-resource-requirements
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: ["ai-scientist"]
+  parameters:
+    cpu: "100m"
+    memory: "128Mi"
+
+---
+# OPA Gatekeeper Constraint Template - Security context
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredsecuritycontext
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredSecurityContext
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredsecuritycontext
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.runAsNonRoot
+          msg := "Container must run as non-root user"
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.allowPrivilegeEscalation != false
+          msg := "Container must not allow privilege escalation"
+        }
+        
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem
+          msg := "Container should have read-only root filesystem"
+        }
+
+---
+# Gatekeeper Constraint - Enforce security context
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredSecurityContext
+metadata:
+  name: must-have-security-context
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: ["ai-scientist"]
+
+---
+# Falco Rules for Runtime Security
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-rules
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: falco
+    app.kubernetes.io/component: security
+data:
+  ai_scientist_rules.yaml: |
+    # AI Scientist specific security rules
+    
+    - rule: Unexpected network connection in AI Scientist
+      desc: Detect unexpected network connections from AI Scientist pods
+      condition: >
+        (inbound_outbound) and 
+        k8s_ns=ai-scientist and 
+        not (fd.sport in (8000, 8080, 6379, 443, 53, 22)) and
+        not (fd.dport in (8000, 8080, 6379, 443, 53, 22))
+      output: >
+        Unexpected network connection in AI Scientist namespace 
+        (proc.name=%proc.name connection=%fd.name)
+      priority: WARNING
+      tags: [network, ai-scientist]
+    
+    - rule: Write to non-allowed directory in AI Scientist
+      desc: Detect writes to directories that shouldn't be writable
+      condition: >
+        open_write and 
+        k8s_ns=ai-scientist and
+        not fd.name startswith /app/logs and
+        not fd.name startswith /app/data and
+        not fd.name startswith /app/experiments and
+        not fd.name startswith /app/cache and
+        not fd.name startswith /tmp
+      output: >
+        Write to unexpected directory in AI Scientist 
+        (proc.name=%proc.name file=%fd.name)
+      priority: WARNING
+      tags: [filesystem, ai-scientist]
+    
+    - rule: Privilege escalation in AI Scientist
+      desc: Detect privilege escalation attempts
+      condition: >
+        spawned_process and 
+        k8s_ns=ai-scientist and
+        (proc.name in (su, sudo, passwd, chsh, chfn, newgrp))
+      output: >
+        Privilege escalation attempt in AI Scientist 
+        (proc.name=%proc.name proc.cmdline=%proc.cmdline)
+      priority: HIGH
+      tags: [privilege-escalation, ai-scientist]
+
+---
+# Kubernetes Audit Policy
+apiVersion: audit.k8s.io/v1
+kind: Policy
+metadata:
+  name: ai-scientist-audit-policy
+rules:
+# Log all requests to AI Scientist namespace
+- level: Metadata
+  namespaces: ["ai-scientist"]
+  resources:
+  - group: ""
+    resources: ["pods", "services", "secrets", "configmaps"]
+  - group: "apps"
+    resources: ["deployments", "replicasets"]
+  - group: "extensions"
+    resources: ["ingresses"]
+
+# Log secret access
+- level: Request
+  resources:
+  - group: ""
+    resources: ["secrets"]
+  namespaces: ["ai-scientist"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+
+# Log exec and port-forward
+- level: Request
+  resources:
+  - group: ""
+    resources: ["pods/exec", "pods/portforward"]
+  namespaces: ["ai-scientist"]
+
+# Log auth decisions
+- level: Request
+  resources:
+  - group: "rbac.authorization.k8s.io"
+    resources: ["*"]
+
+---
+# AppArmor Profile ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apparmor-profiles
+  namespace: ai-scientist
+data:
+  ai-scientist-profile: |
+    #include <tunables/global>
+    
+    profile ai-scientist-container flags=(attach_disconnected,mediate_deleted) {
+      #include <abstractions/base>
+      
+      # Allow network access
+      network inet tcp,
+      network inet udp,
+      network inet6 tcp,
+      network inet6 udp,
+      
+      # Allow file operations in allowed directories
+      /app/** rw,
+      /tmp/** rw,
+      /var/tmp/** rw,
+      
+      # Allow reading system files
+      /etc/** r,
+      /lib/** r,
+      /lib64/** r,
+      /usr/** r,
+      /bin/** r,
+      /sbin/** r,
+      
+      # Allow Python operations
+      /usr/bin/python* rix,
+      /usr/local/bin/python* rix,
+      
+      # Deny sensitive operations
+      deny /root/** rw,
+      deny /home/** rw,
+      deny /boot/** rw,
+      deny /sys/** rw,
+      deny mount,
+      deny umount,
+      deny ptrace,
+      deny signal,
+      
+      # Allow specific capabilities only
+      capability net_bind_service,
+      capability setuid,
+      capability setgid,
+    }
+
+---
+# Secrets Encryption Configuration
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+- resources:
+  - secrets
+  providers:
+  - aescbc:
+      keys:
+      - name: key1
+        secret: <32-byte-base64-encoded-key>
+  - identity: {}
+
+---
+# Admission Controller Configuration
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+- name: PodSecurityPolicy
+  configuration:
+    apiVersion: apiserver.config.k8s.io/v1
+    kind: PodSecurityPolicyConfiguration
+- name: ResourceQuota
+- name: LimitRanger
+- name: NamespaceLifecycle
+- name: ServiceAccount
+- name: NodeRestriction
+- name: AlwaysPullImages
+- name: SecurityContextDeny

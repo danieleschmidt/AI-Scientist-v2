@@ -1,0 +1,666 @@
+# Elasticsearch Configuration for AI Scientist v2 Log Storage
+# Production-ready Elasticsearch cluster for log aggregation
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/component: logging
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: elasticsearch
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: elasticsearch
+        app.kubernetes.io/component: logging
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9200"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      
+      initContainers:
+      - name: increase-vm-max-map
+        image: busybox:1.35
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+      
+      - name: increase-fd-ulimit
+        image: busybox:1.35
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command: ["sh", "-c", "ulimit -n 65536"]
+      
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+        imagePullPolicy: IfNotPresent
+        
+        env:
+        - name: cluster.name
+          value: "ai-scientist-elasticsearch"
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: discovery.seed_hosts
+          value: "elasticsearch-0.elasticsearch,elasticsearch-1.elasticsearch,elasticsearch-2.elasticsearch"
+        - name: cluster.initial_master_nodes
+          value: "elasticsearch-0,elasticsearch-1,elasticsearch-2"
+        - name: node.master
+          value: "true"
+        - name: node.data
+          value: "true"
+        - name: node.ingest
+          value: "true"
+        - name: network.host
+          value: "0.0.0.0"
+        - name: http.port
+          value: "9200"
+        - name: transport.port
+          value: "9300"
+        
+        # JVM settings
+        - name: ES_JAVA_OPTS
+          value: "-Xms2g -Xmx2g"
+        
+        # Security settings
+        - name: xpack.security.enabled
+          value: "true"
+        - name: xpack.security.http.ssl.enabled
+          value: "false"
+        - name: xpack.security.transport.ssl.enabled
+          value: "false"
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ai-scientist-secrets
+              key: elasticsearch-password
+        
+        # Index settings
+        - name: action.destructive_requires_name
+          value: "true"
+        - name: cluster.routing.allocation.disk.threshold_enabled
+          value: "true"
+        - name: cluster.routing.allocation.disk.watermark.low
+          value: "85%"
+        - name: cluster.routing.allocation.disk.watermark.high
+          value: "90%"
+        - name: cluster.routing.allocation.disk.watermark.flood_stage
+          value: "95%"
+        
+        ports:
+        - name: http
+          containerPort: 9200
+          protocol: TCP
+        - name: transport
+          containerPort: 9300
+          protocol: TCP
+        
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+        
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+          readOnly: true
+        
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /_cluster/health?local=true
+            port: 9200
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /_cluster/health?local=true
+            port: 9200
+          initialDelaySeconds: 90
+          periodSeconds: 60
+          timeoutSeconds: 10
+        
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/bash", "-c", "curl -XPOST 'localhost:9200/_cluster/nodes/_local/_shutdown'"]
+      
+      volumes:
+      - name: config
+        configMap:
+          name: elasticsearch-config
+  
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app.kubernetes.io/name: elasticsearch
+        app.kubernetes.io/component: logging
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 100Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/component: logging
+data:
+  elasticsearch.yml: |
+    # AI Scientist v2 Elasticsearch Configuration
+    
+    # Cluster settings
+    cluster.name: ai-scientist-elasticsearch
+    node.roles: ["master", "data", "ingest"]
+    
+    # Network settings
+    network.host: 0.0.0.0
+    http.port: 9200
+    transport.port: 9300
+    http.cors.enabled: true
+    http.cors.allow-origin: "*"
+    
+    # Discovery settings
+    discovery.zen.ping.unicast.hosts: ["elasticsearch-0.elasticsearch", "elasticsearch-1.elasticsearch", "elasticsearch-2.elasticsearch"]
+    discovery.zen.minimum_master_nodes: 2
+    
+    # Path settings
+    path.data: /usr/share/elasticsearch/data
+    path.logs: /usr/share/elasticsearch/logs
+    
+    # Memory settings
+    bootstrap.memory_lock: false
+    indices.memory.index_buffer_size: 30%
+    indices.memory.min_index_buffer_size: 96mb
+    
+    # Performance settings
+    thread_pool.write.queue_size: 1000
+    thread_pool.search.queue_size: 1000
+    thread_pool.get.queue_size: 1000
+    
+    # Index settings
+    action.auto_create_index: "+ai-scientist-*,-*"
+    action.destructive_requires_name: true
+    
+    # Cluster routing
+    cluster.routing.allocation.enable: all
+    cluster.routing.allocation.node_concurrent_recoveries: 2
+    cluster.routing.allocation.disk.threshold_enabled: true
+    cluster.routing.allocation.disk.watermark.low: 85%
+    cluster.routing.allocation.disk.watermark.high: 90%
+    cluster.routing.allocation.disk.watermark.flood_stage: 95%
+    
+    # Recovery settings
+    indices.recovery.max_bytes_per_sec: 100mb
+    cluster.routing.allocation.cluster_concurrent_rebalance: 2
+    
+    # Monitoring settings
+    xpack.monitoring.collection.enabled: true
+    xpack.monitoring.elasticsearch.collection.enabled: true
+    
+    # Security settings
+    xpack.security.enabled: true
+    xpack.security.http.ssl.enabled: false
+    xpack.security.transport.ssl.enabled: false
+    
+    # Index lifecycle management
+    xpack.ilm.enabled: true
+    
+    # Machine learning (disabled for resource conservation)
+    xpack.ml.enabled: false
+    
+    # Watcher (alerting)
+    xpack.watcher.enabled: true
+    
+    # Graph
+    xpack.graph.enabled: false
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/component: logging
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9200"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 9200
+    targetPort: 9200
+  - name: transport
+    port: 9300
+    targetPort: 9300
+  selector:
+    app.kubernetes.io/name: elasticsearch
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-client
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/component: logging
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 9200
+    targetPort: 9200
+  - name: transport
+    port: 9300
+    targetPort: 9300
+  selector:
+    app.kubernetes.io/name: elasticsearch
+
+---
+# Index templates for AI Scientist logs
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-templates
+  namespace: ai-scientist
+data:
+  ai-scientist-logs-template.json: |
+    {
+      "index_patterns": ["ai-scientist-logs-*"],
+      "settings": {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "index.refresh_interval": "30s",
+        "index.codec": "best_compression",
+        "index.mapping.total_fields.limit": 2000,
+        "index.max_result_window": 100000,
+        "index.lifecycle.name": "ai-scientist-logs-policy",
+        "index.lifecycle.rollover_alias": "ai-scientist-logs"
+      },
+      "mappings": {
+        "properties": {
+          "timestamp": {
+            "type": "date",
+            "format": "strict_date_optional_time||epoch_millis"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "logger": {
+            "type": "keyword"
+          },
+          "message": {
+            "type": "text",
+            "analyzer": "standard",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "service_name": {
+            "type": "keyword"
+          },
+          "environment": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          },
+          "experiment_id": {
+            "type": "keyword"
+          },
+          "component": {
+            "type": "keyword"
+          },
+          "duration": {
+            "type": "long"
+          },
+          "memory_usage": {
+            "type": "long"
+          },
+          "cpu_usage": {
+            "type": "float"
+          },
+          "gpu_utilization": {
+            "type": "float"
+          },
+          "kubernetes": {
+            "properties": {
+              "namespace_name": {
+                "type": "keyword"
+              },
+              "pod_name": {
+                "type": "keyword"
+              },
+              "container_name": {
+                "type": "keyword"
+              },
+              "node_name": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  
+  ai-scientist-errors-template.json: |
+    {
+      "index_patterns": ["ai-scientist-errors-*"],
+      "settings": {
+        "number_of_shards": 2,
+        "number_of_replicas": 1,
+        "index.refresh_interval": "5s",
+        "index.lifecycle.name": "ai-scientist-errors-policy"
+      },
+      "mappings": {
+        "properties": {
+          "timestamp": {
+            "type": "date"
+          },
+          "level": {
+            "type": "keyword"
+          },
+          "message": {
+            "type": "text"
+          },
+          "stack_trace": {
+            "type": "text",
+            "index": false
+          },
+          "severity": {
+            "type": "keyword"
+          },
+          "alert_required": {
+            "type": "boolean"
+          },
+          "service_name": {
+            "type": "keyword"
+          },
+          "environment": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+
+---
+# Index Lifecycle Management policies
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-ilm-policies
+  namespace: ai-scientist
+data:
+  ai-scientist-logs-policy.json: |
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "actions": {
+              "rollover": {
+                "max_size": "10GB",
+                "max_age": "1d",
+                "max_docs": 10000000
+              },
+              "set_priority": {
+                "priority": 100
+              }
+            }
+          },
+          "warm": {
+            "min_age": "2d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 0
+              },
+              "forcemerge": {
+                "max_num_segments": 1
+              },
+              "set_priority": {
+                "priority": 50
+              }
+            }
+          },
+          "cold": {
+            "min_age": "7d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 0
+              },
+              "set_priority": {
+                "priority": 0
+              }
+            }
+          },
+          "delete": {
+            "min_age": "30d",
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+  
+  ai-scientist-errors-policy.json: |
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "actions": {
+              "rollover": {
+                "max_size": "5GB",
+                "max_age": "1d"
+              },
+              "set_priority": {
+                "priority": 100
+              }
+            }
+          },
+          "warm": {
+            "min_age": "1d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 1
+              },
+              "set_priority": {
+                "priority": 75
+              }
+            }
+          },
+          "cold": {
+            "min_age": "30d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 0
+              },
+              "set_priority": {
+                "priority": 25
+              }
+            }
+          },
+          "delete": {
+            "min_age": "90d",
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+
+---
+# Elasticsearch curator for index management
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: elasticsearch-curator
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: elasticsearch-curator
+    app.kubernetes.io/component: logging
+spec:
+  schedule: "0 2 * * *"  # Run daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: curator
+            image: untergeek/curator:8.0.4
+            imagePullPolicy: IfNotPresent
+            
+            env:
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch-client"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            
+            command:
+            - curator
+            - --config
+            - /etc/curator/config.yml
+            - /etc/curator/actions.yml
+            
+            volumeMounts:
+            - name: curator-config
+              mountPath: /etc/curator
+              readOnly: true
+            
+            resources:
+              limits:
+                cpu: 100m
+                memory: 256Mi
+              requests:
+                cpu: 50m
+                memory: 128Mi
+          
+          volumes:
+          - name: curator-config
+            configMap:
+              name: curator-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: curator-config
+  namespace: ai-scientist
+data:
+  config.yml: |
+    client:
+      hosts:
+        - elasticsearch-client
+      port: 9200
+      url_prefix:
+      use_ssl: False
+      certificate:
+      client_cert:
+      client_key:
+      ssl_no_validate: False
+      http_auth:
+      timeout: 30
+      master_only: False
+    
+    logging:
+      loglevel: INFO
+      logfile:
+      logformat: default
+      blacklist: ['elasticsearch', 'urllib3']
+  
+  actions.yml: |
+    actions:
+      1:
+        action: delete_indices
+        description: Delete old ai-scientist log indices
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: ai-scientist-logs-
+        - filtertype: age
+          source: name
+          direction: older
+          timestring: '%Y.%m.%d'
+          unit: days
+          unit_count: 30
+      
+      2:
+        action: delete_indices
+        description: Delete old ai-scientist error indices
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: ai-scientist-errors-
+        - filtertype: age
+          source: name
+          direction: older
+          timestring: '%Y.%m.%d'
+          unit: days
+          unit_count: 90
+      
+      3:
+        action: forcemerge
+        description: Merge old indices to reduce disk usage
+        options:
+          max_num_segments: 1
+          delay: 120
+          continue_if_exception: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: ai-scientist-logs-
+        - filtertype: age
+          source: name
+          direction: older
+          timestring: '%Y.%m.%d'
+          unit: days
+          unit_count: 2

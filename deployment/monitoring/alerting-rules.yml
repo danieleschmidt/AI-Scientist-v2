@@ -1,0 +1,416 @@
+# AI Scientist v2 Alerting Rules
+# Comprehensive alerting rules for production monitoring
+
+groups:
+  - name: ai-scientist-application
+    interval: 30s
+    rules:
+    
+    # Application availability
+    - alert: AIScientistDown
+      expr: up{job="ai-scientist-app"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        component: application
+      annotations:
+        summary: "AI Scientist application is down"
+        description: "AI Scientist application {{ $labels.instance }} has been down for more than 1 minute."
+        runbook_url: "https://runbooks.ai-scientist.com/application-down"
+    
+    # High response time
+    - alert: HighResponseTime
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-scientist-app"}[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+        component: application
+      annotations:
+        summary: "High response time detected"
+        description: "95th percentile response time is {{ $value }}s for {{ $labels.instance }}"
+        runbook_url: "https://runbooks.ai-scientist.com/high-response-time"
+    
+    # High error rate
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{job="ai-scientist-app",status=~"5.."}[5m]) / rate(http_requests_total{job="ai-scientist-app"}[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: critical
+        component: application
+      annotations:
+        summary: "High error rate detected"
+        description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.instance }}"
+        runbook_url: "https://runbooks.ai-scientist.com/high-error-rate"
+    
+    # Experiment failures
+    - alert: ExperimentFailureRate
+      expr: rate(ai_scientist_experiments_failed_total[10m]) / rate(ai_scientist_experiments_total[10m]) > 0.2
+      for: 5m
+      labels:
+        severity: warning
+        component: experiments
+      annotations:
+        summary: "High experiment failure rate"
+        description: "Experiment failure rate is {{ $value | humanizePercentage }}"
+        runbook_url: "https://runbooks.ai-scientist.com/experiment-failures"
+    
+    # Long-running experiments
+    - alert: LongRunningExperiment
+      expr: ai_scientist_experiment_duration_seconds > 7200  # 2 hours
+      for: 0m
+      labels:
+        severity: warning
+        component: experiments
+      annotations:
+        summary: "Long-running experiment detected"
+        description: "Experiment {{ $labels.experiment_id }} has been running for {{ $value | humanizeDuration }}"
+    
+    # Queue backlog
+    - alert: ExperimentQueueBacklog
+      expr: ai_scientist_experiment_queue_size > 50
+      for: 10m
+      labels:
+        severity: warning
+        component: queue
+      annotations:
+        summary: "Large experiment queue backlog"
+        description: "Experiment queue size is {{ $value }}"
+        runbook_url: "https://runbooks.ai-scientist.com/queue-backlog"
+
+  - name: ai-scientist-workers
+    interval: 30s
+    rules:
+    
+    # Worker availability
+    - alert: WorkerDown
+      expr: up{job="ai-scientist-workers"} == 0
+      for: 2m
+      labels:
+        severity: warning
+        component: workers
+      annotations:
+        summary: "AI Scientist worker is down"
+        description: "Worker {{ $labels.instance }} has been down for more than 2 minutes."
+    
+    # Low worker count
+    - alert: LowWorkerCount
+      expr: count(up{job="ai-scientist-workers"} == 1) < 3
+      for: 5m
+      labels:
+        severity: warning
+        component: workers
+      annotations:
+        summary: "Low number of available workers"
+        description: "Only {{ $value }} workers are available, minimum is 3"
+        runbook_url: "https://runbooks.ai-scientist.com/low-worker-count"
+    
+    # Worker task failures
+    - alert: WorkerTaskFailures
+      expr: rate(celery_task_failures_total[10m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        component: workers
+      annotations:
+        summary: "High worker task failure rate"
+        description: "Worker task failure rate is {{ $value }} failures/sec"
+
+  - name: ai-scientist-infrastructure
+    interval: 30s
+    rules:
+    
+    # High CPU usage
+    - alert: HighCPUUsage
+      expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+      for: 5m
+      labels:
+        severity: warning
+        component: infrastructure
+      annotations:
+        summary: "High CPU usage"
+        description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+        runbook_url: "https://runbooks.ai-scientist.com/high-cpu"
+    
+    # High memory usage
+    - alert: HighMemoryUsage
+      expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+      for: 3m
+      labels:
+        severity: warning
+        component: infrastructure
+      annotations:
+        summary: "High memory usage"
+        description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+        runbook_url: "https://runbooks.ai-scientist.com/high-memory"
+    
+    # Low disk space
+    - alert: LowDiskSpace
+      expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+        component: infrastructure
+      annotations:
+        summary: "Low disk space"
+        description: "Disk usage is {{ $value }}% on {{ $labels.instance }} at {{ $labels.mountpoint }}"
+        runbook_url: "https://runbooks.ai-scientist.com/low-disk-space"
+    
+    # Critical disk space
+    - alert: CriticalDiskSpace
+      expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 95
+      for: 1m
+      labels:
+        severity: critical
+        component: infrastructure
+      annotations:
+        summary: "Critical disk space"
+        description: "Disk usage is {{ $value }}% on {{ $labels.instance }} at {{ $labels.mountpoint }}"
+        runbook_url: "https://runbooks.ai-scientist.com/critical-disk-space"
+    
+    # High network usage
+    - alert: HighNetworkTraffic
+      expr: rate(node_network_receive_bytes_total[5m]) > 100000000  # 100MB/s
+      for: 5m
+      labels:
+        severity: info
+        component: infrastructure
+      annotations:
+        summary: "High network traffic"
+        description: "Network receive rate is {{ $value | humanize1024 }}/s on {{ $labels.instance }}"
+
+  - name: ai-scientist-gpu
+    interval: 30s
+    rules:
+    
+    # GPU utilization
+    - alert: HighGPUUtilization
+      expr: DCGM_FI_DEV_GPU_UTIL > 95
+      for: 10m
+      labels:
+        severity: info
+        component: gpu
+      annotations:
+        summary: "High GPU utilization"
+        description: "GPU {{ $labels.gpu }} utilization is {{ $value }}%"
+    
+    # GPU memory usage
+    - alert: HighGPUMemoryUsage
+      expr: (DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL) * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+        component: gpu
+      annotations:
+        summary: "High GPU memory usage"
+        description: "GPU {{ $labels.gpu }} memory usage is {{ $value }}%"
+        runbook_url: "https://runbooks.ai-scientist.com/high-gpu-memory"
+    
+    # GPU temperature
+    - alert: HighGPUTemperature
+      expr: DCGM_FI_DEV_GPU_TEMP > 85
+      for: 2m
+      labels:
+        severity: warning
+        component: gpu
+      annotations:
+        summary: "High GPU temperature"
+        description: "GPU {{ $labels.gpu }} temperature is {{ $value }}°C"
+        runbook_url: "https://runbooks.ai-scientist.com/high-gpu-temperature"
+    
+    # GPU power usage
+    - alert: HighGPUPower
+      expr: DCGM_FI_DEV_POWER_USAGE > 250  # Watts
+      for: 5m
+      labels:
+        severity: info
+        component: gpu
+      annotations:
+        summary: "High GPU power usage"
+        description: "GPU {{ $labels.gpu }} power usage is {{ $value }}W"
+
+  - name: ai-scientist-database
+    interval: 30s
+    rules:
+    
+    # Redis down
+    - alert: RedisDown
+      expr: up{job="redis"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        component: database
+      annotations:
+        summary: "Redis is down"
+        description: "Redis instance {{ $labels.instance }} is down"
+        runbook_url: "https://runbooks.ai-scientist.com/redis-down"
+    
+    # High Redis memory usage
+    - alert: HighRedisMemoryUsage
+      expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 90
+      for: 5m
+      labels:
+        severity: warning
+        component: database
+      annotations:
+        summary: "High Redis memory usage"
+        description: "Redis memory usage is {{ $value }}% on {{ $labels.instance }}"
+        runbook_url: "https://runbooks.ai-scientist.com/high-redis-memory"
+    
+    # High Redis connections
+    - alert: HighRedisConnections
+      expr: redis_connected_clients > 80
+      for: 5m
+      labels:
+        severity: warning
+        component: database
+      annotations:
+        summary: "High Redis connection count"
+        description: "Redis has {{ $value }} connected clients on {{ $labels.instance }}"
+    
+    # Database connection pool exhaustion
+    - alert: DatabaseConnectionPoolExhaustion
+      expr: db_connection_pool_active / db_connection_pool_size > 0.9
+      for: 2m
+      labels:
+        severity: warning
+        component: database
+      annotations:
+        summary: "Database connection pool near exhaustion"
+        description: "Database connection pool is {{ $value | humanizePercentage }} full"
+
+  - name: ai-scientist-kubernetes
+    interval: 30s
+    rules:
+    
+    # Pod crashes
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total{namespace="ai-scientist"}[15m]) * 60 * 15 > 0
+      for: 5m
+      labels:
+        severity: warning
+        component: kubernetes
+      annotations:
+        summary: "Pod is crash looping"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crash looping"
+        runbook_url: "https://runbooks.ai-scientist.com/pod-crash-loop"
+    
+    # Pod not ready
+    - alert: PodNotReady
+      expr: kube_pod_status_ready{condition="false", namespace="ai-scientist"} == 1
+      for: 10m
+      labels:
+        severity: warning
+        component: kubernetes
+      annotations:
+        summary: "Pod not ready"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready"
+    
+    # High pod memory usage
+    - alert: HighPodMemoryUsage
+      expr: container_memory_usage_bytes{namespace="ai-scientist"} / container_spec_memory_limit_bytes > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        component: kubernetes
+      annotations:
+        summary: "High pod memory usage"
+        description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }}"
+    
+    # High pod CPU usage
+    - alert: HighPodCPUUsage
+      expr: rate(container_cpu_usage_seconds_total{namespace="ai-scientist"}[5m]) / (container_spec_cpu_quota / 100000) > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        component: kubernetes
+      annotations:
+        summary: "High pod CPU usage"
+        description: "Pod {{ $labels.pod }} CPU usage is {{ $value | humanizePercentage }}"
+    
+    # Node not ready
+    - alert: NodeNotReady
+      expr: kube_node_status_ready{condition="false"} == 1
+      for: 5m
+      labels:
+        severity: critical
+        component: kubernetes
+      annotations:
+        summary: "Node not ready"
+        description: "Node {{ $labels.node }} is not ready"
+        runbook_url: "https://runbooks.ai-scientist.com/node-not-ready"
+
+  - name: ai-scientist-security
+    interval: 60s
+    rules:
+    
+    # Failed authentication attempts
+    - alert: HighFailedAuthentication
+      expr: rate(http_requests_total{status="401"}[5m]) > 10
+      for: 2m
+      labels:
+        severity: warning
+        component: security
+      annotations:
+        summary: "High number of failed authentication attempts"
+        description: "Failed authentication rate is {{ $value }} attempts/sec"
+        runbook_url: "https://runbooks.ai-scientist.com/failed-auth"
+    
+    # Suspicious API usage
+    - alert: SuspiciousAPIUsage
+      expr: rate(http_requests_total[1m]) > 1000
+      for: 1m
+      labels:
+        severity: warning
+        component: security
+      annotations:
+        summary: "Suspicious API usage detected"
+        description: "Request rate is {{ $value }} requests/sec from {{ $labels.instance }}"
+    
+    # Certificate expiration
+    - alert: CertificateExpiration
+      expr: (ssl_certificate_expiry_seconds - time()) / 86400 < 30
+      for: 1h
+      labels:
+        severity: warning
+        component: security
+      annotations:
+        summary: "SSL certificate expiring soon"
+        description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days"
+        runbook_url: "https://runbooks.ai-scientist.com/cert-expiration"
+
+  - name: ai-scientist-business-metrics
+    interval: 60s
+    rules:
+    
+    # Low experiment success rate
+    - alert: LowExperimentSuccessRate
+      expr: rate(ai_scientist_experiments_successful_total[1h]) / rate(ai_scientist_experiments_total[1h]) < 0.8
+      for: 30m
+      labels:
+        severity: warning
+        component: business
+      annotations:
+        summary: "Low experiment success rate"
+        description: "Experiment success rate is {{ $value | humanizePercentage }} over the last hour"
+    
+    # No experiments running
+    - alert: NoExperimentsRunning
+      expr: ai_scientist_active_experiments == 0
+      for: 30m
+      labels:
+        severity: info
+        component: business
+      annotations:
+        summary: "No experiments are currently running"
+        description: "The system has had no active experiments for 30 minutes"
+    
+    # High average experiment duration
+    - alert: HighAverageExperimentDuration
+      expr: avg_over_time(ai_scientist_experiment_duration_seconds[2h]) > 3600  # 1 hour
+      for: 1h
+      labels:
+        severity: info
+        component: business
+      annotations:
+        summary: "High average experiment duration"
+        description: "Average experiment duration is {{ $value | humanizeDuration }} over the last 2 hours"
