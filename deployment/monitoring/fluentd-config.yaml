@@ -1,0 +1,501 @@
+# Fluentd Configuration for AI Scientist v2 Log Aggregation
+# This configuration collects, processes, and forwards logs from the application
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: fluentd
+    app.kubernetes.io/component: logging
+data:
+  fluent.conf: |
+    # Input sources
+    <source>
+      @type tail
+      @id ai_scientist_app_logs
+      path /var/log/containers/ai-scientist-*.log
+      pos_file /var/log/fluentd-ai-scientist.log.pos
+      tag kubernetes.ai-scientist.app
+      format json
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      time_key timestamp
+      keep_time_key true
+    </source>
+    
+    <source>
+      @type tail
+      @id ai_scientist_worker_logs
+      path /var/log/containers/ai-scientist-worker-*.log
+      pos_file /var/log/fluentd-ai-scientist-worker.log.pos
+      tag kubernetes.ai-scientist.worker
+      format json
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      time_key timestamp
+      keep_time_key true
+    </source>
+    
+    <source>
+      @type tail
+      @id ai_scientist_experiment_logs
+      path /app/experiments/*/logs/*.log
+      pos_file /var/log/fluentd-experiments.log.pos
+      tag ai-scientist.experiments
+      format multiline
+      format_firstline /^\d{4}-\d{2}-\d{2}/
+      format1 /^(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \[(?<level>[^\]]+)\] (?<logger>[^:]+): (?<message>.*)/
+      time_format %Y-%m-%d %H:%M:%S,%L
+      time_key timestamp
+    </source>
+    
+    <source>
+      @type tail
+      @id ai_scientist_error_logs
+      path /app/logs/errors.log
+      pos_file /var/log/fluentd-errors.log.pos
+      tag ai-scientist.errors
+      format json
+      time_key timestamp
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+    </source>
+    
+    # Kubernetes metadata enrichment
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+      @id filter_kube_metadata
+      kubernetes_url "#{ENV['KUBERNETES_SERVICE_HOST']}:#{ENV['KUBERNETES_SERVICE_PORT_HTTPS']}"
+      verify_ssl "#{ENV['KUBERNETES_VERIFY_SSL'] || true}"
+      ca_file "#{ENV['KUBERNETES_CA_FILE']}"
+      skip_labels false
+      skip_container_metadata false
+      skip_master_url false
+      skip_namespace_metadata false
+      watch true
+      annotation_match [ ".*" ]
+    </filter>
+    
+    # Parse and enrich AI Scientist logs
+    <filter ai-scientist.**>
+      @type parser
+      @id ai_scientist_parser
+      key_name message
+      reserve_data true
+      remove_key_name_field false
+      emit_invalid_record_to_error false
+      <parse>
+        @type json
+        time_key timestamp
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </filter>
+    
+    # Add common fields to all AI Scientist logs
+    <filter ai-scientist.**>
+      @type record_transformer
+      @id ai_scientist_transformer
+      <record>
+        service_name ai-scientist-v2
+        environment "#{ENV['ENVIRONMENT'] || 'production'}"
+        version "#{ENV['VERSION'] || 'v2.0.0'}"
+        cluster_name "#{ENV['CLUSTER_NAME'] || 'ai-scientist-cluster'}"
+      </record>
+    </filter>
+    
+    # Filter out debug logs in production
+    <filter ai-scientist.**>
+      @type grep
+      @id production_log_filter
+      <regexp>
+        key level
+        pattern ^(?!DEBUG).*$
+      </regexp>
+    </filter>
+    
+    # Parse experiment logs
+    <filter ai-scientist.experiments>
+      @type parser
+      @id experiment_parser
+      key_name message
+      reserve_data true
+      <parse>
+        @type regexp
+        expression /^(?<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \[(?<level>[^\]]+)\] (?<logger>[^:]+): (?<message>.*)/
+        time_key timestamp
+        time_format %Y-%m-%d %H:%M:%S,%L
+      </parse>
+    </filter>
+    
+    # Extract experiment metadata
+    <filter ai-scientist.experiments>
+      @type record_transformer
+      @id experiment_metadata
+      <record>
+        experiment_id ${tag_parts[2]}
+        log_type experiment
+        service_name ai-scientist-v2
+        component experiments
+      </record>
+    </filter>
+    
+    # Error log processing
+    <filter ai-scientist.errors>
+      @type record_transformer
+      @id error_enrichment
+      <record>
+        log_type error
+        severity critical
+        alert_required true
+      </record>
+    </filter>
+    
+    # Performance metrics extraction
+    <filter ai-scientist.**>
+      @type grep
+      @id performance_metrics
+      <regexp>
+        key message
+        pattern (duration|latency|response_time|memory_usage|cpu_usage|gpu_utilization)
+      </regexp>
+    </filter>
+    
+    # Security event detection
+    <filter ai-scientist.**>
+      @type grep
+      @id security_events
+      <regexp>
+        key message
+        pattern (authentication|authorization|failed_login|security_violation|access_denied)
+      </regexp>
+    </filter>
+    
+    # Output to Elasticsearch
+    <match ai-scientist.**>
+      @type elasticsearch
+      @id out_es_ai_scientist
+      host "#{ENV['ELASTICSEARCH_HOST'] || 'elasticsearch'}"
+      port "#{ENV['ELASTICSEARCH_PORT'] || '9200'}"
+      user "#{ENV['ELASTICSEARCH_USER']}"
+      password "#{ENV['ELASTICSEARCH_PASSWORD']}"
+      scheme "#{ENV['ELASTICSEARCH_SCHEME'] || 'http'}"
+      ssl_verify "#{ENV['ELASTICSEARCH_SSL_VERIFY'] || 'false'}"
+      
+      index_name ai-scientist-logs-%Y.%m.%d
+      type_name _doc
+      
+      include_timestamp true
+      reconnect_on_error true
+      reload_on_failure true
+      reload_connections false
+      request_timeout 120s
+      
+      # Buffer settings
+      <buffer time>
+        @type file
+        path /var/log/fluentd-buffers/ai-scientist
+        timekey 1h
+        timekey_use_utc true
+        timekey_wait 5m
+        chunk_limit_size 64MB
+        total_limit_size 512MB
+        flush_mode interval
+        flush_interval 30s
+        flush_thread_count 2
+        retry_type exponential_backoff
+        retry_wait 1s
+        retry_max_interval 60s
+        retry_timeout 60m
+        overflow_action drop_oldest_chunk
+      </buffer>
+    </match>
+    
+    # Output to Kafka (optional)
+    <match ai-scientist.errors>
+      @type kafka2
+      @id out_kafka_errors
+      brokers "#{ENV['KAFKA_BROKERS'] || 'kafka:9092'}"
+      topic_key ai-scientist-errors
+      default_topic ai-scientist-errors
+      
+      # Security
+      username "#{ENV['KAFKA_USERNAME']}"
+      password "#{ENV['KAFKA_PASSWORD']}"
+      sasl_over_ssl "#{ENV['KAFKA_SSL'] || 'false'}"
+      
+      # Serialization
+      <format>
+        @type json
+      </format>
+      
+      # Producer settings
+      max_send_retries 3
+      required_acks 1
+      ack_timeout 5
+      compression_codec gzip
+      
+      <buffer topic>
+        @type file
+        path /var/log/fluentd-buffers/kafka
+        flush_mode immediate
+        chunk_limit_size 1MB
+      </buffer>
+    </match>
+    
+    # Output performance metrics to InfluxDB
+    <match ai-scientist.** performance>
+      @type influxdb
+      @id out_influxdb_performance
+      host "#{ENV['INFLUXDB_HOST'] || 'influxdb'}"
+      port "#{ENV['INFLUXDB_PORT'] || '8086'}"
+      dbname ai_scientist_metrics
+      user "#{ENV['INFLUXDB_USER']}"
+      password "#{ENV['INFLUXDB_PASSWORD']}"
+      
+      # Measurement configuration
+      measurement ai_scientist_metrics
+      tag_keys ["service_name", "component", "environment", "level"]
+      field_keys ["duration", "memory_usage", "cpu_usage", "gpu_utilization"]
+      time_precision s
+      
+      <buffer>
+        @type file
+        path /var/log/fluentd-buffers/influxdb
+        flush_mode interval
+        flush_interval 60s
+        chunk_limit_size 1MB
+      </buffer>
+    </match>
+    
+    # Alert routing for critical errors
+    <match ai-scientist.errors>
+      @type copy
+      
+      # Send to Elasticsearch
+      <store>
+        @type elasticsearch
+        host "#{ENV['ELASTICSEARCH_HOST'] || 'elasticsearch'}"
+        port "#{ENV['ELASTICSEARCH_PORT'] || '9200'}"
+        index_name ai-scientist-errors-%Y.%m.%d
+        
+        <buffer time>
+          @type file
+          path /var/log/fluentd-buffers/errors
+          timekey 1h
+          flush_mode immediate
+        </buffer>
+      </store>
+      
+      # Send alerts to webhook
+      <store>
+        @type webhook
+        endpoint "#{ENV['ALERT_WEBHOOK_URL']}"
+        http_method post
+        serializer json
+        
+        <format>
+          @type json
+        </format>
+        
+        <buffer>
+          @type file
+          path /var/log/fluentd-buffers/alerts
+          flush_mode immediate
+          retry_type exponential_backoff
+          retry_wait 1s
+          retry_max_interval 30s
+          retry_timeout 5m
+        </buffer>
+      </store>
+    </match>
+    
+    # Debug output (development only)
+    <match **>
+      @type stdout
+      @id debug_output
+      <format>
+        @type json
+      </format>
+    </match>
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: fluentd
+    app.kubernetes.io/component: logging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fluentd
+        app.kubernetes.io/component: logging
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "24220"
+    spec:
+      serviceAccount: fluentd
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+      containers:
+      - name: fluentd
+        image: fluent/fluentd-kubernetes-daemonset:v1.14-debian-elasticsearch7-1
+        imagePullPolicy: IfNotPresent
+        
+        env:
+        - name: FLUENTD_SYSTEMD_CONF
+          value: disable
+        - name: FLUENTD_PROMETHEUS_CONF
+          value: enable
+        - name: ELASTICSEARCH_HOST
+          value: "elasticsearch.ai-scientist.svc.cluster.local"
+        - name: ELASTICSEARCH_PORT
+          value: "9200"
+        - name: ENVIRONMENT
+          value: "production"
+        - name: VERSION
+          value: "v2.0.0"
+        - name: CLUSTER_NAME
+          value: "ai-scientist-cluster"
+        
+        resources:
+          limits:
+            memory: 500Mi
+            cpu: 500m
+          requests:
+            cpu: 100m
+            memory: 200Mi
+            
+        volumeMounts:
+        - name: config
+          mountPath: /fluentd/etc
+          readOnly: true
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: fluentd-buffer
+          mountPath: /var/log/fluentd-buffers
+        - name: app-logs
+          mountPath: /app/logs
+          readOnly: true
+        - name: experiment-logs
+          mountPath: /app/experiments
+          readOnly: true
+        
+        ports:
+        - containerPort: 24220
+          name: metrics
+          protocol: TCP
+        - containerPort: 24224
+          name: forward
+          protocol: TCP
+        - containerPort: 5140
+          name: syslog
+          protocol: UDP
+        
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 24220
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 10
+        
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: 24220
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+      
+      volumes:
+      - name: config
+        configMap:
+          name: fluentd-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: fluentd-buffer
+        emptyDir:
+          sizeLimit: 10Gi
+      - name: app-logs
+        persistentVolumeClaim:
+          claimName: ai-scientist-logs
+      - name: experiment-logs
+        persistentVolumeClaim:
+          claimName: ai-scientist-experiments
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd
+  namespace: ai-scientist
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd
+roleRef:
+  kind: ClusterRole
+  name: fluentd
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: ai-scientist
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: fluentd
+    app.kubernetes.io/component: logging
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "24220"
+spec:
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 24220
+    targetPort: 24220
+    protocol: TCP
+  - name: forward
+    port: 24224
+    targetPort: 24224
+    protocol: TCP
+  - name: syslog
+    port: 5140
+    targetPort: 5140
+    protocol: UDP
+  selector:
+    app.kubernetes.io/name: fluentd

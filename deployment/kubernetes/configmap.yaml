@@ -1,0 +1,324 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-scientist-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  # Application configuration
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  
+  # Server configuration
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  WORKERS: "4"
+  TIMEOUT: "300"
+  KEEPALIVE: "5"
+  
+  # Resource limits
+  MAX_MEMORY_USAGE: "85"
+  MAX_CPU_USAGE: "90"
+  MAX_DISK_USAGE: "85"
+  
+  # GPU configuration
+  CUDA_VISIBLE_DEVICES: "0"
+  TORCH_CUDA_ARCH_LIST: "7.0;7.5;8.0;8.6"
+  
+  # Caching configuration
+  CACHE_TTL: "3600"
+  CACHE_MAX_SIZE: "10000"
+  
+  # Research configuration
+  MAX_CONCURRENT_EXPERIMENTS: "10"
+  EXPERIMENT_TIMEOUT: "7200"
+  CHECKPOINT_INTERVAL: "300"
+  
+  # Security configuration
+  ALLOWED_HOSTS: "ai-scientist.yourdomain.com,localhost,127.0.0.1"
+  CORS_ORIGINS: "https://ai-scientist.yourdomain.com"
+  
+  # Database configuration
+  DATABASE_POOL_SIZE: "20"
+  DATABASE_MAX_OVERFLOW: "10"
+  DATABASE_POOL_TIMEOUT: "30"
+  
+  # Monitoring configuration
+  METRICS_ENABLED: "true"
+  HEALTH_CHECK_INTERVAL: "30"
+  TELEMETRY_ENABLED: "true"
+  
+  # Performance configuration
+  PERFORMANCE_MONITORING: "true"
+  PROFILING_ENABLED: "false"
+  
+  # Feature flags
+  FEATURE_QUANTUM_OPTIMIZATION: "true"
+  FEATURE_DISTRIBUTED_COMPUTING: "true"
+  FEATURE_ADVANCED_MONITORING: "true"
+  FEATURE_AUTO_SCALING: "true"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-scientist-init-scripts
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: ai-scientist
+    app.kubernetes.io/component: init-scripts
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  init-container.sh: |
+    #!/bin/bash
+    set -euo pipefail
+    
+    echo "Initializing AI Scientist v2..."
+    
+    # Wait for dependencies
+    echo "Waiting for Redis..."
+    until redis-cli -h ai-scientist-redis -p 6379 -a "$REDIS_PASSWORD" ping; do
+      echo "Redis is unavailable - sleeping"
+      sleep 2
+    done
+    echo "Redis is ready"
+    
+    # Initialize shared data
+    echo "Initializing shared data..."
+    mkdir -p /shared/init-complete
+    touch /shared/init-complete/dependencies-ready
+    
+    echo "Initialization complete"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  redis.conf: |
+    # Redis configuration for AI Scientist v2
+    
+    # Network
+    bind 0.0.0.0
+    port 6379
+    tcp-keepalive 300
+    timeout 0
+    
+    # General
+    daemonize no
+    supervised no
+    pidfile /data/redis.pid
+    loglevel notice
+    logfile ""
+    databases 16
+    
+    # Security
+    protected-mode yes
+    
+    # Memory management
+    maxmemory 3gb
+    maxmemory-policy allkeys-lru
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    stop-writes-on-bgsave-error yes
+    rdbcompression yes
+    rdbchecksum yes
+    dbfilename dump.rdb
+    dir /data/
+    
+    # Append only file
+    appendonly yes
+    appendfilename "appendonly.aof"
+    appendfsync everysec
+    no-appendfsync-on-rewrite no
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    aof-load-truncated yes
+    
+    # Performance
+    tcp-backlog 511
+    timeout 0
+    tcp-keepalive 300
+    
+    # Client limits
+    maxclients 10000
+    
+    # Slow log
+    slowlog-log-slower-than 10000
+    slowlog-max-len 128
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'ai-scientist-k8s'
+        environment: 'production'
+    
+    rule_files:
+      - "rules/*.yml"
+    
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager:9093
+    
+    scrape_configs:
+      # Prometheus itself
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      
+      # AI Scientist application
+      - job_name: 'ai-scientist'
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - ai-scientist
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: kubernetes_name
+      
+      # Redis metrics
+      - job_name: 'redis'
+        static_configs:
+          - targets: ['ai-scientist-redis:6379']
+      
+      # Node metrics
+      - job_name: 'node-exporter'
+        kubernetes_sd_configs:
+        - role: endpoints
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_endpoints_name]
+          regex: 'node-exporter'
+          action: keep
+      
+      # GPU metrics
+      - job_name: 'dcgm-exporter'
+        kubernetes_sd_configs:
+        - role: endpoints
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_endpoints_name]
+          regex: 'dcgm-exporter'
+          action: keep
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: ai-scientist
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ai-scientist-platform
+data:
+  grafana.ini: |
+    [analytics]
+    check_for_updates = false
+    
+    [grafana_net]
+    url = https://grafana.net
+    
+    [log]
+    mode = console
+    level = info
+    
+    [paths]
+    data = /var/lib/grafana/data
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    provisioning = /etc/grafana/provisioning
+    
+    [server]
+    protocol = http
+    http_port = 3000
+    domain = ai-scientist.yourdomain.com
+    enforce_domain = false
+    root_url = https://ai-scientist.yourdomain.com/grafana
+    serve_from_sub_path = true
+    
+    [database]
+    type = sqlite3
+    host = 127.0.0.1:3306
+    name = grafana
+    user = root
+    password =
+    path = grafana.db
+    
+    [session]
+    provider = file
+    provider_config = sessions
+    
+    [security]
+    admin_user = admin
+    admin_password = admin
+    secret_key = SW2YcwTIb9zpOOhoPsMm
+    
+    [snapshots]
+    external_enabled = true
+    external_snapshot_url = https://snapshots-origin.raintank.io
+    external_snapshot_name = Publish to snapshot.raintank.io
+    
+    [dashboards.json]
+    enabled = true
+    path = /var/lib/grafana/dashboards
+    
+    [alerting]
+    enabled = true
+    execute_alerts = true
+    
+    [metrics]
+    enabled = true
+    interval_seconds = 10
+    
+    [tracing.jaeger]
+    address = jaeger:14268
+    always_included_tag = tag1:value1
+    sampler_type = const
+    sampler_param = 1

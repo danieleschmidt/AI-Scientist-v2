@@ -1,0 +1,10 @@
+{
+  "id": "898286c2-87b2-43ac-9c82-5b7c3d4b32de",
+  "timestamp": 1755917097.5181155,
+  "datetime": "2025-08-23T02:44:57.518116",
+  "checkpoint_type": "start",
+  "stage": "initialization",
+  "state_data": {
+    "execution_id": "e7d74819-df0c-49ea-979f-ca974dbfc349",
+    "config": {
+      "research_config": 

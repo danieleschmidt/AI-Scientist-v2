@@ -1,0 +1,299 @@
+# AI Scientist v2 Production Configuration
+# This file contains production-specific settings for the AI Scientist v2 system
+
+# Application settings
+application:
+  name: "ai-scientist-v2"
+  version: "2.0.0"
+  environment: "production"
+  debug: false
+  log_level: "INFO"
+  log_format: "json"
+  
+# Server configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  worker_class: "uvicorn.workers.UvicornWorker"
+  timeout: 300
+  keepalive: 5
+  max_requests: 1000
+  max_requests_jitter: 100
+  preload: true
+  
+# Security settings
+security:
+  secret_key: "${SECRET_KEY}"
+  jwt_secret: "${JWT_SECRET_KEY}"
+  allowed_hosts:
+    - "ai-scientist.yourdomain.com"
+    - "localhost"
+    - "127.0.0.1"
+  cors_origins:
+    - "https://ai-scientist.yourdomain.com"
+  cors_credentials: true
+  cors_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  cors_headers:
+    - "Accept"
+    - "Content-Type"
+    - "Authorization"
+  ssl_redirect: true
+  secure_cookies: true
+  
+# Database configuration
+database:
+  url: "${DATABASE_URL}"
+  pool_size: 20
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: false
+  
+# Redis configuration
+redis:
+  url: "${REDIS_URL}"
+  decode_responses: true
+  socket_timeout: 30
+  socket_connect_timeout: 30
+  socket_keepalive: true
+  socket_keepalive_options: {}
+  connection_pool_max_connections: 50
+  retry_on_timeout: true
+  
+# GPU configuration
+gpu:
+  enabled: true
+  devices: "0"
+  memory_fraction: 0.9
+  allow_growth: true
+  per_process_gpu_memory_fraction: 0.8
+  
+# Research configuration
+research:
+  max_concurrent_experiments: 10
+  experiment_timeout: 7200  # 2 hours
+  checkpoint_interval: 300  # 5 minutes
+  auto_checkpoint: true
+  backup_interval: 3600  # 1 hour
+  max_backup_files: 168  # 1 week at hourly backups
+  
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_port: 8080
+  health_check_port: 8443
+  health_check_interval: 30
+  performance_monitoring: true
+  resource_monitoring: true
+  gpu_monitoring: true
+  
+# Logging configuration
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: "[{asctime}] [{levelname}] [{name}] {message}"
+      style: "{"
+    json:
+      format: "{\"timestamp\": \"{asctime}\", \"level\": \"{levelname}\", \"logger\": \"{name}\", \"message\": \"{message}\"}"
+      style: "{"
+  handlers:
+    console:
+      class: "logging.StreamHandler"
+      level: "INFO"
+      formatter: "json"
+      stream: "ext://sys.stdout"
+    file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "INFO"
+      formatter: "json"
+      filename: "/app/logs/application.log"
+      maxBytes: 104857600  # 100MB
+      backupCount: 10
+    error_file:
+      class: "logging.handlers.RotatingFileHandler"
+      level: "ERROR"
+      formatter: "json"
+      filename: "/app/logs/errors.log"
+      maxBytes: 104857600  # 100MB
+      backupCount: 10
+  loggers:
+    ai_scientist:
+      level: "INFO"
+      handlers: ["console", "file"]
+      propagate: false
+    uvicorn:
+      level: "INFO"
+      handlers: ["console"]
+      propagate: false
+    uvicorn.access:
+      level: "INFO"
+      handlers: ["console"]
+      propagate: false
+  root:
+    level: "INFO"
+    handlers: ["console", "file", "error_file"]
+
+# Cache configuration
+cache:
+  default_timeout: 3600  # 1 hour
+  max_entries: 10000
+  eviction_policy: "lru"
+  
+# API configuration
+api:
+  rate_limiting:
+    enabled: true
+    per_minute: 1000
+    per_hour: 10000
+    per_day: 100000
+  pagination:
+    default_page_size: 20
+    max_page_size: 1000
+  versioning:
+    default_version: "v2"
+    allowed_versions: ["v2"]
+    
+# LLM configuration
+llm:
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    model: "claude-3-sonnet-20240229"
+    max_tokens: 4096
+    temperature: 0.1
+    timeout: 300
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-4-turbo-preview"
+    max_tokens: 4096
+    temperature: 0.1
+    timeout: 300
+  
+# Performance configuration
+performance:
+  async_workers: 8
+  thread_pool_workers: 16
+  max_memory_usage: 85  # percentage
+  max_cpu_usage: 90  # percentage
+  max_gpu_memory_usage: 90  # percentage
+  
+# Feature flags
+features:
+  quantum_optimization: true
+  distributed_computing: true
+  advanced_monitoring: true
+  auto_scaling: true
+  experiment_caching: true
+  result_persistence: true
+  
+# Distributed computing configuration
+distributed:
+  enabled: true
+  backend: "redis"
+  broker_url: "${REDIS_URL}"
+  result_backend: "${REDIS_URL}"
+  worker_concurrency: 4
+  task_serializer: "json"
+  result_serializer: "json"
+  accept_content: ["json"]
+  timezone: "UTC"
+  enable_utc: true
+  
+# File storage configuration
+storage:
+  backend: "local"  # local, s3, gcs, azure
+  local:
+    data_path: "/app/data"
+    experiments_path: "/app/experiments"
+    logs_path: "/app/logs"
+    cache_path: "/app/cache"
+    backup_path: "/app/backups"
+  s3:
+    bucket: "ai-scientist-data"
+    region: "us-west-2"
+    access_key: "${AWS_ACCESS_KEY_ID}"
+    secret_key: "${AWS_SECRET_ACCESS_KEY}"
+  
+# Backup configuration
+backup:
+  enabled: true
+  interval: 3600  # 1 hour
+  retention_days: 30
+  compression: true
+  encryption: true
+  
+# Alert configuration
+alerts:
+  enabled: true
+  channels:
+    - type: "email"
+      recipients: ["admin@yourdomain.com"]
+    - type: "slack"
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+    - type: "webhook"
+      url: "${ALERT_WEBHOOK_URL}"
+  
+# Health check configuration
+health_checks:
+  - name: "database"
+    type: "database"
+    critical: true
+    timeout: 10
+  - name: "redis"
+    type: "redis"
+    critical: true
+    timeout: 5
+  - name: "gpu"
+    type: "gpu"
+    critical: false
+    timeout: 10
+  - name: "disk_space"
+    type: "disk"
+    critical: true
+    threshold: 90  # percentage
+  - name: "memory"
+    type: "memory"
+    critical: true
+    threshold: 90  # percentage
+    
+# Prometheus metrics configuration
+metrics:
+  enabled: true
+  endpoint: "/metrics"
+  include_default: true
+  custom_metrics:
+    - name: "experiments_total"
+      type: "counter"
+      description: "Total number of experiments run"
+    - name: "experiment_duration"
+      type: "histogram"
+      description: "Experiment execution duration"
+    - name: "gpu_utilization"
+      type: "gauge"
+      description: "GPU utilization percentage"
+    - name: "memory_usage"
+      type: "gauge"
+      description: "Memory usage in bytes"
+      
+# Tracing configuration
+tracing:
+  enabled: true
+  service_name: "ai-scientist-v2"
+  jaeger:
+    agent_host: "jaeger-agent"
+    agent_port: 6831
+    collector_endpoint: "http://jaeger-collector:14268/api/traces"
+  sampling_rate: 0.1  # 10% of traces
+  
+# Profiling configuration (disabled in production by default)
+profiling:
+  enabled: false
+  output_dir: "/app/profiles"
+  interval: 60  # seconds

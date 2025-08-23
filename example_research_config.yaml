@@ -1,0 +1,37 @@
+# Example Configuration for Unified Research Pipeline
+# This shows how to customize the pipeline behavior
+
+# Research Configuration
+research_topic: "improving transformer efficiency through sparse attention"
+max_ideas: 3
+num_reflections: 5
+
+# Model Configuration  
+model: "gpt-4o-2024-11-20"           # For ideation and experiments
+big_model: "o1-2024-12-17"           # For paper writeup
+page_limit: 8
+
+# Pipeline Control
+skip_steps:
+  ideation: false      # Set to true to skip idea generation
+  experiments: false   # Set to true to skip experiment execution  
+  writeup: false       # Set to true to skip paper generation
+
+# Experiment Configuration
+experiment_settings:
+  max_experiment_time_hours: 4
+  parallel_agents: 2
+  tree_search_depth: 10
+
+# Output Configuration
+output_settings:
+  save_intermediate_results: true
+  generate_plots: true
+  include_debug_logs: false
+
+# Advanced Settings (optional)
+advanced:
+  use_semantic_scholar: true
+  citation_rounds: 20
+  writeup_reflections: 3
+  latex_template: "icml"  # or "icbinb"

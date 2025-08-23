@@ -1,0 +1,411 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Scientist v2 - Production Overview",
+    "tags": ["ai-scientist", "production", "overview"],
+    "timezone": "utc",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "up{job=\"ai-scientist-app\"}",
+            "refId": "A",
+            "legendFormat": "Application Status"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            },
+            "mappings": [
+              {"type": "value", "value": "1", "text": "UP"},
+              {"type": "value", "value": "0", "text": "DOWN"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Experiments",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "ai_scientist_active_experiments",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Success Rate (24h)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(ai_scientist_experiments_successful_total[24h]) / rate(ai_scientist_experiments_total[24h])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            },
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Time (95th percentile)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"ai-scientist-app\"}[5m]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            },
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"ai-scientist-app\"}[5m])",
+            "refId": "A",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ],
+        "yAxes": [
+          {"label": "Requests/sec", "min": 0},
+          {"show": false}
+        ],
+        "xAxis": {"mode": "time", "show": true}
+      },
+      {
+        "id": 6,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"ai-scientist-app\",status=~\"5..\"}[5m]) / rate(http_requests_total{job=\"ai-scientist-app\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "yAxes": [
+          {"label": "Error Rate", "min": 0, "max": 1, "unit": "percentunit"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Experiment Duration",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(ai_scientist_experiment_duration_seconds_bucket[5m]))",
+            "refId": "A",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(ai_scientist_experiment_duration_seconds_bucket[5m]))",
+            "refId": "B",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(ai_scientist_experiment_duration_seconds_bucket[5m]))",
+            "refId": "C",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "yAxes": [
+          {"label": "Duration", "unit": "s", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Resource Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{namespace=\"ai-scientist\",container=\"ai-scientist\"}[5m])",
+            "refId": "A",
+            "legendFormat": "CPU Usage"
+          },
+          {
+            "expr": "container_memory_usage_bytes{namespace=\"ai-scientist\",container=\"ai-scientist\"} / 1024 / 1024 / 1024",
+            "refId": "B",
+            "legendFormat": "Memory Usage (GB)"
+          }
+        ],
+        "yAxes": [
+          {"label": "Usage", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "GPU Utilization",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "DCGM_FI_DEV_GPU_UTIL",
+            "refId": "A",
+            "legendFormat": "GPU {{gpu}}"
+          }
+        ],
+        "yAxes": [
+          {"label": "Utilization %", "min": 0, "max": 100},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "GPU Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+        "targets": [
+          {
+            "expr": "(DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL) * 100",
+            "refId": "A",
+            "legendFormat": "GPU {{gpu}} Memory %"
+          }
+        ],
+        "yAxes": [
+          {"label": "Memory %", "min": 0, "max": 100},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "GPU Temperature",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+        "targets": [
+          {
+            "expr": "DCGM_FI_DEV_GPU_TEMP",
+            "refId": "A",
+            "legendFormat": "GPU {{gpu}} Temp"
+          }
+        ],
+        "yAxes": [
+          {"label": "Temperature (°C)", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Worker Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "count(up{job=\"ai-scientist-workers\"} == 1)",
+            "refId": "A",
+            "legendFormat": "Active Workers"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 3},
+                {"color": "green", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Queue Backlog",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+        "targets": [
+          {
+            "expr": "ai_scientist_experiment_queue_size",
+            "refId": "A",
+            "legendFormat": "Queue Size"
+          }
+        ],
+        "yAxes": [
+          {"label": "Queue Size", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Database Performance",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36},
+        "targets": [
+          {
+            "expr": "redis_connected_clients",
+            "refId": "A",
+            "legendFormat": "Redis Connections"
+          },
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "refId": "B",
+            "legendFormat": "Redis Commands/sec"
+          }
+        ],
+        "yAxes": [
+          {"label": "Count/Rate", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Network I/O",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36},
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m])",
+            "refId": "A",
+            "legendFormat": "{{device}} RX"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m])",
+            "refId": "B",
+            "legendFormat": "{{device}} TX"
+          }
+        ],
+        "yAxes": [
+          {"label": "Bytes/sec", "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Disk I/O",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 44},
+        "targets": [
+          {
+            "expr": "rate(node_disk_read_bytes_total[5m])",
+            "refId": "A",
+            "legendFormat": "{{device}} Read"
+          },
+          {
+            "expr": "rate(node_disk_written_bytes_total[5m])",
+            "refId": "B",
+            "legendFormat": "{{device}} Write"
+          }
+        ],
+        "yAxes": [
+          {"label": "Bytes/sec", "min": 0},
+          {"show": false}
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1,
+    "links": [
+      {
+        "title": "AI Scientist Documentation",
+        "url": "https://docs.ai-scientist.com",
+        "type": "link"
+      },
+      {
+        "title": "Runbooks",
+        "url": "https://runbooks.ai-scientist.com",
+        "type": "link"
+      },
+      {
+        "title": "Status Page",
+        "url": "https://status.ai-scientist.com",
+        "type": "link"
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up{job=\"ai-scientist-app\"}, instance)",
+          "refresh": 1,
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "gpu",
+          "type": "query",
+          "query": "label_values(DCGM_FI_DEV_GPU_UTIL, gpu)",
+          "refresh": 1,
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "kube_pod_container_status_restarts_total{namespace=\"ai-scientist\"}"
+        },
+        {
+          "name": "Alerts",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertstate=\"firing\"}"
+        }
+      ]
+    }
+  }
+}
