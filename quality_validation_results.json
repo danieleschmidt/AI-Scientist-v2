@@ -1,468 +1,311 @@
 {
+  "validation_timestamp": "2025-08-24T03:35:30.553401",
+  "overall_status": "FAILED",
+  "pass_rate": 52.0,
+  "total_execution_time": 0.147939,
   "summary": {
-    "overall_status": "FAILED",
-    "overall_score": 43.03904027564853,
-    "gates_passed": 2,
-    "gates_failed": 1,
-    "gates_warning": 1,
-    "gates_error": 0,
-    "total_gates": 4,
-    "gate_results": [
-      {
-        "gate_type": "unit_tests",
-        "status": "passed",
-        "score": 0.0,
-        "execution_time": 0.5674996376037598,
-        "violations_count": 0,
-        "recommendations_count": 0
-      },
-      {
-        "gate_type": "security_scan",
-        "status": "failed",
-        "score": 0.0,
-        "execution_time": 0.5019736289978027,
-        "violations_count": 30,
-        "recommendations_count": 0
-      },
-      {
-        "gate_type": "performance_benchmark",
-        "status": "passed",
-        "score": 99.60714149475098,
-        "execution_time": 0.0012776851654052734,
-        "violations_count": 0,
-        "recommendations_count": 0
-      },
-      {
-        "gate_type": "code_quality",
-        "status": "warning",
-        "score": 72.54901960784314,
-        "execution_time": 0.049675703048706055,
-        "violations_count": 0,
-        "recommendations_count": 0
-      }
-    ],
-    "recommendations": [],
-    "critical_issues": [
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "pickle can execute arbitrary code",
-      "pickle can execute arbitrary code",
-      "Use of eval() can be dangerous",
-      "pickle can execute arbitrary code",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "pickle can execute arbitrary code",
-      "Use of eval() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of eval() can be dangerous",
-      "Use of exec() can be dangerous",
-      "Potential hardcoded secret: API_KEY = \"api_key\"",
-      "Potential hardcoded secret: PASSWORD = \"password\"",
-      "Potential hardcoded secret: SECRET = \"generic_secret\"",
-      "Potential hardcoded secret: TOKEN = \"token\"",
-      "Potential hardcoded secret: api_key = \"test-api-key-12345\""
-    ]
+    "total_tests": 25,
+    "tests_passed": 13,
+    "tests_failed": 12,
+    "quality_gates_run": 7,
+    "critical_failures": 2
   },
-  "detailed_results": [
-    {
-      "gate_type": "unit_tests",
-      "status": "passed",
-      "score": 0.0,
-      "max_score": 100.0,
-      "details": {
-        "test_files_found": 86,
-        "test_files": [
-          "/root/repo/test_ai_scientist_integration.py",
-          "/root/repo/test_ai_scientist_minimal.py",
-          "/root/repo/test_gpu_fixes.py",
-          "/root/repo/test_imports.py",
-          "/root/repo/test_runner.py",
-          "/root/repo/test_system.py",
-          "/root/repo/tests/test_api_key_security.py",
-          "/root/repo/tests/test_api_key_security_enhancement.py",
-          "/root/repo/tests/test_autonomous_sdlc_generations.py",
-          "/root/repo/tests/test_basic_autonomous_sdlc.py",
-          "/root/repo/tests/test_basic_functionality.py",
-          "/root/repo/tests/test_configuration_management.py",
-          "/root/repo/tests/test_debug_error_handling.py",
-          "/root/repo/tests/test_dependency_management.py",
-          "/root/repo/tests/test_enterprise_integration.py",
-          "/root/repo/tests/test_enterprise_simple.py",
-          "/root/repo/tests/test_file_handle_leak_fix.py",
-          "/root/repo/tests/test_gpu_manager_enhanced.py",
-          "/root/repo/tests/test_gpu_manager_isolated.py",
-          "/root/repo/tests/test_gpu_resource_management.py",
-          "/root/repo/tests/test_input_validation_security.py",
-          "/root/repo/tests/test_interpreter_timeout.py",
-          "/root/repo/tests/test_llm_configuration_integration.py",
-          "/root/repo/tests/test_llm_simple.py",
-          "/root/repo/tests/test_nested_zip.py",
-          "/root/repo/tests/test_path_security.py",
-          "/root/repo/tests/test_process_cleanup_enhanced.py",
-          "/root/repo/tests/test_security_fixes.py",
-          "/root/repo/tests/test_security_integration.py",
-          "/root/repo/tests/test_timeout_fix.py",
-          "/root/repo/tests/test_torch_compile_safety.py",
-          "/root/repo/tests/test_torch_compile_safety_enhanced.py",
-          "/root/repo/tests/test_utils.py",
-          "/root/repo/tests/test_vlm_prepare_prompt.py",
-          "/root/repo/tests/integration/test_e2e_research_pipeline.py",
-          "/root/repo/tests/performance/test_benchmarks.py",
-          "/root/repo/tests/performance/test_load_benchmarks.py",
-          "/root/repo/tests/quantum_task_planner/test_core.py",
-          "/root/repo/tests/quantum_task_planner/test_integration.py",
-          "/root/repo/tests/quantum_task_planner/test_monitoring.py",
-          "/root/repo/tests/quantum_task_planner/test_optimization.py",
-          "/root/repo/tests/quantum_task_planner/test_validation.py",
-          "/root/repo/tests/security/test_comprehensive_security.py",
-          "/root/repo/tests/unit/test_config_management.py",
-          "/root/repo/tests/__init__.py",
-          "/root/repo/tests/conftest.py",
-          "/root/repo/tests/test_api_key_security.py",
-          "/root/repo/tests/test_api_key_security_enhancement.py",
-          "/root/repo/tests/test_autonomous_sdlc_generations.py",
-          "/root/repo/tests/test_basic_autonomous_sdlc.py",
-          "/root/repo/tests/test_basic_functionality.py",
-          "/root/repo/tests/test_configuration_management.py",
-          "/root/repo/tests/test_debug_error_handling.py",
-          "/root/repo/tests/test_dependency_management.py",
-          "/root/repo/tests/test_enterprise_integration.py",
-          "/root/repo/tests/test_enterprise_simple.py",
-          "/root/repo/tests/test_file_handle_leak_fix.py",
-          "/root/repo/tests/test_gpu_manager_enhanced.py",
-          "/root/repo/tests/test_gpu_manager_isolated.py",
-          "/root/repo/tests/test_gpu_resource_management.py",
-          "/root/repo/tests/test_input_validation_security.py",
-          "/root/repo/tests/test_interpreter_timeout.py",
-          "/root/repo/tests/test_llm_configuration_integration.py",
-          "/root/repo/tests/test_llm_simple.py",
-          "/root/repo/tests/test_nested_zip.py",
-          "/root/repo/tests/test_path_security.py",
-          "/root/repo/tests/test_process_cleanup_enhanced.py",
-          "/root/repo/tests/test_security_fixes.py",
-          "/root/repo/tests/test_security_integration.py",
-          "/root/repo/tests/test_timeout_fix.py",
-          "/root/repo/tests/test_torch_compile_safety.py",
-          "/root/repo/tests/test_torch_compile_safety_enhanced.py",
-          "/root/repo/tests/test_utils.py",
-          "/root/repo/tests/test_vlm_prepare_prompt.py",
-          "/root/repo/tests/fixtures/sample_data.py",
-          "/root/repo/tests/integration/test_e2e_research_pipeline.py",
-          "/root/repo/tests/performance/test_benchmarks.py",
-          "/root/repo/tests/performance/test_load_benchmarks.py",
-          "/root/repo/tests/quantum_task_planner/__init__.py",
-          "/root/repo/tests/quantum_task_planner/test_core.py",
-          "/root/repo/tests/quantum_task_planner/test_integration.py",
-          "/root/repo/tests/quantum_task_planner/test_monitoring.py",
-          "/root/repo/tests/quantum_task_planner/test_optimization.py",
-          "/root/repo/tests/quantum_task_planner/test_validation.py",
-          "/root/repo/tests/security/test_comprehensive_security.py",
-          "/root/repo/tests/unit/test_config_management.py"
-        ],
-        "exit_code": 1,
-        "output": "/usr/bin/python3: No module named pytest\n",
-        "execution_method": "pytest"
-      },
-      "metrics": {},
-      "violations": [],
-      "recommendations": [],
-      "execution_time": 0.5674996376037598,
-      "timestamp": "2025-08-16T19:29:25.211152"
-    },
-    {
-      "gate_type": "security_scan",
-      "status": "failed",
-      "score": 0.0,
-      "max_score": 100.0,
-      "details": {
-        "security_issues": [
-          {
-            "file": "/root/repo/run_quality_gates.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/run_quality_gates.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tdd_security_framework.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tdd_security_framework.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/autonomous_quality_validator.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/autonomous_quality_validator.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/scalable_autonomous_orchestrator.py",
-            "description": "pickle can execute arbitrary code",
-            "severity": "medium",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/scalable_research_orchestrator.py",
-            "description": "pickle can execute arbitrary code",
-            "severity": "medium",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/security_framework.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/scalable_execution_engine.py",
-            "description": "pickle can execute arbitrary code",
-            "severity": "medium",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/test_input_validation_security.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/test_input_validation_security.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/test_security_integration.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_better.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/ideas/i_cant_believe_its_not_betterrealworld.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/treesearch/interpreter.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/utils/distributed_cache.py",
-            "description": "pickle can execute arbitrary code",
-            "severity": "medium",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/utils/input_validation.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/utils/torch_compile_safety.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/ai_scientist/validation/autonomous_quality_gates.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/fixtures/sample_data.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/fixtures/sample_data.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/quantum_task_planner/test_monitoring.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/security/test_comprehensive_security.py",
-            "description": "Use of eval() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/tests/security/test_comprehensive_security.py",
-            "description": "Use of exec() can be dangerous",
-            "severity": "critical",
-            "type": "dangerous_function"
-          },
-          {
-            "file": "/root/repo/security/secrets_scanner.py",
-            "description": "Potential hardcoded secret: API_KEY = \"api_key\"",
-            "severity": "high",
-            "type": "hardcoded_secret",
-            "line": 22
-          },
-          {
-            "file": "/root/repo/security/secrets_scanner.py",
-            "description": "Potential hardcoded secret: PASSWORD = \"password\"",
-            "severity": "high",
-            "type": "hardcoded_secret",
-            "line": 23
-          },
-          {
-            "file": "/root/repo/security/secrets_scanner.py",
-            "description": "Potential hardcoded secret: SECRET = \"generic_secret\"",
-            "severity": "high",
-            "type": "hardcoded_secret",
-            "line": 27
-          },
-          {
-            "file": "/root/repo/security/secrets_scanner.py",
-            "description": "Potential hardcoded secret: TOKEN = \"token\"",
-            "severity": "high",
-            "type": "hardcoded_secret",
-            "line": 24
-          },
-          {
-            "file": "/root/repo/tests/test_api_key_security.py",
-            "description": "Potential hardcoded secret: api_key = \"test-api-key-12345\"",
-            "severity": "high",
-            "type": "hardcoded_secret",
-            "line": 77
-          }
-        ],
-        "files_scanned": 190
-      },
-      "metrics": {},
-      "violations": [
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "pickle can execute arbitrary code",
-        "pickle can execute arbitrary code",
-        "Use of eval() can be dangerous",
-        "pickle can execute arbitrary code",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "pickle can execute arbitrary code",
-        "Use of eval() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of eval() can be dangerous",
-        "Use of exec() can be dangerous",
-        "Potential hardcoded secret: API_KEY = \"api_key\"",
-        "Potential hardcoded secret: PASSWORD = \"password\"",
-        "Potential hardcoded secret: SECRET = \"generic_secret\"",
-        "Potential hardcoded secret: TOKEN = \"token\"",
-        "Potential hardcoded secret: api_key = \"test-api-key-12345\""
-      ],
-      "recommendations": [],
-      "execution_time": 0.5019736289978027,
-      "timestamp": "2025-08-16T19:29:25.224711"
-    },
-    {
-      "gate_type": "performance_benchmark",
-      "status": "passed",
-      "score": 99.60714149475098,
-      "max_score": 100.0,
-      "details": {
-        "benchmark_results": {
-          "memory_usage_mb": 0.0062713623046875,
-          "cpu_performance_score": 99.09257888793945,
-          "io_performance_score": 99.73511695861816
+  "quality_gates": {
+    "unit_tests": {
+      "gate_type": "QualityGateType.UNIT_TESTS",
+      "status": "TestStatus.FAILED",
+      "tests_run": 7,
+      "tests_passed": 3,
+      "tests_failed": 4,
+      "total_time": 0.07557129859924316,
+      "coverage_percentage": 85.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "test_config_creation",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.008250236511230469,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 129, in _run_single_test\n    test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 454, in _test_config_creation\n    from terragon_autonomous_research_engine import ResearchConfig\n  File \"/root/repo/terragon_autonomous_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.414776"
+        },
+        {
+          "name": "test_engine_initialization",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.0006248950958251953,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 129, in _run_single_test\n    test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 473, in _test_engine_initialization\n    from terragon_autonomous_research_engine import AutonomousResearchEngine, ResearchConfig\n  File \"/root/repo/terragon_autonomous_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.415724"
+        },
+        {
+          "name": "test_file_operations",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.010120868682861328,
+          "message": "Test passed successfully",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.425888"
+        },
+        {
+          "name": "test_error_handling",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.01578044891357422,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 129, in _run_single_test\n    test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 508, in _test_error_handling\n    from terragon_robust_research_engine import ErrorType, ErrorInfo\n  File \"/root/repo/terragon_robust_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.442290"
+        },
+        {
+          "name": "test_validation_functions",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.029973745346069336,
+          "message": "Test passed successfully",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.472322"
+        },
+        {
+          "name": "test_security_functions",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.0005576610565185547,
+          "message": "Test passed successfully",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.472893"
+        },
+        {
+          "name": "test_monitoring_functions",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.00760960578918457,
+          "message": "No module named 'psutil'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 129, in _run_single_test\n    test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 550, in _test_monitoring_functions\n    from terragon_monitoring_system import MetricCollector\n  File \"/root/repo/terragon_monitoring_system.py\", line 22, in <module>\n    import psutil\nModuleNotFoundError: No module named 'psutil'\n",
+          "timestamp": "2025-08-24 03:35:30.481001"
         }
-      },
-      "metrics": {
-        "memory_usage_mb": 0.0062713623046875,
-        "cpu_performance_score": 99.09257888793945,
-        "io_performance_score": 99.73511695861816
-      },
-      "violations": [],
-      "recommendations": [],
-      "execution_time": 0.0012776851654052734,
-      "timestamp": "2025-08-16T19:29:25.726817"
+      ]
     },
-    {
-      "gate_type": "code_quality",
-      "status": "warning",
-      "score": 72.54901960784314,
-      "max_score": 100.0,
-      "details": {
-        "files_analyzed": 190,
-        "quality_metrics": {
-          "total_lines": 94562,
-          "total_functions": 340,
-          "total_classes": 344,
-          "avg_function_length": 10.0,
-          "avg_complexity": 2.0,
-          "docstring_coverage": 37.64705882352941
+    "integration_tests": {
+      "gate_type": "QualityGateType.INTEGRATION_TESTS",
+      "status": "TestStatus.FAILED",
+      "tests_run": 3,
+      "tests_passed": 1,
+      "tests_failed": 2,
+      "total_time": 0.0033392906188964844,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "test_pipeline_integration",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.0006012916564941406,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 127, in _run_single_test\n    await test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 568, in _test_pipeline_integration\n    from terragon_autonomous_research_engine import AutonomousResearchEngine, ResearchConfig\n  File \"/root/repo/terragon_autonomous_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.482007"
+        },
+        {
+          "name": "test_system_integration",
+          "status": "TestStatus.FAILED",
+          "execution_time": 0.0004801750183105469,
+          "message": "Failed to import terragon_autonomous_research_engine: No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 614, in _test_system_integration\n    module = importlib.import_module(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/importlib/__init__.py\", line 90, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/root/repo/terragon_autonomous_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 127, in _run_single_test\n    await test_func()\n  File \"/root/repo/terragon_quality_validator.py\", line 617, in _test_system_integration\n    raise AssertionError(f\"Failed to import {module_name}: {e}\")\nAssertionError: Failed to import terragon_autonomous_research_engine: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.484407"
+        },
+        {
+          "name": "test_api_integration",
+          "status": "TestStatus.PASSED",
+          "execution_time": 3.790855407714844e-05,
+          "message": "Test passed successfully",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.484477"
         }
-      },
-      "metrics": {
-        "total_lines": 94562,
-        "total_functions": 340,
-        "total_classes": 344,
-        "avg_function_length": 10.0,
-        "avg_complexity": 2.0,
-        "docstring_coverage": 37.64705882352941
-      },
-      "violations": [],
-      "recommendations": [],
-      "execution_time": 0.049675703048706055,
-      "timestamp": "2025-08-16T19:29:25.728107"
+      ]
+    },
+    "security_scan": {
+      "gate_type": "QualityGateType.SECURITY_SCAN",
+      "status": "TestStatus.FAILED",
+      "tests_run": 4,
+      "tests_passed": 3,
+      "tests_failed": 1,
+      "total_time": 0.03455662727355957,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "scan_for_secrets",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.03386688232421875,
+          "message": "No hardcoded secrets found",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.518422"
+        },
+        {
+          "name": "test_input_sanitization",
+          "status": "TestStatus.FAILED",
+          "execution_time": 0.00010657310485839844,
+          "message": "Some dangerous inputs not blocked",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.518601"
+        },
+        {
+          "name": "check_file_permissions",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.00031638145446777344,
+          "message": "File permissions are secure",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.518927"
+        },
+        {
+          "name": "test_api_key_security",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.000156402587890625,
+          "message": "API key validation working correctly",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.519090"
+        }
+      ]
+    },
+    "performance_benchmark": {
+      "gate_type": "QualityGateType.PERFORMANCE_BENCHMARK",
+      "status": "TestStatus.FAILED",
+      "tests_run": 4,
+      "tests_passed": 0,
+      "tests_failed": 4,
+      "total_time": 0.0178830623626709,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "benchmark_initialization",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.01485300064086914,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 844, in _benchmark_initialization\n    from terragon_scalable_research_engine import ScalableResearchEngine, ScalableResearchConfig\n  File \"/root/repo/terragon_scalable_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.534656"
+        },
+        {
+          "name": "benchmark_memory_usage",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.00014710426330566406,
+          "message": "No module named 'psutil'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 892, in _benchmark_memory_usage\n    import psutil\nModuleNotFoundError: No module named 'psutil'\n",
+          "timestamp": "2025-08-24 03:35:30.534975"
+        },
+        {
+          "name": "benchmark_concurrency",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.0009255409240722656,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 944, in _benchmark_concurrency\n    from terragon_scalable_research_engine import DistributedCache, CacheStrategy\n  File \"/root/repo/terragon_scalable_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.536072"
+        },
+        {
+          "name": "benchmark_cache_performance",
+          "status": "TestStatus.ERROR",
+          "execution_time": 0.0007319450378417969,
+          "message": "No module named 'yaml'",
+          "error_details": "Traceback (most recent call last):\n  File \"/root/repo/terragon_quality_validator.py\", line 994, in _benchmark_cache_performance\n    from terragon_scalable_research_engine import DistributedCache, CacheStrategy\n  File \"/root/repo/terragon_scalable_research_engine.py\", line 12, in <module>\n    import yaml\nModuleNotFoundError: No module named 'yaml'\n",
+          "timestamp": "2025-08-24 03:35:30.536992"
+        }
+      ]
+    },
+    "code_quality": {
+      "gate_type": "QualityGateType.CODE_QUALITY",
+      "status": "TestStatus.PASSED",
+      "tests_run": 3,
+      "tests_passed": 3,
+      "tests_failed": 0,
+      "total_time": 0.011267662048339844,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "check_code_structure",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.0018277168273925781,
+          "message": "Code structure looks good",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.538914"
+        },
+        {
+          "name": "check_documentation",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.006326436996459961,
+          "message": "Good documentation: 3.0/5 average score",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.545317"
+        },
+        {
+          "name": "check_error_handling",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.0028731822967529297,
+          "message": "Good error handling: 4.9/5 average score",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.548280"
+        }
+      ]
+    },
+    "dependency_check": {
+      "gate_type": "QualityGateType.DEPENDENCY_CHECK",
+      "status": "TestStatus.FAILED",
+      "tests_run": 2,
+      "tests_passed": 1,
+      "tests_failed": 1,
+      "total_time": 0.00030803680419921875,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "check_required_dependencies",
+          "status": "TestStatus.FAILED",
+          "execution_time": 0.00028443336486816406,
+          "message": "Some optional dependencies missing (psutil)",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.548694"
+        },
+        {
+          "name": "check_vulnerable_dependencies",
+          "status": "TestStatus.PASSED",
+          "execution_time": 2.86102294921875e-06,
+          "message": "Python 3.12 is supported",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.548709"
+        }
+      ]
+    },
+    "compatibility_test": {
+      "gate_type": "QualityGateType.COMPATIBILITY_TEST",
+      "status": "TestStatus.PASSED",
+      "tests_run": 2,
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "total_time": 0.004584312438964844,
+      "coverage_percentage": 0.0,
+      "details": {},
+      "test_results": [
+        {
+          "name": "test_python_compatibility",
+          "status": "TestStatus.PASSED",
+          "execution_time": 4.76837158203125e-07,
+          "message": "Python 3.12.3 is compatible",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.548749"
+        },
+        {
+          "name": "test_os_compatibility",
+          "status": "TestStatus.PASSED",
+          "execution_time": 0.0045604705810546875,
+          "message": "Linux 6.1.102 is supported",
+          "error_details": "",
+          "timestamp": "2025-08-24 03:35:30.553321"
+        }
+      ]
     }
+  },
+  "recommendations": [
+    "\ud83e\uddea Fix failing unit tests",
+    "\ud83d\udd12 Address security vulnerabilities immediately",
+    "\u26a1 Optimize performance bottlenecks",
+    "\ud83d\udcca Improve overall test coverage and reliability"
+  ],
+  "next_steps": [
+    "Review failed tests and address issues",
+    "Run quality validation regularly",
+    "Implement automated quality gates in CI/CD",
+    "Monitor performance metrics continuously"
   ]
 }
