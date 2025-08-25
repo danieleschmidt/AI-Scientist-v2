@@ -34,6 +34,29 @@ import threading
 import subprocess
 import sys
 
+# Enhanced Generation 1: Novel Research Capabilities
+try:
+    from scipy.optimize import minimize, differential_evolution
+    from scipy.stats import gaussian_kde, entropy
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
+try:
+    from sklearn.gaussian_process import GaussianProcessRegressor
+    from sklearn.gaussian_process.kernels import Matern, RBF
+    from sklearn.cluster import DBSCAN
+    from sklearn.manifold import UMAP
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+
+try:
+    import networkx as nx
+    NETWORKX_AVAILABLE = True
+except ImportError:
+    NETWORKX_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,6 +68,12 @@ class ResearchDomain(Enum):
     MULTIMODAL_AI = "multimodal_ai"
     AUTONOMOUS_AGENTS = "autonomous_agents"
     CONTINUAL_LEARNING = "continual_learning"
+    # Generation 1: Enhanced Research Domains
+    CAUSAL_AI = "causal_ai"
+    NEURO_SYMBOLIC = "neuro_symbolic"
+    FEDERATED_LEARNING = "federated_learning"
+    GRAPH_NEURAL_NETWORKS = "graph_neural_networks"
+    QUANTUM_ML_HYBRIDS = "quantum_ml_hybrids"
 
 
 @dataclass
@@ -62,6 +91,14 @@ class NovelHypothesis:
     success_metrics: List[str] = field(default_factory=list)
     resource_requirements: Dict[str, float] = field(default_factory=dict)
     created_timestamp: float = field(default_factory=time.time)
+    
+    # Generation 1: Enhanced Hypothesis Properties
+    causal_mechanisms: List[str] = field(default_factory=list)
+    literature_gaps: List[str] = field(default_factory=list)
+    cross_domain_insights: List[str] = field(default_factory=list)
+    uncertainty_quantification: Dict[str, float] = field(default_factory=dict)
+    theoretical_foundation_score: float = 0.0
+    reproducibility_requirements: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

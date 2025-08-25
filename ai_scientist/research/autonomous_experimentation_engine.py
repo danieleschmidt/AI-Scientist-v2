@@ -60,6 +60,15 @@ try:
 except ImportError:
     SKLEARN_AVAILABLE = False
 
+# Generation 1: Enhanced optimization imports
+try:
+    from ai_scientist.research.bayesian_optimization_engine import (
+        BayesianOptimizationEngine, Parameter, AcquisitionFunction
+    )
+    BAYESIAN_OPT_AVAILABLE = True
+except ImportError:
+    BAYESIAN_OPT_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
