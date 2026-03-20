@@ -1,1 +1,0 @@
-# AI Scientist v2 - Performance Optimization Framework
